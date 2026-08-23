@@ -13,8 +13,20 @@ Recharts + React Hook Form + Zod.
 A prévia roda em **modo demonstração**: como o GitHub Pages não tem as credenciais do Supabase, o
 app usa dados de exemplo salvos no `localStorage` do visitante. Qualquer email e senha entram, e
 tudo que você criar/editar fica só no seu navegador (o botão *Restaurar dados* no topo devolve o
-estado inicial). O deploy é feito pelo workflow [`deploy.yml`](.github/workflows/deploy.yml) a cada
-push na `main`.
+estado inicial).
+
+O site é servido pelo branch `gh-pages`, publicado a partir de `dist/`. Para atualizar a prévia
+depois de mudar o código:
+
+```bash
+BASE_PATH=/aurora/ npm run build   # no PowerShell: $env:BASE_PATH='/aurora/'; npm run build
+cp dist/index.html dist/404.html   # faz as rotas do React Router funcionarem no Pages
+# publique o conteudo de dist/ no branch gh-pages
+```
+
+Existe um workflow pronto em `.github/workflows/deploy.yml` (fora do versionamento) que faz isso
+automaticamente a cada push na `main`. Para habilitá-lo, o token do GitHub CLI precisa do escopo
+`workflow`: `gh auth refresh -h github.com -s workflow`, e então versionar o arquivo.
 
 Com o `.env` preenchido, o mesmo código usa o Supabase de verdade — o modo demonstração só liga
 quando não há credenciais válidas.
