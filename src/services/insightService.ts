@@ -3,6 +3,7 @@ import { BookService } from './bookService'
 import { FinanceService } from './financeService'
 import { supabase } from './supabase'
 import type { Insight } from '../types/database.types'
+import { todayISO } from '../utils/format'
 
 export class InsightService {
   /**
@@ -15,7 +16,7 @@ export class InsightService {
       FinanceService.getBalance()
     ])
 
-    const today = new Date().toISOString().split('T')[0]
+    const today = todayISO()
     const completedToday = habits.filter(h => h.completed_today).length
 
     const insights = {

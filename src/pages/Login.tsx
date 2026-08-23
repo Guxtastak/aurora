@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { motion } from 'framer-motion'
+import { isDemo } from '../services/supabase'
 
 export function Login() {
   const [email, setEmail] = useState('')
@@ -35,6 +36,13 @@ export function Login() {
       >
         <h1 className="text-3xl font-bold text-center mb-2 text-aurora-600 dark:text-aurora-400">Aurora</h1>
         <p className="text-center text-gray-500 dark:text-gray-400 mb-8">Seu dashboard pessoal</p>
+
+        {isDemo && (
+          <div className="mb-6 rounded-lg bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 px-4 py-3 text-xs text-amber-800 dark:text-amber-200">
+            <strong>Modo demonstração.</strong> O Supabase não está configurado, então qualquer
+            email e senha entram e os dados são de exemplo, salvos apenas no seu navegador.
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>

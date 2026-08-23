@@ -13,11 +13,15 @@ export function formatDate(date: string) {
   return `${d}/${m}/${y}`
 }
 
+/** Converte um Date para YYYY-MM-DD no fuso local (toISOString usaria UTC e trocaria o dia) */
+export function toISODate(date: Date) {
+  const offset = date.getTimezoneOffset() * 60000
+  return new Date(date.getTime() - offset).toISOString().split('T')[0]
+}
+
 /** Data de hoje em YYYY-MM-DD no fuso local */
 export function todayISO() {
-  const now = new Date()
-  const offset = now.getTimezoneOffset() * 60000
-  return new Date(now.getTime() - offset).toISOString().split('T')[0]
+  return toISODate(new Date())
 }
 
 /** Percentual limitado entre 0 e 100 */

@@ -1,5 +1,6 @@
 import { supabase } from './supabase'
 import type { Book } from '../types/database.types'
+import { todayISO } from '../utils/format'
 
 export interface GoogleBook {
   id: string
@@ -103,7 +104,7 @@ export class BookService {
       pages_read: 0,
       google_books_id: googleBookId,
       status: 'reading' as const,
-      started_date: new Date().toISOString().split('T')[0]
+      started_date: todayISO()
     }
 
     const { data, error } = await supabase
@@ -166,7 +167,7 @@ export class BookService {
   static async finishBook(id: string, rating?: number) {
     const updates: Partial<Omit<Book, 'id'>> = {
       status: 'finished',
-      finished_date: new Date().toISOString().split('T')[0]
+      finished_date: todayISO()
     }
 
     if (rating) updates.rating = rating

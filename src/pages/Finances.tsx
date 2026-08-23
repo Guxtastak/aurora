@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Plus, TrendingUp, TrendingDown, Wallet, DollarSign } from 'lucide-react'
-import { FinanceService } from '../services/financeService'
+import { FinanceService } from '../services/data'
 import type { Finance } from '../types/database.types'
 import { TransactionForm } from '../components/finances/TransactionForm'
 import type { TransactionFormValues } from '../components/finances/TransactionForm'

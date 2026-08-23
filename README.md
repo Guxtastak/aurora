@@ -6,6 +6,19 @@ especificação do PDF `especificacao.pdf`.
 Stack: React 19 + Vite + TypeScript + Tailwind CSS + Supabase (auth e banco) + Framer Motion +
 Recharts + React Hook Form + Zod.
 
+## Prévia online
+
+**<https://guxtastak.github.io/aurora/>**
+
+A prévia roda em **modo demonstração**: como o GitHub Pages não tem as credenciais do Supabase, o
+app usa dados de exemplo salvos no `localStorage` do visitante. Qualquer email e senha entram, e
+tudo que você criar/editar fica só no seu navegador (o botão *Restaurar dados* no topo devolve o
+estado inicial). O deploy é feito pelo workflow [`deploy.yml`](.github/workflows/deploy.yml) a cada
+push na `main`.
+
+Com o `.env` preenchido, o mesmo código usa o Supabase de verdade — o modo demonstração só liga
+quando não há credenciais válidas.
+
 ---
 
 ## Como rodar
@@ -59,6 +72,7 @@ src/
   pages/         Login, Register, Dashboard, Habits, Books, Finances, Settings
   hooks/         useAuth (AuthProvider + contexto), useTheme (dark mode)
   services/      supabase, habitService, bookService, financeService, insightService
+                 data.ts (escolhe Supabase ou demo), demo/ (dados de exemplo da prévia)
   types/         database.types.ts
   utils/         format.ts (moeda, datas, percentuais)
   styles/        index.css (Tailwind)

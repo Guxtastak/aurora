@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { BookOpen, Plus, Search } from 'lucide-react'
-import { BookService } from '../services/bookService'
+import { BookService } from '../services/data'
 import type { Book } from '../types/database.types'
 import { BookCard } from '../components/books/BookCard'
 import { BookSearch } from '../components/books/BookSearch'

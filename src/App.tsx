@@ -5,7 +5,8 @@ import './styles/index.css'
 
 function App() {
   return (
-    <Router>
+    // basename acompanha o base do Vite: '/' em dev, '/aurora/' no GitHub Pages
+    <Router basename={import.meta.env.BASE_URL}>
       <AuthProvider>
         <AppRoutes />
       </AuthProvider>

@@ -4,16 +4,16 @@ import type { Database } from '../types/database.types'
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables')
-}
+/**
+ * Modo demonstração: sem credenciais válidas do Supabase o app roda com dados
+ * de exemplo no localStorage (é assim que a prévia do GitHub Pages funciona).
+ * Preencha o .env com a URL e a anon key do seu projeto para usar o banco real.
+ */
+export const isDemo = !supabaseUrl || !supabaseAnonKey || !/^https?:\/\//.test(supabaseUrl)
 
-// Mensagem clara no primeiro boot, antes do erro genérico de URL inválida do SDK
-if (!/^https?:\/\//.test(supabaseUrl)) {
-  throw new Error(
-    'VITE_SUPABASE_URL inválida. Preencha o arquivo .env com a URL e a anon key do seu projeto Supabase ' +
-      '(Project Settings > API) e reinicie o servidor de desenvolvimento.'
-  )
-}
-
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey)
+// Em modo demo o cliente nunca é usado, mas precisa de uma URL sintaticamente
+// válida para o createClient não lançar durante o import.
+export const supabase = createClient<Database>(
+  isDemo ? 'https://demo.invalid' : supabaseUrl,
+  isDemo ? 'demo-anon-key' : supabaseAnonKey
+)

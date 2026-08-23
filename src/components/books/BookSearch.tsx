@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Search, Plus } from 'lucide-react'
-import { BookService } from '../../services/bookService'
+import { BookService } from '../../services/data'
 import type { GoogleBook } from '../../services/bookService'
 import { Button } from '../common/Button'
 import { Loading } from '../common/Loading'

@@ -5,7 +5,7 @@ import { Card } from '../components/common/Card'
 import { Button } from '../components/common/Button'
 import { useAuth } from '../hooks/useAuth'
 import { useTheme } from '../hooks/useTheme'
-import { InsightService } from '../services/insightService'
+import { InsightService } from '../services/data'
 import type { Insight } from '../types/database.types'
 
 export function Settings() {

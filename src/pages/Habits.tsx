@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { Plus, Repeat } from 'lucide-react'
-import { HabitService } from '../services/habitService'
+import { HabitService } from '../services/data'
 import type { Habit } from '../types/database.types'
 import { HabitCard } from '../components/habits/HabitCard'
 import { HabitForm } from '../components/habits/HabitForm'

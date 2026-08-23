@@ -10,17 +10,17 @@ import {
   ResponsiveContainer
 } from 'recharts'
 import { Repeat, BookOpen, Wallet, Flame, Sparkles, Check } from 'lucide-react'
-import { HabitService } from '../services/habitService'
-import { BookService } from '../services/bookService'
-import { FinanceService } from '../services/financeService'
-import { InsightService } from '../services/insightService'
+import { HabitService } from '../services/data'
+import { BookService } from '../services/data'
+import { FinanceService } from '../services/data'
+import { InsightService } from '../services/data'
 import type { Habit, Book } from '../types/database.types'
 import { StatCard } from '../components/common/StatCard'
 import { Card } from '../components/common/Card'
 import { Button } from '../components/common/Button'
 import { Loading } from '../components/common/Loading'
 import { EmptyState } from '../components/common/EmptyState'
-import { formatCurrency, percent, todayISO } from '../utils/format'
+import { formatCurrency, percent, todayISO, toISODate } from '../utils/format'
 import { useAuth } from '../hooks/useAuth'
 
 interface DayPoint {
@@ -44,7 +44,7 @@ export function Dashboard() {
       setError('')
       const start = new Date()
       start.setDate(start.getDate() - 6)
-      const startISO = start.toISOString().split('T')[0]
+      const startISO = toISODate(start)
 
       const [habitsData, booksData, balanceData, logs] = await Promise.all([
         HabitService.getHabitsWithTodayStatus(),
@@ -62,7 +62,7 @@ export function Dashboard() {
       for (let i = 6; i >= 0; i--) {
         const date = new Date()
         date.setDate(date.getDate() - i)
-        const iso = date.toISOString().split('T')[0]
+        const iso = toISODate(date)
         days.push({
           day: date.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', ''),
           concluidos: logs.filter(l => l.date === iso).length
