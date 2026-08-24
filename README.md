@@ -15,18 +15,22 @@ app usa dados de exemplo salvos no `localStorage` do visitante. Qualquer email e
 tudo que você criar/editar fica só no seu navegador (o botão *Restaurar dados* no topo devolve o
 estado inicial).
 
-O site é servido pelo branch `gh-pages`, publicado a partir de `dist/`. Para atualizar a prévia
-depois de mudar o código:
+O site é publicado pelo **GitHub Actions**, pelo workflow
+[`.github/workflows/deploy.yml`](.github/workflows/deploy.yml), a cada push na `main` — a fonte do
+Pages é o Actions (`build_type=workflow`), não um branch. Não há passo manual: o workflow constrói
+com `BASE_PATH=/aurora/`, copia `dist/index.html` para `dist/404.html` (é o que faz as rotas do
+React Router funcionarem no Pages) e envia o `dist/` com `actions/deploy-pages@v4`.
+
+Para reproduzir o build da prévia na sua máquina:
 
 ```bash
 BASE_PATH=/aurora/ npm run build   # no PowerShell: $env:BASE_PATH='/aurora/'; npm run build
-cp dist/index.html dist/404.html   # faz as rotas do React Router funcionarem no Pages
-# publique o conteudo de dist/ no branch gh-pages
 ```
 
-Existe um workflow pronto em `.github/workflows/deploy.yml` (fora do versionamento) que faz isso
-automaticamente a cada push na `main`. Para habilitá-lo, o token do GitHub CLI precisa do escopo
-`workflow`: `gh auth refresh -h github.com -s workflow`, e então versionar o arquivo.
+> **Ao mexer em `.github/workflows/`, empurre por SSH.** Nenhum token do `gh` tem o escopo
+> `workflow`, e o GitHub rejeita o push por HTTPS de qualquer arquivo nessa pasta. O `origin` deste
+> clone já usa o alias SSH. A alternativa seria `gh auth refresh -h github.com -s workflow`, que é
+> interativo.
 
 Com o `.env` preenchido, o mesmo código usa o Supabase de verdade — o modo demonstração só liga
 quando não há credenciais válidas.
