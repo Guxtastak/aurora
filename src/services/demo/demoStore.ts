@@ -1,4 +1,5 @@
-import type { Habit, HabitLog, Book, Finance, Insight } from '../../types/database.types'
+import type { Habit, HabitLog, Book, Finance, Goal, Insight } from '../../types/database.types'
+import { goalProgress } from '../../utils/goalProgress'
 
 /**
  * Armazenamento do modo demonstração: mantém os dados em localStorage para que a
@@ -6,7 +7,7 @@ import type { Habit, HabitLog, Book, Finance, Insight } from '../../types/databa
  * própria cópia dos dados, no próprio navegador.
  */
 
-const STORAGE_KEY = 'aurora-demo-v1'
+const STORAGE_KEY = 'aurora-demo-v2'
 const DEMO_USER_ID = 'demo-user'
 
 export interface DemoData {
@@ -14,6 +15,7 @@ export interface DemoData {
   habit_logs: HabitLog[]
   books: Book[]
   finances: Finance[]
+  goals: Goal[]
   insights: Insight[]
 }
 
@@ -183,7 +185,98 @@ function seed(): DemoData {
     created_at: daysAgo(day).toISOString()
   }))
 
-  return { habits, habit_logs, books, finances, insights: [] }
+  const goalSeeds: Array<{
+    id: string
+    title: string
+    description: string
+    category: Goal['category']
+    target: number
+    current: number
+    unit: string
+    startedDaysAgo: number
+    deadlineInDays: number
+    status: Goal['status']
+  }> = [
+    {
+      id: 'demo-goal-1',
+      title: 'Ler 24 livros no ano',
+      description: 'Dois livros por mes, alternando ficcao e nao ficcao',
+      category: 'reading',
+      target: 24,
+      current: 9,
+      unit: 'livros',
+      startedDaysAgo: 120,
+      deadlineInDays: 150,
+      status: 'active'
+    },
+    {
+      id: 'demo-goal-2',
+      title: 'Guardar R$ 12.000',
+      description: 'Reserva de emergencia de seis meses',
+      category: 'finance',
+      target: 12000,
+      current: 7350,
+      unit: 'R$',
+      startedDaysAgo: 210,
+      deadlineInDays: 120,
+      status: 'active'
+    },
+    {
+      id: 'demo-goal-3',
+      title: 'Treinar 30 dias seguidos',
+      description: 'Sem quebrar a sequencia, nem no fim de semana',
+      category: 'habits',
+      target: 30,
+      current: 18,
+      unit: 'dias',
+      startedDaysAgo: 20,
+      deadlineInDays: 12,
+      status: 'active'
+    },
+    {
+      id: 'demo-goal-4',
+      title: 'Correr 100 km no trimestre',
+      description: 'Meta batida antes do prazo',
+      category: 'health',
+      target: 100,
+      current: 104,
+      unit: 'km',
+      startedDaysAgo: 95,
+      deadlineInDays: 8,
+      status: 'completed'
+    },
+    {
+      id: 'demo-goal-5',
+      title: 'Terminar o curso de TypeScript',
+      description: 'Prazo estourado: a meta segue ativa e aparece como atrasada',
+      category: 'habits',
+      target: 40,
+      current: 26,
+      unit: 'aulas',
+      startedDaysAgo: 75,
+      deadlineInDays: -9,
+      status: 'active'
+    }
+  ]
+
+  const goals: Goal[] = goalSeeds.map(item => ({
+    id: item.id,
+    user_id: DEMO_USER_ID,
+    title: item.title,
+    description: item.description,
+    target_value: item.target,
+    current_value: item.current,
+    unit: item.unit,
+    start_date: iso(daysAgo(item.startedDaysAgo)),
+    deadline: iso(daysAgo(-item.deadlineInDays)),
+    category: item.category,
+    status: item.status,
+    progress_percentage: goalProgress(item.current, item.target),
+    created_at: daysAgo(item.startedDaysAgo).toISOString(),
+    updated_at: now
+  }))
+
+  return { habits, habit_logs, books, finances, goals, insights: [] }
 }
 
 let cache: DemoData | null = null

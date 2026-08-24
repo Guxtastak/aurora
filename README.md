@@ -66,6 +66,8 @@ A chave do Google Books é **opcional** — sem ela a busca funciona com a quota
 ```bash
 npm run dev     # http://localhost:5173
 npm run build   # typecheck + build de produção
+npm test        # testes das regras de progresso das metas (vitest)
+npm run lint    # oxlint
 npm run preview # serve o build
 ```
 
@@ -81,12 +83,14 @@ src/
     habits/      HabitCard, HabitForm
     books/       BookCard, BookForm, BookSearch (Google Books)
     finances/    TransactionForm, TransactionList, CategoryChart
-  pages/         Login, Register, Dashboard, Habits, Books, Finances, Settings
+    goals/       GoalCard, GoalForm
+  pages/         Login, Register, Dashboard, Habits, Books, Finances, Goals, Settings
   hooks/         useAuth (AuthProvider + contexto), useTheme (dark mode)
-  services/      supabase, habitService, bookService, financeService, insightService
+  services/      supabase, habitService, bookService, financeService, goalService, insightService
                  data.ts (escolhe Supabase ou demo), demo/ (dados de exemplo da prévia)
   types/         database.types.ts
   utils/         format.ts (moeda, datas, percentuais)
+                 goalProgress.ts (regras de progresso/status das metas) + testes
   styles/        index.css (Tailwind)
 supabase/
   schema.sql     Schema completo + RLS
@@ -101,6 +105,10 @@ supabase/
   filtros por status e estatísticas de leitura.
 - **Finanças**: receitas e despesas por categoria, saldo total e mensal, seleção de mês,
   gráfico de pizza por categoria e cotação USD→BRL (AwesomeAPI).
+- **Metas**: CRUD por categoria (leitura, hábitos, finanças, saúde), alvo com unidade, prazo,
+  progresso calculado a partir do valor atual e filtro por status. Bater o alvo conclui a meta e
+  cair abaixo dele a reabre; prazo vencido marca a meta como atrasada sem declarar fracasso.
+  Meta sem alvo fica qualitativa: sem barra de progresso e com o status que você escolher.
 - **Dashboard**: indicadores do dia, gráfico dos últimos 7 dias de hábitos, leitura em andamento e
   geração de insight diário (salvo na tabela `insights`).
 - **Configurações**: conta, alternância de tema claro/escuro e histórico de insights.
@@ -122,5 +130,10 @@ necessidade técnica:
 | `VITE_GOOGLE_BOOKS_API_KEY` | passou a ser opcional | a API responde sem chave; antes o app lançava erro |
 | Fuso horário nas datas | uso de data local em vez de `toISOString()` direto | evita marcar o hábito no dia errado à noite (UTC-3) |
 
-Itens citados na especificação e ainda não implementados: a tabela `goals` existe no schema e no
-tipo `Goal`, mas não tem tela; `getHabitCorrelations` continua retornando os valores simulados do PDF.
+O PDF define a tabela `goals` e o tipo `Goal`, mas nenhum serviço ou tela — a tela de Metas foi
+desenhada aqui, seguindo o formato dos outros módulos. As regras de progresso e status ficam em
+`src/utils/goalProgress.ts`, fora do serviço, porque valem igual para o Supabase e para o modo
+demonstração; são a única parte com teste automatizado.
+
+Item da especificação ainda não implementado: `getHabitCorrelations` continua retornando os valores
+simulados do PDF — correlacionar hábito com humor exigiria registrar humor, que não existe no schema.
