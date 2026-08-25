@@ -70,6 +70,19 @@ export type Goal = {
   updated_at: string
 }
 
+export type MoodLog = {
+  id: string
+  user_id: string
+  date: string
+  /** Escala de 1 a 5 */
+  mood: number
+  /** Escala de 1 a 5 */
+  energy: number
+  notes?: string
+  created_at: string
+  updated_at: string
+}
+
 export type Insight = {
   id: string
   user_id: string
@@ -132,6 +145,12 @@ export type Database = {
         Row: Goal
         Insert: InsertOf<Goal>
         Update: UpdateOf<Goal>
+        Relationships: []
+      }
+      mood_logs: {
+        Row: MoodLog
+        Insert: InsertOf<MoodLog>
+        Update: UpdateOf<MoodLog>
         Relationships: []
       }
       insights: {

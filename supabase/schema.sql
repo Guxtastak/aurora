@@ -86,6 +86,19 @@ create table if not exists public.goals (
   updated_at          timestamptz not null default now()
 );
 
+-- --------------------------------------------------------------- mood_logs
+create table if not exists public.mood_logs (
+  id         uuid primary key default gen_random_uuid(),
+  user_id    uuid not null references auth.users (id) on delete cascade default auth.uid(),
+  date       date not null default current_date,
+  mood       integer not null check (mood between 1 and 5),
+  energy     integer not null check (energy between 1 and 5),
+  notes      text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (user_id, date)
+);
+
 -- ---------------------------------------------------------------- insights
 create table if not exists public.insights (
   id           uuid primary key default gen_random_uuid(),
@@ -104,6 +117,7 @@ create index if not exists habit_logs_habit_idx on public.habit_logs (habit_id, 
 create index if not exists books_user_idx       on public.books (user_id, created_at desc);
 create index if not exists finances_user_idx    on public.finances (user_id, date desc);
 create index if not exists goals_user_idx       on public.goals (user_id, created_at desc);
+create index if not exists mood_logs_user_idx   on public.mood_logs (user_id, date desc);
 create index if not exists insights_user_idx    on public.insights (user_id, generated_at desc);
 
 -- ------------------------------------------------- trigger de updated_at
@@ -132,12 +146,18 @@ create trigger goals_set_updated_at
   before update on public.goals
   for each row execute function public.set_updated_at();
 
+drop trigger if exists mood_logs_set_updated_at on public.mood_logs;
+create trigger mood_logs_set_updated_at
+  before update on public.mood_logs
+  for each row execute function public.set_updated_at();
+
 -- ---------------------------------------------------------------------- RLS
 alter table public.habits     enable row level security;
 alter table public.habit_logs enable row level security;
 alter table public.books      enable row level security;
 alter table public.finances   enable row level security;
 alter table public.goals      enable row level security;
+alter table public.mood_logs  enable row level security;
 alter table public.insights   enable row level security;
 
 do $$
@@ -145,7 +165,7 @@ declare
   t text;
 begin
   for t in
-    select unnest(array['habits', 'habit_logs', 'books', 'finances', 'goals', 'insights'])
+    select unnest(array['habits', 'habit_logs', 'books', 'finances', 'goals', 'mood_logs', 'insights'])
   loop
     execute format('drop policy if exists "%1$s_select_own" on public.%1$I', t);
     execute format('drop policy if exists "%1$s_insert_own" on public.%1$I', t);
