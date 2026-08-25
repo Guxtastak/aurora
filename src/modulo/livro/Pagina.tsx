@@ -2,10 +2,11 @@
  * Tela de Livros (/livros): estante com filtro por status, progresso de
  * leitura, busca no Google Books e cadastro manual.
  */
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { BookOpen, Plus, Search } from 'lucide-react'
 import { ServicoDeLivros } from '@/compartilhado/fonte/fonteDeDados'
+import { useDados } from '@/compartilhado/gancho/useDados'
 import type { Livro } from '@/compartilhado/tipo/banco'
 import { CartaoDeLivro } from '@/modulo/livro/componente/CartaoDeLivro'
 import { BuscaDeLivro } from '@/modulo/livro/componente/BuscaDeLivro'
@@ -28,34 +29,27 @@ const FILTERS: { key: Filter; label: string }[] = [
 ]
 
 export function PaginaDeLivros() {
-  const [books, setBooks] = useState<Livro[]>([])
-  const [carregando, setCarregando] = useState(true)
-  const [error, setError] = useState('')
-  const [filter, setFilter] = useState<Filter>('all')
+  const {
+    dados: livros,
+    setDados: setLivros,
+    carregando,
+    erro,
+    setErro,
+    recarregar
+  } = useDados(() => ServicoDeLivros.listarLivros(), [] as Livro[], {
+    aoFalhar: 'Erro ao carregar livros'
+  })
+
+  const [filtro, setFiltro] = useState<Filter>('all')
   const [buscaAberta, setBuscaAberta] = useState(false)
   const [cadastroManualAberto, setCadastroManualAberto] = useState(false)
 
-  const load = async () => {
-    try {
-      setError('')
-      setBooks(await ServicoDeLivros.listarLivros())
-    } catch (err: any) {
-      setError(err.message || 'Erro ao carregar livros')
-    } finally {
-      setCarregando(false)
-    }
-  }
-
-  useEffect(() => {
-    load()
-  }, [])
-
-  const handleProgress = async (book: Livro, pages: number) => {
+  const aoAvancarPaginas = async (book: Livro, pages: number) => {
     try {
       const updated = await ServicoDeLivros.atualizarProgresso(book.id, pages)
-      setBooks(prev => prev.map(b => (b.id === book.id ? updated : b)))
-    } catch (err: any) {
-      setError(err.message || 'Erro ao atualizar progresso')
+      setLivros(prev => prev.map(b => (b.id === book.id ? updated : b)))
+    } catch (falha: any) {
+      setErro(falha.message || 'Erro ao atualizar progresso')
     }
   }
 
@@ -67,9 +61,9 @@ export function PaginaDeLivros() {
         book.id,
         rating && rating >= 1 && rating <= 5 ? rating : undefined
       )
-      setBooks(prev => prev.map(b => (b.id === book.id ? updated : b)))
-    } catch (err: any) {
-      setError(err.message || 'Erro ao finalizar livro')
+      setLivros(prev => prev.map(b => (b.id === book.id ? updated : b)))
+    } catch (falha: any) {
+      setErro(falha.message || 'Erro ao finalizar livro')
     }
   }
 
@@ -77,9 +71,9 @@ export function PaginaDeLivros() {
     if (!window.confirm(`Excluir "${book.title}"?`)) return
     try {
       await ServicoDeLivros.excluirLivro(book.id)
-      setBooks(prev => prev.filter(b => b.id !== book.id))
-    } catch (err: any) {
-      setError(err.message || 'Erro ao excluir livro')
+      setLivros(prev => prev.filter(b => b.id !== book.id))
+    } catch (falha: any) {
+      setErro(falha.message || 'Erro ao excluir livro')
     }
   }
 
@@ -87,14 +81,14 @@ export function PaginaDeLivros() {
     try {
       await ServicoDeLivros.adicionarLivro(values)
       setCadastroManualAberto(false)
-      await load()
-    } catch (err: any) {
-      setError(err.message || 'Erro ao adicionar livro')
+      await recarregar()
+    } catch (falha: any) {
+      setErro(falha.message || 'Erro ao adicionar livro')
     }
   }
 
-  const visible = filter === 'all' ? books : books.filter(b => b.status === filter)
-  const finished = books.filter(b => b.status === 'finished')
+  const visible = filtro === 'all' ? livros : livros.filter(b => b.status === filtro)
+  const finished = livros.filter(b => b.status === 'finished')
   const pagesRead = finished.reduce((sum, b) => sum + (b.pages_total || 0), 0)
 
   return (
@@ -114,12 +108,12 @@ export function PaginaDeLivros() {
         </div>
       </div>
 
-      {error && (
-        <p className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg px-4 py-2">{error}</p>
+      {erro && (
+        <p className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg px-4 py-2">{erro}</p>
       )}
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <CartaoIndicador label="Na biblioteca" value={books.length} />
+        <CartaoIndicador label="Na biblioteca" value={livros.length} />
         <CartaoIndicador label="Finalizados" value={finished.length} accent="green" />
         <CartaoIndicador label="Páginas lidas" value={pagesRead} accent="amber" />
       </div>
@@ -128,9 +122,9 @@ export function PaginaDeLivros() {
         {FILTERS.map(f => (
           <button
             key={f.key}
-            onClick={() => setFilter(f.key)}
+            onClick={() => setFiltro(f.key)}
             className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
-              filter === f.key
+              filtro === f.key
                 ? 'bg-aurora-500 text-white'
                 : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
             }`}
@@ -145,14 +139,14 @@ export function PaginaDeLivros() {
       ) : visible.length === 0 ? (
         <EstadoVazio
           icon={<BookOpen size={40} />}
-          title={books.length === 0 ? 'Sua biblioteca está vazia' : 'Nada neste filtro'}
+          title={livros.length === 0 ? 'Sua biblioteca está vazia' : 'Nada neste filtro'}
           description={
-            books.length === 0
+            livros.length === 0
               ? 'Busque um livro no Google Books ou cadastre manualmente.'
               : 'Tente outro filtro para ver seus livros.'
           }
           action={
-            books.length === 0 ? (
+            livros.length === 0 ? (
               <Botao icon={<Search size={16} />} onClick={() => setBuscaAberta(true)}>
                 Buscar livro
               </Botao>
@@ -166,7 +160,7 @@ export function PaginaDeLivros() {
               <CartaoDeLivro
                 key={book.id}
                 book={book}
-                onProgress={handleProgress}
+                onProgress={aoAvancarPaginas}
                 onFinish={handleFinish}
                 onDelete={aoExcluir}
               />
@@ -179,7 +173,7 @@ export function PaginaDeLivros() {
         <BuscaDeLivro
           onAdded={() => {
             setBuscaAberta(false)
-            load()
+            recarregar()
           }}
         />
       </Modal>
