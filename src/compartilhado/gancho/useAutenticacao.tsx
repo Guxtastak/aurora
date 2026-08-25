@@ -4,7 +4,7 @@ import type { User } from '@supabase/supabase-js'
 
 interface AuthContextType {
   user: User | null
-  loading: boolean
+  carregando: boolean
   signIn: (email: string, password: string) => Promise<void>
   signUp: (email: string, password: string) => Promise<void>
   signOut: () => Promise<void>
@@ -19,7 +19,7 @@ const demoUser = { id: 'demo-user', email: 'visitante@aurora.demo' } as User
 
 export function ProvedorDeAutenticacao({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [carregando, setCarregando] = useState(true)
 
   useEffect(() => {
     if (modoDemonstracao) {
@@ -31,19 +31,19 @@ export function ProvedorDeAutenticacao({ children }: { children: React.ReactNode
         // sem localStorage: mantem a sessao demo
       }
       setUser(loggedOut ? null : demoUser)
-      setLoading(false)
+      setCarregando(false)
       return
     }
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user || null)
-      setLoading(false)
+      setCarregando(false)
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         setUser(session?.user || null)
-        setLoading(false)
+        setCarregando(false)
       }
     )
 
@@ -89,7 +89,7 @@ export function ProvedorDeAutenticacao({ children }: { children: React.ReactNode
   }
 
   return (
-    <ContextoDeAutenticacao.Provider value={{ user, loading, signIn, signUp, signOut, isAuthenticated: !!user }}>
+    <ContextoDeAutenticacao.Provider value={{ user, carregando, signIn, signUp, signOut, isAuthenticated: !!user }}>
       {children}
     </ContextoDeAutenticacao.Provider>
   )

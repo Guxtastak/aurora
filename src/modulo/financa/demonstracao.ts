@@ -48,11 +48,11 @@ export class FinancasDaDemonstracao {
   }
 
   static async obterSaldo() {
-    const transactions = await this.listarTransacoes()
-    const totalIncome = transactions
+    const transacoes = await this.listarTransacoes()
+    const totalIncome = transacoes
       .filter(t => t.type === 'income')
       .reduce((sum, t) => sum + Number(t.amount), 0)
-    const totalExpenses = transactions
+    const totalExpenses = transacoes
       .filter(t => t.type === 'expense')
       .reduce((sum, t) => sum + Number(t.amount), 0)
 
@@ -60,14 +60,14 @@ export class FinancasDaDemonstracao {
       balance: totalIncome - totalExpenses,
       totalIncome,
       totalExpenses,
-      count: transactions.length
+      count: transacoes.length
     }
   }
 
   static async listarTransacoesPorCategoria() {
-    const transactions = await this.listarTransacoes()
+    const transacoes = await this.listarTransacoes()
     const categories: { [key: string]: { income: number; expense: number; count: number } } = {}
-    transactions.forEach(t => {
+    transacoes.forEach(t => {
       if (!categories[t.category]) {
         categories[t.category] = { income: 0, expense: 0, count: 0 }
       }
@@ -83,14 +83,14 @@ export class FinancasDaDemonstracao {
 
   static async obterResumoDoMes(year: number, month: number) {
     const prefix = `${year}-${String(month).padStart(2, '0')}`
-    const transactions = (await this.listarTransacoes()).filter(t => t.date.startsWith(prefix))
-    const income = transactions
+    const transacoes = (await this.listarTransacoes()).filter(t => t.date.startsWith(prefix))
+    const income = transacoes
       .filter(t => t.type === 'income')
       .reduce((sum, t) => sum + Number(t.amount), 0)
-    const expenses = transactions
+    const expenses = transacoes
       .filter(t => t.type === 'expense')
       .reduce((sum, t) => sum + Number(t.amount), 0)
 
-    return { income, expenses, balance: income - expenses, count: transactions.length, transactions }
+    return { income, expenses, balance: income - expenses, count: transacoes.length, transacoes }
   }
 }

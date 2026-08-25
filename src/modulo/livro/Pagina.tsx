@@ -25,11 +25,11 @@ const FILTERS: { key: Filter; label: string }[] = [
 
 export function PaginaDeLivros() {
   const [books, setBooks] = useState<Livro[]>([])
-  const [loading, setLoading] = useState(true)
+  const [carregando, setCarregando] = useState(true)
   const [error, setError] = useState('')
   const [filter, setFilter] = useState<Filter>('all')
-  const [searchOpen, setSearchOpen] = useState(false)
-  const [manualOpen, setManualOpen] = useState(false)
+  const [buscaAberta, setBuscaAberta] = useState(false)
+  const [cadastroManualAberto, setCadastroManualAberto] = useState(false)
 
   const load = async () => {
     try {
@@ -38,7 +38,7 @@ export function PaginaDeLivros() {
     } catch (err: any) {
       setError(err.message || 'Erro ao carregar livros')
     } finally {
-      setLoading(false)
+      setCarregando(false)
     }
   }
 
@@ -69,7 +69,7 @@ export function PaginaDeLivros() {
     }
   }
 
-  const handleDelete = async (book: Livro) => {
+  const aoExcluir = async (book: Livro) => {
     if (!window.confirm(`Excluir "${book.title}"?`)) return
     try {
       await ServicoDeLivros.excluirLivro(book.id)
@@ -82,7 +82,7 @@ export function PaginaDeLivros() {
   const handleManualAdd = async (values: ValoresDoLivro) => {
     try {
       await ServicoDeLivros.adicionarLivro(values)
-      setManualOpen(false)
+      setCadastroManualAberto(false)
       await load()
     } catch (err: any) {
       setError(err.message || 'Erro ao adicionar livro')
@@ -101,10 +101,10 @@ export function PaginaDeLivros() {
           <p className="text-sm text-gray-500 dark:text-gray-400">Sua biblioteca e progresso de leitura</p>
         </div>
         <div className="flex gap-2">
-          <Botao variant="secondary" icon={<Plus size={16} />} onClick={() => setManualOpen(true)}>
+          <Botao variant="secondary" icon={<Plus size={16} />} onClick={() => setCadastroManualAberto(true)}>
             Manual
           </Botao>
-          <Botao icon={<Search size={16} />} onClick={() => setSearchOpen(true)}>
+          <Botao icon={<Search size={16} />} onClick={() => setBuscaAberta(true)}>
             Buscar livro
           </Botao>
         </div>
@@ -136,7 +136,7 @@ export function PaginaDeLivros() {
         ))}
       </div>
 
-      {loading ? (
+      {carregando ? (
         <Carregando label="Carregando livros..." />
       ) : visible.length === 0 ? (
         <EstadoVazio
@@ -149,7 +149,7 @@ export function PaginaDeLivros() {
           }
           action={
             books.length === 0 ? (
-              <Botao icon={<Search size={16} />} onClick={() => setSearchOpen(true)}>
+              <Botao icon={<Search size={16} />} onClick={() => setBuscaAberta(true)}>
                 Buscar livro
               </Botao>
             ) : undefined
@@ -164,24 +164,24 @@ export function PaginaDeLivros() {
                 book={book}
                 onProgress={handleProgress}
                 onFinish={handleFinish}
-                onDelete={handleDelete}
+                onDelete={aoExcluir}
               />
             ))}
           </AnimatePresence>
         </div>
       )}
 
-      <Modal open={searchOpen} onClose={() => setSearchOpen(false)} title="Buscar no Google Books" maxWidth="max-w-lg">
+      <Modal open={buscaAberta} onClose={() => setBuscaAberta(false)} title="Buscar no Google Books" maxWidth="max-w-lg">
         <BuscaDeLivro
           onAdded={() => {
-            setSearchOpen(false)
+            setBuscaAberta(false)
             load()
           }}
         />
       </Modal>
 
-      <Modal open={manualOpen} onClose={() => setManualOpen(false)} title="Adicionar livro manualmente">
-        <FormularioDeLivro onSubmit={handleManualAdd} onCancel={() => setManualOpen(false)} />
+      <Modal open={cadastroManualAberto} onClose={() => setCadastroManualAberto(false)} title="Adicionar livro manualmente">
+        <FormularioDeLivro onSubmit={handleManualAdd} onCancel={() => setCadastroManualAberto(false)} />
       </Modal>
     </div>
   )

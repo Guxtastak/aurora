@@ -15,11 +15,11 @@ import { porcentagem } from '@/compartilhado/utilitario/formato'
 
 export function PaginaDeHabitos() {
   const [habits, setHabits] = useState<Habito[]>([])
-  const [loading, setLoading] = useState(true)
+  const [carregando, setCarregando] = useState(true)
   const [error, setError] = useState('')
-  const [modalOpen, setModalOpen] = useState(false)
-  const [editing, setEditing] = useState<Habito | null>(null)
-  const [busyId, setBusyId] = useState<string | null>(null)
+  const [modalAberto, setModalAberto] = useState(false)
+  const [emEdicao, setEmEdicao] = useState<Habito | null>(null)
+  const [idOcupado, setIdOcupado] = useState<string | null>(null)
 
   const load = async () => {
     try {
@@ -29,7 +29,7 @@ export function PaginaDeHabitos() {
     } catch (err: any) {
       setError(err.message || 'Erro ao carregar hábitos')
     } finally {
-      setLoading(false)
+      setCarregando(false)
     }
   }
 
@@ -38,7 +38,7 @@ export function PaginaDeHabitos() {
   }, [])
 
   const handleToggle = async (habit: Habito) => {
-    setBusyId(habit.id)
+    setIdOcupado(habit.id)
     // Atualização otimista
     setHabits(prev =>
       prev.map(h => (h.id === habit.id ? { ...h, completed_today: !h.completed_today } : h))
@@ -50,26 +50,26 @@ export function PaginaDeHabitos() {
       setError(err.message || 'Erro ao atualizar hábito')
       await load()
     } finally {
-      setBusyId(null)
+      setIdOcupado(null)
     }
   }
 
   const handleSubmit = async (values: ValoresDoHabito) => {
     try {
-      if (editing) {
-        await ServicoDeHabitos.atualizarHabito(editing.id, values)
+      if (emEdicao) {
+        await ServicoDeHabitos.atualizarHabito(emEdicao.id, values)
       } else {
         await ServicoDeHabitos.criarHabito(values)
       }
-      setModalOpen(false)
-      setEditing(null)
+      setModalAberto(false)
+      setEmEdicao(null)
       await load()
     } catch (err: any) {
       setError(err.message || 'Erro ao salvar hábito')
     }
   }
 
-  const handleDelete = async (habit: Habito) => {
+  const aoExcluir = async (habit: Habito) => {
     if (!window.confirm(`Excluir o hábito "${habit.name}"?`)) return
     try {
       await ServicoDeHabitos.excluirHabito(habit.id)
@@ -94,8 +94,8 @@ export function PaginaDeHabitos() {
         <Botao
           icon={<Plus size={16} />}
           onClick={() => {
-            setEditing(null)
-            setModalOpen(true)
+            setEmEdicao(null)
+            setModalAberto(true)
           }}
         >
           Novo hábito
@@ -106,7 +106,7 @@ export function PaginaDeHabitos() {
         <p className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg px-4 py-2">{error}</p>
       )}
 
-      {loading ? (
+      {carregando ? (
         <Carregando label="Carregando hábitos..." />
       ) : habits.length === 0 ? (
         <EstadoVazio
@@ -114,7 +114,7 @@ export function PaginaDeHabitos() {
           title="Nenhum hábito ainda"
           description="Crie seu primeiro hábito e comece a construir consistência."
           action={
-            <Botao icon={<Plus size={16} />} onClick={() => setModalOpen(true)}>
+            <Botao icon={<Plus size={16} />} onClick={() => setModalAberto(true)}>
               Criar hábito
             </Botao>
           }
@@ -137,13 +137,13 @@ export function PaginaDeHabitos() {
                 <CartaoDeHabito
                   key={habit.id}
                   habit={habit}
-                  busy={busyId === habit.id}
+                  busy={idOcupado === habit.id}
                   onToggle={handleToggle}
                   onEdit={h => {
-                    setEditing(h)
-                    setModalOpen(true)
+                    setEmEdicao(h)
+                    setModalAberto(true)
                   }}
-                  onDelete={handleDelete}
+                  onDelete={aoExcluir}
                 />
               ))}
             </AnimatePresence>
@@ -152,19 +152,19 @@ export function PaginaDeHabitos() {
       )}
 
       <Modal
-        open={modalOpen}
+        open={modalAberto}
         onClose={() => {
-          setModalOpen(false)
-          setEditing(null)
+          setModalAberto(false)
+          setEmEdicao(null)
         }}
-        title={editing ? 'Editar hábito' : 'Novo hábito'}
+        title={emEdicao ? 'Editar hábito' : 'Novo hábito'}
       >
         <FormularioDeHabito
-          habit={editing}
+          habit={emEdicao}
           onSubmit={handleSubmit}
           onCancel={() => {
-            setModalOpen(false)
-            setEditing(null)
+            setModalAberto(false)
+            setEmEdicao(null)
           }}
         />
       </Modal>

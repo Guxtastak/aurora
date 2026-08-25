@@ -12,14 +12,14 @@ interface BuscaDeLivroProps {
 export function BuscaDeLivro({ onAdded }: BuscaDeLivroProps) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<LivroDoGoogle[]>([])
-  const [loading, setLoading] = useState(false)
-  const [addingId, setAddingId] = useState<string | null>(null)
+  const [carregando, setCarregando] = useState(false)
+  const [idSendoAdicionado, setIdSendoAdicionado] = useState<string | null>(null)
   const [error, setError] = useState('')
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!query.trim()) return
-    setLoading(true)
+    setCarregando(true)
     setError('')
     try {
       const items = await ServicoDeLivros.buscarNoGoogleBooks(query, 10)
@@ -28,12 +28,12 @@ export function BuscaDeLivro({ onAdded }: BuscaDeLivroProps) {
     } catch (err: any) {
       setError(err.message || 'Erro na busca')
     } finally {
-      setLoading(false)
+      setCarregando(false)
     }
   }
 
   const handleAdd = async (googleBookId: string) => {
-    setAddingId(googleBookId)
+    setIdSendoAdicionado(googleBookId)
     setError('')
     try {
       await ServicoDeLivros.adicionarLivroDoGoogle(googleBookId)
@@ -41,7 +41,7 @@ export function BuscaDeLivro({ onAdded }: BuscaDeLivroProps) {
     } catch (err: any) {
       setError(err.message || 'Erro ao adicionar livro')
     } finally {
-      setAddingId(null)
+      setIdSendoAdicionado(null)
     }
   }
 
@@ -54,14 +54,14 @@ export function BuscaDeLivro({ onAdded }: BuscaDeLivroProps) {
           placeholder="Título, autor ou ISBN"
           className="flex-1 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-aurora-500 outline-none"
         />
-        <Botao type="submit" icon={<Search size={16} />} loading={loading}>
+        <Botao type="submit" icon={<Search size={16} />} carregando={carregando}>
           Buscar
         </Botao>
       </form>
 
       {error && <p className="text-sm text-red-500">{error}</p>}
 
-      {loading ? (
+      {carregando ? (
         <Carregando label="Buscando no Google Books..." />
       ) : (
         <div className="space-y-2 max-h-96 overflow-y-auto scrollbar-thin">
@@ -90,7 +90,7 @@ export function BuscaDeLivro({ onAdded }: BuscaDeLivroProps) {
                 size="sm"
                 variant="secondary"
                 icon={<Plus size={14} />}
-                loading={addingId === item.id}
+                carregando={idSendoAdicionado === item.id}
                 onClick={() => handleAdd(item.id)}
               >
                 Adicionar

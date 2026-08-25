@@ -22,9 +22,9 @@ function media(values: number[]) {
 
 export function PaginaDeHumor() {
   const [logs, setLogs] = useState<RegistroDeHumor[]>([])
-  const [correlations, setCorrelations] = useState<ComparacaoDeHabito[]>([])
-  const [editing, setEditing] = useState<RegistroDeHumor | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [comparacoes, setComparacoes] = useState<ComparacaoDeHabito[]>([])
+  const [emEdicao, setEmEdicao] = useState<RegistroDeHumor | null>(null)
+  const [carregando, setCarregando] = useState(true)
   const [error, setError] = useState('')
 
   const load = async () => {
@@ -35,11 +35,11 @@ export function PaginaDeHumor() {
         ServicoDeInsights.obterComparacaoDosHabitos()
       ])
       setLogs(moodLogs)
-      setCorrelations(habitCorrelations)
+      setComparacoes(habitCorrelations)
     } catch (err: any) {
       setError(err.message || 'Erro ao carregar o humor')
     } finally {
-      setLoading(false)
+      setCarregando(false)
     }
   }
 
@@ -47,18 +47,18 @@ export function PaginaDeHumor() {
     load()
   }, [])
 
-  const handleEdit = async (values: { mood: number; energy: number; notes?: string }) => {
-    if (!editing) return
+  const aoEditar = async (values: { mood: number; energy: number; notes?: string }) => {
+    if (!emEdicao) return
     try {
-      await ServicoDeHumor.gravarRegistroDoDia({ date: editing.date, ...values })
-      setEditing(null)
+      await ServicoDeHumor.gravarRegistroDoDia({ date: emEdicao.date, ...values })
+      setEmEdicao(null)
       await load()
     } catch (err: any) {
       setError(err.message || 'Erro ao salvar o registro')
     }
   }
 
-  const handleDelete = async (log: RegistroDeHumor) => {
+  const aoExcluir = async (log: RegistroDeHumor) => {
     if (!window.confirm(`Excluir o registro de ${formatarData(log.date)}?`)) return
     try {
       await ServicoDeHumor.excluirRegistro(log.id)
@@ -83,7 +83,7 @@ export function PaginaDeHumor() {
 
       <RegistroDoDia onSaved={load} />
 
-      {loading ? (
+      {carregando ? (
         <Carregando label="Carregando seus registros..." />
       ) : logs.length === 0 ? (
         <EstadoVazio
@@ -117,14 +117,14 @@ export function PaginaDeHumor() {
           </div>
 
           <GraficoDeTendencia logs={logs} />
-          <ComparacaoComHabitos correlations={correlations} />
-          <Historico logs={logs} onEdit={setEditing} onDelete={handleDelete} />
+          <ComparacaoComHabitos comparacoes={comparacoes} />
+          <Historico logs={logs} onEdit={setEmEdicao} onDelete={aoExcluir} />
         </>
       )}
 
-      <Modal open={!!editing} onClose={() => setEditing(null)} title="Editar registro">
-        {editing && (
-          <FormularioDeEdicao log={editing} onSubmit={handleEdit} onCancel={() => setEditing(null)} />
+      <Modal open={!!emEdicao} onClose={() => setEmEdicao(null)} title="Editar registro">
+        {emEdicao && (
+          <FormularioDeEdicao log={emEdicao} onSubmit={aoEditar} onCancel={() => setEmEdicao(null)} />
         )}
       </Modal>
     </div>

@@ -17,9 +17,9 @@ export function RegistroDoDia({ onSaved }: RegistroDoDiaProps) {
   const [mood, setMood] = useState<number | null>(null)
   const [energy, setEnergy] = useState<number | null>(null)
   const [notes, setNotes] = useState('')
-  const [showNotes, setShowNotes] = useState(false)
-  const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
+  const [mostrarNota, setMostrarNota] = useState(false)
+  const [salvando, setSalvando] = useState(false)
+  const [salvo, setSalvo] = useState(false)
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -29,15 +29,15 @@ export function RegistroDoDia({ onSaved }: RegistroDoDiaProps) {
         setMood(today.mood)
         setEnergy(today.energy)
         setNotes(today.notes || '')
-        setShowNotes(!!today.notes)
-        setSaved(true)
+        setMostrarNota(!!today.notes)
+        setSalvo(true)
       })
       .catch(err => setError(err.message || 'Erro ao carregar o humor de hoje'))
   }, [])
 
-  const handleSave = async () => {
+  const aoSalvar = async () => {
     if (mood === null || energy === null) return
-    setSaving(true)
+    setSalvando(true)
     setError('')
     try {
       await ServicoDeHumor.gravarRegistroDoDia({
@@ -46,18 +46,18 @@ export function RegistroDoDia({ onSaved }: RegistroDoDiaProps) {
         energy,
         notes: notes.trim() || undefined
       })
-      setSaved(true)
+      setSalvo(true)
       onSaved?.()
     } catch (err: any) {
       setError(err.message || 'Erro ao salvar o humor')
     } finally {
-      setSaving(false)
+      setSalvando(false)
     }
   }
 
   const pick = (setter: (value: number) => void) => (value: number) => {
     setter(value)
-    setSaved(false)
+    setSalvo(false)
   }
 
   return (
@@ -66,21 +66,21 @@ export function RegistroDoDia({ onSaved }: RegistroDoDiaProps) {
         <Escala legend="Humor" options={HUMORES} value={mood} onChange={pick(setMood)} />
         <Escala legend="Energia" options={ENERGIAS} value={energy} onChange={pick(setEnergy)} />
 
-        {showNotes ? (
+        {mostrarNota ? (
           <CampoDeTextoLongo
             label="Nota do dia (opcional)"
             rows={2}
             value={notes}
             onChange={event => {
               setNotes(event.target.value)
-              setSaved(false)
+              setSalvo(false)
             }}
             placeholder="O que aconteceu hoje?"
           />
         ) : (
           <button
             type="button"
-            onClick={() => setShowNotes(true)}
+            onClick={() => setMostrarNota(true)}
             className="inline-flex items-center gap-1.5 text-sm text-aurora-600 dark:text-aurora-300 hover:underline"
           >
             <MessageSquarePlus size={15} />
@@ -92,13 +92,13 @@ export function RegistroDoDia({ onSaved }: RegistroDoDiaProps) {
 
         <div className="flex items-center gap-3">
           <Botao
-            onClick={handleSave}
-            loading={saving}
-            disabled={mood === null || energy === null || saved}
+            onClick={aoSalvar}
+            carregando={salvando}
+            disabled={mood === null || energy === null || salvo}
           >
-            {saved ? 'Registrado' : 'Salvar'}
+            {salvo ? 'Registrado' : 'Salvar'}
           </Botao>
-          {saved && (
+          {salvo && (
             <span className="inline-flex items-center gap-1 text-sm text-green-600 dark:text-green-400">
               <Check size={15} />
               Hoje já está registrado

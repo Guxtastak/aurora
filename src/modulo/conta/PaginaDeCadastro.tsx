@@ -9,7 +9,7 @@ export function PaginaDeCadastro() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [carregando, setCarregando] = useState(false)
   const { signUp } = useAutenticacao()
   const navigate = useNavigate()
 
@@ -28,7 +28,7 @@ export function PaginaDeCadastro() {
       return
     }
 
-    setLoading(true)
+    setCarregando(true)
     try {
       await signUp(email, password)
       // Se a confirmação de email estiver desativada no Supabase, a sessão já existe
@@ -38,7 +38,7 @@ export function PaginaDeCadastro() {
     } catch (err: any) {
       setError(err.message || 'Erro ao criar conta')
     } finally {
-      setLoading(false)
+      setCarregando(false)
     }
   }
 
@@ -95,10 +95,10 @@ export function PaginaDeCadastro() {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={carregando}
             className="w-full bg-aurora-500 hover:bg-aurora-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors disabled:opacity-50"
           >
-            {loading ? 'Criando conta...' : 'Cadastrar'}
+            {carregando ? 'Criando conta...' : 'Cadastrar'}
           </button>
         </form>
 

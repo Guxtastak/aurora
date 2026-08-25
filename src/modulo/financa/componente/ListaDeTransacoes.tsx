@@ -3,14 +3,14 @@ import type { Transacao } from '@/compartilhado/tipo/banco'
 import { formatarMoeda, formatarData } from '@/compartilhado/utilitario/formato'
 
 interface ListaDeTransacoesProps {
-  transactions: Transacao[]
+  transacoes: Transacao[]
   onDelete: (transaction: Transacao) => void
 }
 
-export function ListaDeTransacoes({ transactions, onDelete }: ListaDeTransacoesProps) {
+export function ListaDeTransacoes({ transacoes, onDelete }: ListaDeTransacoesProps) {
   return (
     <ul className="divide-y divide-gray-100 dark:divide-gray-700">
-      {transactions.map(t => {
+      {transacoes.map(t => {
         const income = t.type === 'income'
         return (
           <li key={t.id} className="flex items-center gap-3 py-3">

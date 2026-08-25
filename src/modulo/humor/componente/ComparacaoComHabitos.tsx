@@ -4,7 +4,7 @@ import { MINIMO_DE_DIAS } from '@/modulo/humor/regraDeComparacao'
 import { Cartao } from '@/compartilhado/componente/Cartao'
 
 interface ComparacaoComHabitosProps {
-  correlations: ComparacaoDeHabito[]
+  comparacoes: ComparacaoDeHabito[]
 }
 
 /** Uma casa decimal, com vírgula — o arredondamento é só de exibição */
@@ -23,20 +23,20 @@ function Indicador({ value }: { value: number }) {
   return <Minus size={16} className="text-gray-400" aria-hidden="true" />
 }
 
-export function ComparacaoComHabitos({ correlations }: ComparacaoComHabitosProps) {
+export function ComparacaoComHabitos({ comparacoes }: ComparacaoComHabitosProps) {
   return (
     <Cartao
       title="Hábitos e humor"
       subtitle="O que os dias registrados mostram — é comparação, não causa"
     >
-      {correlations.length === 0 ? (
+      {comparacoes.length === 0 ? (
         <p className="text-sm text-gray-500 dark:text-gray-400">
           Nenhum hábito diário cadastrado ainda. Hábitos semanais e mensais ficam de fora
           porque, neles, a maioria dos dias é "não cumprido" por desenho.
         </p>
       ) : (
         <ul className="space-y-3">
-          {correlations.map(item => (
+          {comparacoes.map(item => (
             <li
               key={item.habitId}
               className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 dark:border-gray-700 last:border-0 pb-3 last:pb-0"

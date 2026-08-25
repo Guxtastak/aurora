@@ -105,7 +105,7 @@ export function FormularioDeHabito({ habit, onSubmit, onCancel }: FormularioDeHa
         <Botao type="button" variant="secondary" onClick={onCancel}>
           Cancelar
         </Botao>
-        <Botao type="submit" loading={isSubmitting}>
+        <Botao type="submit" carregando={isSubmitting}>
           {habit ? 'Salvar' : 'Criar hábito'}
         </Botao>
       </div>

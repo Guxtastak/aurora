@@ -23,11 +23,11 @@ const FILTERS: { key: Filter; label: string }[] = [
 
 export function PaginaDeMetas() {
   const [goals, setGoals] = useState<Meta[]>([])
-  const [loading, setLoading] = useState(true)
+  const [carregando, setCarregando] = useState(true)
   const [error, setError] = useState('')
   const [filter, setFilter] = useState<Filter>('all')
-  const [modalOpen, setModalOpen] = useState(false)
-  const [editing, setEditing] = useState<Meta | null>(null)
+  const [modalAberto, setModalAberto] = useState(false)
+  const [emEdicao, setEmEdicao] = useState<Meta | null>(null)
 
   const load = async () => {
     try {
@@ -36,7 +36,7 @@ export function PaginaDeMetas() {
     } catch (err: any) {
       setError(err.message || 'Erro ao carregar metas')
     } finally {
-      setLoading(false)
+      setCarregando(false)
     }
   }
 
@@ -46,20 +46,20 @@ export function PaginaDeMetas() {
 
   const handleSubmit = async (values: ValoresDaMeta) => {
     try {
-      if (editing) {
-        await ServicoDeMetas.atualizarMeta(editing.id, values)
+      if (emEdicao) {
+        await ServicoDeMetas.atualizarMeta(emEdicao.id, values)
       } else {
         await ServicoDeMetas.criarMeta(values)
       }
-      setModalOpen(false)
-      setEditing(null)
+      setModalAberto(false)
+      setEmEdicao(null)
       await load()
     } catch (err: any) {
       setError(err.message || 'Erro ao salvar meta')
     }
   }
 
-  const handleDelete = async (goal: Meta) => {
+  const aoExcluir = async (goal: Meta) => {
     if (!window.confirm(`Excluir a meta "${goal.title}"?`)) return
     try {
       await ServicoDeMetas.excluirMeta(goal.id)
@@ -70,8 +70,8 @@ export function PaginaDeMetas() {
   }
 
   const closeModal = () => {
-    setModalOpen(false)
-    setEditing(null)
+    setModalAberto(false)
+    setEmEdicao(null)
   }
 
   const visible = filter === 'all' ? goals : goals.filter(g => g.status === filter)
@@ -97,8 +97,8 @@ export function PaginaDeMetas() {
         <Botao
           icon={<Plus size={16} />}
           onClick={() => {
-            setEditing(null)
-            setModalOpen(true)
+            setEmEdicao(null)
+            setModalAberto(true)
           }}
         >
           Nova meta
@@ -109,7 +109,7 @@ export function PaginaDeMetas() {
         <p className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg px-4 py-2">{error}</p>
       )}
 
-      {loading ? (
+      {carregando ? (
         <Carregando label="Carregando metas..." />
       ) : goals.length === 0 ? (
         <EstadoVazio
@@ -117,7 +117,7 @@ export function PaginaDeMetas() {
           title="Nenhuma meta ainda"
           description="Defina onde você quer chegar e acompanhe o progresso em um lugar só."
           action={
-            <Botao icon={<Plus size={16} />} onClick={() => setModalOpen(true)}>
+            <Botao icon={<Plus size={16} />} onClick={() => setModalAberto(true)}>
               Criar meta
             </Botao>
           }
@@ -161,10 +161,10 @@ export function PaginaDeMetas() {
                     key={goal.id}
                     goal={goal}
                     onEdit={g => {
-                      setEditing(g)
-                      setModalOpen(true)
+                      setEmEdicao(g)
+                      setModalAberto(true)
                     }}
-                    onDelete={handleDelete}
+                    onDelete={aoExcluir}
                   />
                 ))}
               </AnimatePresence>
@@ -173,8 +173,8 @@ export function PaginaDeMetas() {
         </>
       )}
 
-      <Modal open={modalOpen} onClose={closeModal} title={editing ? 'Editar meta' : 'Nova meta'}>
-        <FormularioDeMeta goal={editing} onSubmit={handleSubmit} onCancel={closeModal} />
+      <Modal open={modalAberto} onClose={closeModal} title={emEdicao ? 'Editar meta' : 'Nova meta'}>
+        <FormularioDeMeta goal={emEdicao} onSubmit={handleSubmit} onCancel={closeModal} />
       </Modal>
     </div>
   )

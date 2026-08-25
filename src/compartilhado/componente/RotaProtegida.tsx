@@ -4,9 +4,9 @@ import { CarregandoPaginaInteira } from '@/compartilhado/componente/Carregando'
 import { Moldura } from '@/compartilhado/moldura/Moldura'
 
 export function RotaProtegida({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, loading } = useAutenticacao()
+  const { isAuthenticated, carregando } = useAutenticacao()
 
-  if (loading) return <CarregandoPaginaInteira />
+  if (carregando) return <CarregandoPaginaInteira />
   if (!isAuthenticated) return <Navigate to="/entrar" replace />
 
   return <Moldura>{children}</Moldura>

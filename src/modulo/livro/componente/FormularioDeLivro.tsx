@@ -70,7 +70,7 @@ export function FormularioDeLivro({ onSubmit, onCancel }: FormularioDeLivroProps
         <Botao type="button" variant="secondary" onClick={onCancel}>
           Cancelar
         </Botao>
-        <Botao type="submit" loading={isSubmitting}>
+        <Botao type="submit" carregando={isSubmitting}>
           Adicionar livro
         </Botao>
       </div>

@@ -75,13 +75,13 @@ export class ServicoDeFinancas {
    * Calcula o saldo atual
    */
   static async obterSaldo() {
-    const transactions = await this.listarTransacoes()
+    const transacoes = await this.listarTransacoes()
 
-    const totalIncome = transactions
+    const totalIncome = transacoes
       .filter(t => t.type === 'income')
       .reduce((sum, t) => sum + Number(t.amount), 0)
 
-    const totalExpenses = transactions
+    const totalExpenses = transacoes
       .filter(t => t.type === 'expense')
       .reduce((sum, t) => sum + Number(t.amount), 0)
 
@@ -89,7 +89,7 @@ export class ServicoDeFinancas {
       balance: totalIncome - totalExpenses,
       totalIncome,
       totalExpenses,
-      count: transactions.length
+      count: transacoes.length
     }
   }
 
@@ -97,10 +97,10 @@ export class ServicoDeFinancas {
    * Busca transações agrupadas por categoria
    */
   static async listarTransacoesPorCategoria() {
-    const transactions = await this.listarTransacoes()
+    const transacoes = await this.listarTransacoes()
     const categories: { [key: string]: { income: number; expense: number; count: number } } = {}
 
-    transactions.forEach(t => {
+    transacoes.forEach(t => {
       if (!categories[t.category]) {
         categories[t.category] = { income: 0, expense: 0, count: 0 }
       }
@@ -122,13 +122,13 @@ export class ServicoDeFinancas {
     const startDate = `${year}-${String(month).padStart(2, '0')}-01`
     const endDate = `${year}-${String(month).padStart(2, '0')}-${new Date(year, month, 0).getDate()}`
 
-    const transactions = await this.listarTransacoesPorPeriodo(startDate, endDate)
+    const transacoes = await this.listarTransacoesPorPeriodo(startDate, endDate)
 
-    const income = transactions
+    const income = transacoes
       .filter(t => t.type === 'income')
       .reduce((sum, t) => sum + Number(t.amount), 0)
 
-    const expenses = transactions
+    const expenses = transacoes
       .filter(t => t.type === 'expense')
       .reduce((sum, t) => sum + Number(t.amount), 0)
 
@@ -136,8 +136,8 @@ export class ServicoDeFinancas {
       income,
       expenses,
       balance: income - expenses,
-      count: transactions.length,
-      transactions
+      count: transacoes.length,
+      transacoes
     }
   }
 

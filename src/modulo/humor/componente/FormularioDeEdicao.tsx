@@ -17,14 +17,14 @@ export function FormularioDeEdicao({ log, onSubmit, onCancel }: FormularioDeEdic
   const [mood, setMood] = useState(log.mood)
   const [energy, setEnergy] = useState(log.energy)
   const [notes, setNotes] = useState(log.notes || '')
-  const [saving, setSaving] = useState(false)
+  const [salvando, setSalvando] = useState(false)
 
   const handleSubmit = async () => {
-    setSaving(true)
+    setSalvando(true)
     try {
       await onSubmit({ mood, energy, notes: notes.trim() || undefined })
     } finally {
-      setSaving(false)
+      setSalvando(false)
     }
   }
 
@@ -47,7 +47,7 @@ export function FormularioDeEdicao({ log, onSubmit, onCancel }: FormularioDeEdic
         <Botao variant="secondary" onClick={onCancel}>
           Cancelar
         </Botao>
-        <Botao onClick={handleSubmit} loading={saving}>
+        <Botao onClick={handleSubmit} carregando={salvando}>
           Salvar
         </Botao>
       </div>

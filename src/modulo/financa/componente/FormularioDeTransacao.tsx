@@ -83,7 +83,7 @@ export function FormularioDeTransacao({ onSubmit, onCancel }: FormularioDeTransa
         <Botao type="button" variant="secondary" onClick={onCancel}>
           Cancelar
         </Botao>
-        <Botao type="submit" loading={isSubmitting}>
+        <Botao type="submit" carregando={isSubmitting}>
           Salvar
         </Botao>
       </div>

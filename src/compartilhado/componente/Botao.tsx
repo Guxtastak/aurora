@@ -6,7 +6,7 @@ type Size = 'sm' | 'md' | 'lg'
 interface BotaoProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant
   size?: Size
-  loading?: boolean
+  carregando?: boolean
   icon?: React.ReactNode
 }
 
@@ -27,7 +27,7 @@ const sizes: Record<Size, string> = {
 export function Botao({
   variant = 'primary',
   size = 'md',
-  loading = false,
+  carregando = false,
   icon,
   children,
   className = '',
@@ -36,13 +36,13 @@ export function Botao({
 }: BotaoProps) {
   return (
     <motion.button
-      whileHover={{ scale: disabled || loading ? 1 : 1.02 }}
-      whileTap={{ scale: disabled || loading ? 1 : 0.98 }}
-      disabled={disabled || loading}
+      whileHover={{ scale: disabled || carregando ? 1 : 1.02 }}
+      whileTap={{ scale: disabled || carregando ? 1 : 0.98 }}
+      disabled={disabled || carregando}
       className={`inline-flex items-center justify-center gap-2 font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-aurora-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 ${variants[variant]} ${sizes[size]} ${className}`}
       {...(props as any)}
     >
-      {loading ? (
+      {carregando ? (
         <span className="h-4 w-4 rounded-full border-2 border-current border-t-transparent animate-spin" />
       ) : (
         icon

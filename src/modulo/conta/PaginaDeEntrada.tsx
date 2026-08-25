@@ -8,21 +8,21 @@ export function PaginaDeEntrada() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [carregando, setCarregando] = useState(false)
   const { signIn } = useAutenticacao()
   const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-    setLoading(true)
+    setCarregando(true)
     try {
       await signIn(email, password)
       navigate('/painel')
     } catch (err: any) {
       setError(err.message || 'Erro ao fazer login')
     } finally {
-      setLoading(false)
+      setCarregando(false)
     }
   }
 
@@ -73,10 +73,10 @@ export function PaginaDeEntrada() {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={carregando}
             className="w-full bg-aurora-500 hover:bg-aurora-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors disabled:opacity-50"
           >
-            {loading ? 'Entrando...' : 'Entrar'}
+            {carregando ? 'Entrando...' : 'Entrar'}
           </button>
         </form>
 

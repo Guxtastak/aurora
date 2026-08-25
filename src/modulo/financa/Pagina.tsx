@@ -15,10 +15,10 @@ import { CartaoIndicador } from '@/compartilhado/componente/CartaoIndicador'
 import { formatarMoeda, MESES } from '@/compartilhado/utilitario/formato'
 
 export function PaginaDeFinancas() {
-  const [transactions, setTransactions] = useState<Transacao[]>([])
-  const [loading, setLoading] = useState(true)
+  const [transacoes, setTransacoes] = useState<Transacao[]>([])
+  const [carregando, setCarregando] = useState(true)
   const [error, setError] = useState('')
-  const [modalOpen, setModalOpen] = useState(false)
+  const [modalAberto, setModalAberto] = useState(false)
   const [rate, setRate] = useState<number | null>(null)
 
   const now = new Date()
@@ -28,11 +28,11 @@ export function PaginaDeFinancas() {
   const load = async () => {
     try {
       setError('')
-      setTransactions(await ServicoDeFinancas.listarTransacoes())
+      setTransacoes(await ServicoDeFinancas.listarTransacoes())
     } catch (err: any) {
       setError(err.message || 'Erro ao carregar transações')
     } finally {
-      setLoading(false)
+      setCarregando(false)
     }
   }
 
@@ -46,25 +46,25 @@ export function PaginaDeFinancas() {
   const handleAdd = async (values: ValoresDaTransacao) => {
     try {
       await ServicoDeFinancas.adicionarTransacao(values)
-      setModalOpen(false)
+      setModalAberto(false)
       await load()
     } catch (err: any) {
       setError(err.message || 'Erro ao salvar transação')
     }
   }
 
-  const handleDelete = async (transaction: Transacao) => {
+  const aoExcluir = async (transaction: Transacao) => {
     if (!window.confirm('Excluir esta transação?')) return
     try {
       await ServicoDeFinancas.excluirTransacao(transaction.id)
-      setTransactions(prev => prev.filter(t => t.id !== transaction.id))
+      setTransacoes(prev => prev.filter(t => t.id !== transaction.id))
     } catch (err: any) {
       setError(err.message || 'Erro ao excluir transação')
     }
   }
 
   const monthPrefix = `${year}-${String(month).padStart(2, '0')}`
-  const monthTransactions = transactions.filter(t => t.date.startsWith(monthPrefix))
+  const monthTransactions = transacoes.filter(t => t.date.startsWith(monthPrefix))
 
   const income = monthTransactions
     .filter(t => t.type === 'income')
@@ -73,10 +73,10 @@ export function PaginaDeFinancas() {
     .filter(t => t.type === 'expense')
     .reduce((sum, t) => sum + Number(t.amount), 0)
 
-  const totalIncome = transactions
+  const totalIncome = transacoes
     .filter(t => t.type === 'income')
     .reduce((sum, t) => sum + Number(t.amount), 0)
-  const totalExpenses = transactions
+  const totalExpenses = transacoes
     .filter(t => t.type === 'expense')
     .reduce((sum, t) => sum + Number(t.amount), 0)
 
@@ -101,7 +101,7 @@ export function PaginaDeFinancas() {
             {rate !== null && ` · USD ${formatarMoeda(rate)}`}
           </p>
         </div>
-        <Botao icon={<Plus size={16} />} onClick={() => setModalOpen(true)}>
+        <Botao icon={<Plus size={16} />} onClick={() => setModalAberto(true)}>
           Nova transação
         </Botao>
       </div>
@@ -152,7 +152,7 @@ export function PaginaDeFinancas() {
         ))}
       </div>
 
-      {loading ? (
+      {carregando ? (
         <Carregando label="Carregando transações..." />
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">
@@ -166,20 +166,20 @@ export function PaginaDeFinancas() {
                 title="Nenhuma transação neste mês"
                 description="Adicione receitas e despesas para acompanhar seu saldo."
                 action={
-                  <Botao size="sm" icon={<Plus size={14} />} onClick={() => setModalOpen(true)}>
+                  <Botao size="sm" icon={<Plus size={14} />} onClick={() => setModalAberto(true)}>
                     Adicionar
                   </Botao>
                 }
               />
             ) : (
-              <ListaDeTransacoes transactions={monthTransactions} onDelete={handleDelete} />
+              <ListaDeTransacoes transacoes={monthTransactions} onDelete={aoExcluir} />
             )}
           </Cartao>
         </div>
       )}
 
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Nova transação">
-        <FormularioDeTransacao onSubmit={handleAdd} onCancel={() => setModalOpen(false)} />
+      <Modal open={modalAberto} onClose={() => setModalAberto(false)} title="Nova transação">
+        <FormularioDeTransacao onSubmit={handleAdd} onCancel={() => setModalAberto(false)} />
       </Modal>
     </div>
   )

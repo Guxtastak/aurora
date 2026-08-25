@@ -34,11 +34,11 @@ export function PaginaInicial() {
   const [habits, setHabits] = useState<Habito[]>([])
   const [books, setBooks] = useState<Livro[]>([])
   const [balance, setBalance] = useState({ balance: 0, totalIncome: 0, totalExpenses: 0 })
-  const [weekData, setWeekData] = useState<DayPoint[]>([])
-  const [loading, setLoading] = useState(true)
+  const [dadosDaSemana, setDadosDaSemana] = useState<DayPoint[]>([])
+  const [carregando, setCarregando] = useState(true)
   const [error, setError] = useState('')
   const [insight, setInsight] = useState<string>('')
-  const [generating, setGenerating] = useState(false)
+  const [gerando, setGerando] = useState(false)
 
   const load = async () => {
     try {
@@ -69,11 +69,11 @@ export function PaginaInicial() {
           concluidos: logs.filter(l => l.date === iso).length
         })
       }
-      setWeekData(days)
+      setDadosDaSemana(days)
     } catch (err: any) {
       setError(err.message || 'Erro ao carregar o dashboard')
     } finally {
-      setLoading(false)
+      setCarregando(false)
     }
   }
 
@@ -94,8 +94,8 @@ export function PaginaInicial() {
     }
   }
 
-  const handleGenerateInsight = async () => {
-    setGenerating(true)
+  const aoGerarInsight = async () => {
+    setGerando(true)
     try {
       const result = await ServicoDeInsights.gerarInsightDoDia()
       const data = result.metadata
@@ -107,11 +107,11 @@ export function PaginaInicial() {
     } catch (err: any) {
       setError(err.message || 'Erro ao gerar insight')
     } finally {
-      setGenerating(false)
+      setGerando(false)
     }
   }
 
-  if (loading) return <Carregando label="Montando seu dashboard..." />
+  if (carregando) return <Carregando label="Montando seu dashboard..." />
 
   const doneToday = habits.filter(h => h.completed_today).length
   const bestStreak = habits.reduce((max, h) => Math.max(max, h.current_streak || 0), 0)
@@ -173,7 +173,7 @@ export function PaginaInicial() {
         title="Insight do dia"
         subtitle="Um resumo cruzando hábitos, leitura e finanças"
         action={
-          <Botao size="sm" variant="secondary" icon={<Sparkles size={14} />} loading={generating} onClick={handleGenerateInsight}>
+          <Botao size="sm" variant="secondary" icon={<Sparkles size={14} />} carregando={gerando} onClick={aoGerarInsight}>
             Gerar
           </Botao>
         }
@@ -187,7 +187,7 @@ export function PaginaInicial() {
         <Cartao title="Hábitos dos últimos 7 dias" subtitle="Total de conclusões por dia">
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={weekData}>
+              <BarChart data={dadosDaSemana}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
                 <XAxis dataKey="day" tick={{ fontSize: 12 }} stroke="#9ca3af" />
                 <YAxis allowDecimals={false} tick={{ fontSize: 12 }} stroke="#9ca3af" />
