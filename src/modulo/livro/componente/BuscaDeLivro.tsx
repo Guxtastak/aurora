@@ -62,7 +62,7 @@ export function BuscaDeLivro({ onAdded }: BuscaDeLivroProps) {
       {error && <p className="text-sm text-red-500">{error}</p>}
 
       {loading ? (
-        <Carregando label="Buscando no Google PaginaDeLivros..." />
+        <Carregando label="Buscando no Google Books..." />
       ) : (
         <div className="space-y-2 max-h-96 overflow-y-auto scrollbar-thin">
           {results.map(item => (

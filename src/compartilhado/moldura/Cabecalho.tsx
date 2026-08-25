@@ -10,7 +10,7 @@ export function Cabecalho({ onMenuClick }: { onMenuClick: () => void }) {
 
   const handleSignOut = async () => {
     await signOut()
-    navigate('/login')
+    navigate('/entrar')
   }
 
   return (

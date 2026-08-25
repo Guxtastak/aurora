@@ -98,7 +98,7 @@ export function ProvedorDeAutenticacao({ children }: { children: React.ReactNode
 export function useAutenticacao() {
   const context = useContext(ContextoDeAutenticacao)
   if (context === undefined) {
-    throw new Error('useAutenticacao must be used within an ProvedorDeAutenticacao')
+    throw new Error('useAutenticacao precisa estar dentro de um ProvedorDeAutenticacao')
   }
   return context
 }

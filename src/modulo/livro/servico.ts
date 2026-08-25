@@ -18,7 +18,7 @@ export interface LivroDoGoogle {
 
 const GOOGLE_BOOKS_URL = 'https://www.googleapis.com/books/v1/volumes'
 
-/** A chave é opcional: a API do Google PaginaDeLivros aceita consultas anônimas (com quota menor) */
+/** A chave é opcional: a API do Google Books aceita consultas anônimas (com quota menor) */
 function withKey(url: string) {
   const key = import.meta.env.VITE_GOOGLE_BOOKS_API_KEY
   if (!key || key === 'sua_chave_aqui') return url
@@ -68,7 +68,7 @@ export class ServicoDeLivros {
   }
 
   /**
-   * Busca livros na API do Google PaginaDeLivros
+   * Busca livros na API do Google Books
    */
   static async buscarNoGoogleBooks(query: string, maxResults: number = 10) {
     const response = await fetch(
@@ -76,7 +76,7 @@ export class ServicoDeLivros {
     )
 
     if (!response.ok) {
-      throw new Error('Erro ao buscar livros no Google PaginaDeLivros')
+      throw new Error('Erro ao buscar livros no Google Books')
     }
 
     const data = await response.json()
@@ -84,7 +84,7 @@ export class ServicoDeLivros {
   }
 
   /**
-   * Adiciona um livro usando dados do Google PaginaDeLivros
+   * Adiciona um livro usando dados do Google Books
    */
   static async adicionarLivroDoGoogle(googleBookId: string) {
     const response = await fetch(withKey(`${GOOGLE_BOOKS_URL}/${googleBookId}`))

@@ -7,7 +7,7 @@ export function RotaProtegida({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, loading } = useAutenticacao()
 
   if (loading) return <CarregandoPaginaInteira />
-  if (!isAuthenticated) return <Navigate to="/login" replace />
+  if (!isAuthenticated) return <Navigate to="/entrar" replace />
 
   return <Moldura>{children}</Moldura>
 }

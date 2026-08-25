@@ -13,17 +13,17 @@ import { PaginaDeConfiguracoes } from '@/modulo/conta/PaginaDeConfiguracoes'
 export function Rotas() {
   return (
     <Routes>
-      <Route path="/login" element={<PaginaDeEntrada />} />
-      <Route path="/register" element={<PaginaDeCadastro />} />
+      <Route path="/entrar" element={<PaginaDeEntrada />} />
+      <Route path="/cadastro" element={<PaginaDeCadastro />} />
       <Route path="/" element={<RotaProtegida><PaginaInicial /></RotaProtegida>} />
-      <Route path="/dashboard" element={<RotaProtegida><PaginaInicial /></RotaProtegida>} />
-      <Route path="/habits" element={<RotaProtegida><PaginaDeHabitos /></RotaProtegida>} />
-      <Route path="/books" element={<RotaProtegida><PaginaDeLivros /></RotaProtegida>} />
-      <Route path="/finances" element={<RotaProtegida><PaginaDeFinancas /></RotaProtegida>} />
-      <Route path="/goals" element={<RotaProtegida><PaginaDeMetas /></RotaProtegida>} />
-      <Route path="/mood" element={<RotaProtegida><PaginaDeHumor /></RotaProtegida>} />
-      <Route path="/settings" element={<RotaProtegida><PaginaDeConfiguracoes /></RotaProtegida>} />
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/painel" element={<RotaProtegida><PaginaInicial /></RotaProtegida>} />
+      <Route path="/habitos" element={<RotaProtegida><PaginaDeHabitos /></RotaProtegida>} />
+      <Route path="/livros" element={<RotaProtegida><PaginaDeLivros /></RotaProtegida>} />
+      <Route path="/financas" element={<RotaProtegida><PaginaDeFinancas /></RotaProtegida>} />
+      <Route path="/metas" element={<RotaProtegida><PaginaDeMetas /></RotaProtegida>} />
+      <Route path="/humor" element={<RotaProtegida><PaginaDeHumor /></RotaProtegida>} />
+      <Route path="/configuracoes" element={<RotaProtegida><PaginaDeConfiguracoes /></RotaProtegida>} />
+      <Route path="*" element={<Navigate to="/painel" replace />} />
     </Routes>
   )
 }

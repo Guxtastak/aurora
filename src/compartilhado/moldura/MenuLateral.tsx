@@ -3,13 +3,13 @@ import { LayoutDashboard, Repeat, BookOpen, Wallet, Target, Settings as Settings
 import { motion } from 'framer-motion'
 
 const links = [
-  { to: '/dashboard', label: 'PaginaInicial', icon: LayoutDashboard },
-  { to: '/habits', label: 'Hábitos', icon: Repeat },
-  { to: '/books', label: 'Livros', icon: BookOpen },
-  { to: '/finances', label: 'Finanças', icon: Wallet },
-  { to: '/goals', label: 'Metas', icon: Target },
-  { to: '/mood', label: 'Humor', icon: Smile },
-  { to: '/settings', label: 'Configurações', icon: SettingsIcon }
+  { to: '/painel', label: 'Painel', icon: LayoutDashboard },
+  { to: '/habitos', label: 'Hábitos', icon: Repeat },
+  { to: '/livros', label: 'Livros', icon: BookOpen },
+  { to: '/financas', label: 'Finanças', icon: Wallet },
+  { to: '/metas', label: 'Metas', icon: Target },
+  { to: '/humor', label: 'Humor', icon: Smile },
+  { to: '/configuracoes', label: 'Configurações', icon: SettingsIcon }
 ]
 
 interface MenuLateralProps {

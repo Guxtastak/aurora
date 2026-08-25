@@ -23,7 +23,7 @@ export function PaginaDeConfiguracoes() {
 
   const handleSignOut = async () => {
     await signOut()
-    navigate('/login')
+    navigate('/entrar')
   }
 
   return (

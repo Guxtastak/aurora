@@ -34,7 +34,7 @@ export function PaginaDeCadastro() {
       // Se a confirmação de email estiver desativada no Supabase, a sessão já existe
       // e o RotaProtegida libera o dashboard direto.
       setMessage('Conta criada! Verifique seu email caso a confirmação esteja ativada.')
-      setTimeout(() => navigate('/dashboard'), 1200)
+      setTimeout(() => navigate('/painel'), 1200)
     } catch (err: any) {
       setError(err.message || 'Erro ao criar conta')
     } finally {
@@ -104,7 +104,7 @@ export function PaginaDeCadastro() {
 
         <p className="text-center mt-6 text-gray-600 dark:text-gray-400">
           Já tem conta?{' '}
-          <Link to="/login" className="text-aurora-600 dark:text-aurora-400 hover:underline">
+          <Link to="/entrar" className="text-aurora-600 dark:text-aurora-400 hover:underline">
             Entrar
           </Link>
         </p>

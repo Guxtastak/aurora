@@ -18,7 +18,7 @@ export function PaginaDeEntrada() {
     setLoading(true)
     try {
       await signIn(email, password)
-      navigate('/dashboard')
+      navigate('/painel')
     } catch (err: any) {
       setError(err.message || 'Erro ao fazer login')
     } finally {
@@ -82,7 +82,7 @@ export function PaginaDeEntrada() {
 
         <p className="text-center mt-6 text-gray-600 dark:text-gray-400">
           Não tem conta?{' '}
-          <Link to="/register" className="text-aurora-600 dark:text-aurora-400 hover:underline">
+          <Link to="/cadastro" className="text-aurora-600 dark:text-aurora-400 hover:underline">
             Cadastre-se
           </Link>
         </p>

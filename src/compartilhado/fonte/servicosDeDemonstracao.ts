@@ -170,7 +170,7 @@ export class HabitosDaDemonstracao {
 }
 
 export class LivrosDaDemonstracao {
-  // A busca no Google PaginaDeLivros é uma API pública: continua usando a implementação real
+  // A busca no Google Books é uma API pública: continua usando a implementação real
   static buscarNoGoogleBooks = ServicoDeLivros.buscarNoGoogleBooks.bind(ServicoDeLivros)
 
   static async listarLivros() {

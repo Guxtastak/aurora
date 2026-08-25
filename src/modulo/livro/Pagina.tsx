@@ -144,7 +144,7 @@ export function PaginaDeLivros() {
           title={books.length === 0 ? 'Sua biblioteca está vazia' : 'Nada neste filtro'}
           description={
             books.length === 0
-              ? 'Busque um livro no Google PaginaDeLivros ou cadastre manualmente.'
+              ? 'Busque um livro no Google Books ou cadastre manualmente.'
               : 'Tente outro filtro para ver seus livros.'
           }
           action={
@@ -171,7 +171,7 @@ export function PaginaDeLivros() {
         </div>
       )}
 
-      <Modal open={searchOpen} onClose={() => setSearchOpen(false)} title="Buscar no Google PaginaDeLivros" maxWidth="max-w-lg">
+      <Modal open={searchOpen} onClose={() => setSearchOpen(false)} title="Buscar no Google Books" maxWidth="max-w-lg">
         <BuscaDeLivro
           onAdded={() => {
             setSearchOpen(false)

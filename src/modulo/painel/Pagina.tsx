@@ -202,7 +202,7 @@ export function PaginaInicial() {
           title="Hábitos de hoje"
           subtitle="Marque direto por aqui"
           action={
-            <Link to="/habits" className="text-sm text-aurora-600 dark:text-aurora-400 hover:underline">
+            <Link to="/habitos" className="text-sm text-aurora-600 dark:text-aurora-400 hover:underline">
               ver todos
             </Link>
           }
@@ -212,7 +212,7 @@ export function PaginaInicial() {
               title="Sem hábitos cadastrados"
               description="Crie hábitos para acompanhar sua rotina."
               action={
-                <Link to="/habits">
+                <Link to="/habitos">
                   <Botao size="sm">Criar hábito</Botao>
                 </Link>
               }
@@ -254,7 +254,7 @@ export function PaginaInicial() {
       <Cartao
         title="Leitura em andamento"
         action={
-          <Link to="/books" className="text-sm text-aurora-600 dark:text-aurora-400 hover:underline">
+          <Link to="/livros" className="text-sm text-aurora-600 dark:text-aurora-400 hover:underline">
             ver biblioteca
           </Link>
         }
@@ -264,7 +264,7 @@ export function PaginaInicial() {
             title="Nenhum livro em andamento"
             description="Adicione um livro para acompanhar seu progresso de leitura."
             action={
-              <Link to="/books">
+              <Link to="/livros">
                 <Botao size="sm">Adicionar livro</Botao>
               </Link>
             }
