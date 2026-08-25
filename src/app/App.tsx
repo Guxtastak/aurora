@@ -6,7 +6,7 @@
  * Quem decide qual tela aparece é o rotas.tsx.
  */
 import { BrowserRouter as Router } from 'react-router-dom'
-import { ProvedorDeAutenticacao } from '@/compartilhado/gancho/useAutenticacao'
+import { ProvedorDeAutenticacao } from '@/compartilhado/gancho/ProvedorDeAutenticacao'
 import { Rotas } from '@/app/rotas'
 import '@/estilo/index.css'
 

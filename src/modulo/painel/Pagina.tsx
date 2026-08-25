@@ -35,7 +35,7 @@ interface DayPoint {
 }
 
 export function PaginaInicial() {
-  const { user } = useAutenticacao()
+  const { usuario } = useAutenticacao()
   // O painel cruza quatro serviços, então busca os quatro de uma vez e guarda
   // o resultado junto — a tela só aparece quando tudo chegou.
   const { dados, setDados, carregando, erro, setErro, recarregar } = useDados(
@@ -118,7 +118,7 @@ export function PaginaInicial() {
   const bestStreak = habitos.reduce((max, h) => Math.max(max, h.current_streak || 0), 0)
   const reading = livros.filter(b => b.status === 'reading')
   const finished = livros.filter(b => b.status === 'finished')
-  const firstName = user?.email?.split('@')[0] || 'você'
+  const firstName = usuario?.email?.split('@')[0] || 'você'
 
   return (
     <div className="space-y-6">

@@ -19,7 +19,8 @@ src/
     componente/        Botao, Cartao, Campo, Modal, Carregando, EstadoVazio,
                        CartaoIndicador, RotaProtegida
     moldura/           Moldura, Cabecalho, MenuLateral, AvisoDeDemonstracao
-    gancho/            useAutenticacao, useTema, useDados (busca com carregando/erro)
+    gancho/            useDados (busca com carregando/erro), useTema,
+                       contextoDeAutenticacao + ProvedorDeAutenticacao + useAutenticacao
     utilitario/        formato.ts (moeda, data, porcentagem)
     tipo/              banco.ts — as tabelas do Supabase em TypeScript
     fonte/             supabase.ts, fonteDeDados.ts, armazenamentoDeDemonstracao.ts
@@ -80,7 +81,7 @@ método em um, acrescente no outro.
 | --- | --- |
 | Que endereços existem? | `app/rotas.tsx` |
 | O que aparece no menu? | `compartilhado/moldura/MenuLateral.tsx` |
-| Quem está logado? | `compartilhado/gancho/useAutenticacao.tsx` |
+| Quem está logado? | `compartilhado/gancho/useAutenticacao.ts` (o gancho); `ProvedorDeAutenticacao.tsx` (a lógica) |
 | Estamos no modo demonstração? | `compartilhado/fonte/supabase.ts` |
 | Quais são as tabelas? | `compartilhado/tipo/banco.ts` e `supabase/schema.sql` |
 | Quando uma meta conta como concluída? | `modulo/meta/regraDeProgresso.ts` |
@@ -118,6 +119,11 @@ um `recarregar()`, e ja trata o try/catch. Nao escreva `useEffect` com
 grafico de financas junto. Tela nova entra por ali, na funcao `tela()` — se
 voce importar a pagina direto no topo do arquivo, ela volta para o pacote
 inicial e todo mundo passa a baixa-la.
+
+**Um arquivo, um tipo de coisa.** Componente num arquivo, constante em outro,
+gancho em outro. Nao e purismo: o React so consegue recarregar a tela sem
+perder o estado (fast refresh) quando o arquivo exporta apenas componentes —
+e o lint avisa quando isso quebra.
 
 **Cabeçalho.** Todo arquivo começa com um bloco dizendo o que ele faz e quem o
 usa. Arquivo novo sem cabeçalho é arquivo pela metade.

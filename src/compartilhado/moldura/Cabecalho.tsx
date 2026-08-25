@@ -8,12 +8,12 @@ import { useTema } from '@/compartilhado/gancho/useTema'
 import { useNavigate } from 'react-router-dom'
 
 export function Cabecalho({ onMenuClick }: { onMenuClick: () => void }) {
-  const { user, signOut } = useAutenticacao()
+  const { usuario, sair } = useAutenticacao()
   const { theme, toggleTheme } = useTema()
   const navigate = useNavigate()
 
   const handleSignOut = async () => {
-    await signOut()
+    await sair()
     navigate('/entrar')
   }
 
@@ -45,7 +45,7 @@ export function Cabecalho({ onMenuClick }: { onMenuClick: () => void }) {
         </button>
 
         <span className="hidden sm:block text-sm text-gray-600 dark:text-gray-300 max-w-[180px] truncate">
-          {user?.email}
+          {usuario?.email}
         </span>
 
         <button
