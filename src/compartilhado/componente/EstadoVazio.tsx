@@ -1,11 +1,11 @@
-interface EmptyStateProps {
+interface EstadoVazioProps {
   icon?: React.ReactNode
   title: string
   description?: string
   action?: React.ReactNode
 }
 
-export function EmptyState({ icon, title, description, action }: EmptyStateProps) {
+export function EstadoVazio({ icon, title, description, action }: EstadoVazioProps) {
   return (
     <div className="flex flex-col items-center justify-center text-center py-14 px-6">
       {icon && (

@@ -1,18 +1,18 @@
 import { useEffect, useState } from 'react'
 import { Smile, Zap, CalendarCheck } from 'lucide-react'
-import { MoodService, InsightService } from '@/compartilhado/fonte/fonteDeDados'
-import type { MoodLog } from '@/compartilhado/tipo/banco'
-import type { HabitMoodCorrelation } from '@/modulo/humor/regraDeComparacao'
-import { MoodCheckin } from '@/modulo/humor/componente/RegistroDoDia'
-import { MoodTrendChart } from '@/modulo/humor/componente/GraficoDeTendencia'
-import { HabitMoodCorrelations } from '@/modulo/humor/componente/ComparacaoComHabitos'
-import { MoodHistory } from '@/modulo/humor/componente/Historico'
-import { MoodEditForm } from '@/modulo/humor/componente/FormularioDeEdicao'
+import { ServicoDeHumor, ServicoDeInsights } from '@/compartilhado/fonte/fonteDeDados'
+import type { RegistroDeHumor } from '@/compartilhado/tipo/banco'
+import type { ComparacaoDeHabito } from '@/modulo/humor/regraDeComparacao'
+import { RegistroDoDia } from '@/modulo/humor/componente/RegistroDoDia'
+import { GraficoDeTendencia } from '@/modulo/humor/componente/GraficoDeTendencia'
+import { ComparacaoComHabitos } from '@/modulo/humor/componente/ComparacaoComHabitos'
+import { Historico } from '@/modulo/humor/componente/Historico'
+import { FormularioDeEdicao } from '@/modulo/humor/componente/FormularioDeEdicao'
 import { Modal } from '@/compartilhado/componente/Modal'
-import { StatCard } from '@/compartilhado/componente/CartaoIndicador'
-import { Loading } from '@/compartilhado/componente/Carregando'
-import { EmptyState } from '@/compartilhado/componente/EstadoVazio'
-import { formatDate } from '@/compartilhado/utilitario/formato'
+import { CartaoIndicador } from '@/compartilhado/componente/CartaoIndicador'
+import { Carregando } from '@/compartilhado/componente/Carregando'
+import { EstadoVazio } from '@/compartilhado/componente/EstadoVazio'
+import { formatarData } from '@/compartilhado/utilitario/formato'
 
 function media(values: number[]) {
   if (!values.length) return '—'
@@ -20,10 +20,10 @@ function media(values: number[]) {
   return (total / values.length).toFixed(1).replace('.', ',')
 }
 
-export function Mood() {
-  const [logs, setLogs] = useState<MoodLog[]>([])
-  const [correlations, setCorrelations] = useState<HabitMoodCorrelation[]>([])
-  const [editing, setEditing] = useState<MoodLog | null>(null)
+export function PaginaDeHumor() {
+  const [logs, setLogs] = useState<RegistroDeHumor[]>([])
+  const [correlations, setCorrelations] = useState<ComparacaoDeHabito[]>([])
+  const [editing, setEditing] = useState<RegistroDeHumor | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -31,8 +31,8 @@ export function Mood() {
     try {
       setError('')
       const [moodLogs, habitCorrelations] = await Promise.all([
-        MoodService.getMoodLogs(30),
-        InsightService.getHabitCorrelations()
+        ServicoDeHumor.listarRegistrosDeHumor(30),
+        ServicoDeInsights.obterComparacaoDosHabitos()
       ])
       setLogs(moodLogs)
       setCorrelations(habitCorrelations)
@@ -50,7 +50,7 @@ export function Mood() {
   const handleEdit = async (values: { mood: number; energy: number; notes?: string }) => {
     if (!editing) return
     try {
-      await MoodService.saveMood({ date: editing.date, ...values })
+      await ServicoDeHumor.gravarRegistroDoDia({ date: editing.date, ...values })
       setEditing(null)
       await load()
     } catch (err: any) {
@@ -58,10 +58,10 @@ export function Mood() {
     }
   }
 
-  const handleDelete = async (log: MoodLog) => {
-    if (!window.confirm(`Excluir o registro de ${formatDate(log.date)}?`)) return
+  const handleDelete = async (log: RegistroDeHumor) => {
+    if (!window.confirm(`Excluir o registro de ${formatarData(log.date)}?`)) return
     try {
-      await MoodService.deleteMood(log.id)
+      await ServicoDeHumor.excluirRegistro(log.id)
       setLogs(prev => prev.filter(item => item.id !== log.id))
     } catch (err: any) {
       setError(err.message || 'Erro ao excluir o registro')
@@ -81,12 +81,12 @@ export function Mood() {
         <p className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg px-4 py-2">{error}</p>
       )}
 
-      <MoodCheckin onSaved={load} />
+      <RegistroDoDia onSaved={load} />
 
       {loading ? (
-        <Loading label="Carregando seus registros..." />
+        <Carregando label="Carregando seus registros..." />
       ) : logs.length === 0 ? (
-        <EmptyState
+        <EstadoVazio
           icon={<Smile size={40} />}
           title="Nenhum dia registrado ainda"
           description="Marque o humor de hoje no card acima. Com alguns dias registrados, dá para comparar com seus hábitos."
@@ -94,20 +94,20 @@ export function Mood() {
       ) : (
         <>
           <div className="grid gap-4 sm:grid-cols-3">
-            <StatCard
+            <CartaoIndicador
               label="Humor médio"
               value={media(logs.map(log => log.mood))}
               hint="últimos 30 dias"
               icon={<Smile size={18} />}
             />
-            <StatCard
+            <CartaoIndicador
               label="Energia média"
               value={media(logs.map(log => log.energy))}
               hint="últimos 30 dias"
               accent="green"
               icon={<Zap size={18} />}
             />
-            <StatCard
+            <CartaoIndicador
               label="Dias registrados"
               value={logs.length}
               hint="de 30 dias"
@@ -116,15 +116,15 @@ export function Mood() {
             />
           </div>
 
-          <MoodTrendChart logs={logs} />
-          <HabitMoodCorrelations correlations={correlations} />
-          <MoodHistory logs={logs} onEdit={setEditing} onDelete={handleDelete} />
+          <GraficoDeTendencia logs={logs} />
+          <ComparacaoComHabitos correlations={correlations} />
+          <Historico logs={logs} onEdit={setEditing} onDelete={handleDelete} />
         </>
       )}
 
       <Modal open={!!editing} onClose={() => setEditing(null)} title="Editar registro">
         {editing && (
-          <MoodEditForm log={editing} onSubmit={handleEdit} onCancel={() => setEditing(null)} />
+          <FormularioDeEdicao log={editing} onSubmit={handleEdit} onCancel={() => setEditing(null)} />
         )}
       </Modal>
     </div>

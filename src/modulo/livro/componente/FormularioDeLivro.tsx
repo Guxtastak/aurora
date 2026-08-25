@@ -1,8 +1,8 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Input, Select } from '@/compartilhado/componente/Campo'
-import { Button } from '@/compartilhado/componente/Botao'
+import { CampoDeTexto, CampoDeSelecao } from '@/compartilhado/componente/Campo'
+import { Botao } from '@/compartilhado/componente/Botao'
 
 const schema = z.object({
   title: z.string().min(1, 'Informe o título'),
@@ -13,19 +13,19 @@ const schema = z.object({
   cover_url: z.string().optional()
 })
 
-export type BookFormValues = z.infer<typeof schema>
+export type ValoresDoLivro = z.infer<typeof schema>
 
-interface BookFormProps {
-  onSubmit: (values: BookFormValues) => Promise<void>
+interface FormularioDeLivroProps {
+  onSubmit: (values: ValoresDoLivro) => Promise<void>
   onCancel: () => void
 }
 
-export function BookForm({ onSubmit, onCancel }: BookFormProps) {
+export function FormularioDeLivro({ onSubmit, onCancel }: FormularioDeLivroProps) {
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting }
-  } = useForm<BookFormValues>({
+  } = useForm<ValoresDoLivro>({
     resolver: zodResolver(schema),
     defaultValues: {
       title: '',
@@ -39,24 +39,24 @@ export function BookForm({ onSubmit, onCancel }: BookFormProps) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <Input label="Título" error={errors.title?.message} {...register('title')} />
-      <Input label="Autor" error={errors.author?.message} {...register('author')} />
+      <CampoDeTexto label="Título" error={errors.title?.message} {...register('title')} />
+      <CampoDeTexto label="Autor" error={errors.author?.message} {...register('author')} />
 
-      <Select label="Status" {...register('status')}>
+      <CampoDeSelecao label="Status" {...register('status')}>
         <option value="want_to_read">Quero ler</option>
         <option value="reading">Lendo</option>
         <option value="finished">Finalizado</option>
         <option value="dropped">Abandonado</option>
-      </Select>
+      </CampoDeSelecao>
 
       <div className="grid grid-cols-2 gap-4">
-        <Input
+        <CampoDeTexto
           label="Total de páginas"
           type="number"
           min={0}
           {...register('pages_total', { valueAsNumber: true })}
         />
-        <Input
+        <CampoDeTexto
           label="Páginas lidas"
           type="number"
           min={0}
@@ -64,15 +64,15 @@ export function BookForm({ onSubmit, onCancel }: BookFormProps) {
         />
       </div>
 
-      <Input label="URL da capa (opcional)" {...register('cover_url')} />
+      <CampoDeTexto label="URL da capa (opcional)" {...register('cover_url')} />
 
       <div className="flex justify-end gap-2 pt-2">
-        <Button type="button" variant="secondary" onClick={onCancel}>
+        <Botao type="button" variant="secondary" onClick={onCancel}>
           Cancelar
-        </Button>
-        <Button type="submit" loading={isSubmitting}>
+        </Botao>
+        <Botao type="submit" loading={isSubmitting}>
           Adicionar livro
-        </Button>
+        </Botao>
       </div>
     </form>
   )

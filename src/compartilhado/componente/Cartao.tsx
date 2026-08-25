@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 
-interface CardProps {
+interface CartaoProps {
   children: React.ReactNode
   className?: string
   title?: string
@@ -9,7 +9,7 @@ interface CardProps {
   delay?: number
 }
 
-export function Card({ children, className = '', title, subtitle, action, delay = 0 }: CardProps) {
+export function Cartao({ children, className = '', title, subtitle, action, delay = 0 }: CartaoProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}

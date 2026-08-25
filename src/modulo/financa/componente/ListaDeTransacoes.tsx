@@ -1,13 +1,13 @@
 import { ArrowDownRight, ArrowUpRight, Trash2 } from 'lucide-react'
-import type { Finance } from '@/compartilhado/tipo/banco'
-import { formatCurrency, formatDate } from '@/compartilhado/utilitario/formato'
+import type { Transacao } from '@/compartilhado/tipo/banco'
+import { formatarMoeda, formatarData } from '@/compartilhado/utilitario/formato'
 
-interface TransactionListProps {
-  transactions: Finance[]
-  onDelete: (transaction: Finance) => void
+interface ListaDeTransacoesProps {
+  transactions: Transacao[]
+  onDelete: (transaction: Transacao) => void
 }
 
-export function TransactionList({ transactions, onDelete }: TransactionListProps) {
+export function ListaDeTransacoes({ transactions, onDelete }: ListaDeTransacoesProps) {
   return (
     <ul className="divide-y divide-gray-100 dark:divide-gray-700">
       {transactions.map(t => {
@@ -29,7 +29,7 @@ export function TransactionList({ transactions, onDelete }: TransactionListProps
                 {t.description || t.category}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                {t.category} · {formatDate(t.date)}
+                {t.category} · {formatarData(t.date)}
               </p>
             </div>
 
@@ -38,7 +38,7 @@ export function TransactionList({ transactions, onDelete }: TransactionListProps
                 income ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
               }`}
             >
-              {income ? '+' : '-'} {formatCurrency(Number(t.amount))}
+              {income ? '+' : '-'} {formatarMoeda(Number(t.amount))}
             </span>
 
             <button

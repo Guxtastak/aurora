@@ -1,22 +1,22 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Moon, Sun, LogOut, Sparkles } from 'lucide-react'
-import { Card } from '@/compartilhado/componente/Cartao'
-import { Button } from '@/compartilhado/componente/Botao'
-import { useAuth } from '@/compartilhado/gancho/useAutenticacao'
-import { useTheme } from '@/compartilhado/gancho/useTema'
-import { InsightService } from '@/compartilhado/fonte/fonteDeDados'
+import { Cartao } from '@/compartilhado/componente/Cartao'
+import { Botao } from '@/compartilhado/componente/Botao'
+import { useAutenticacao } from '@/compartilhado/gancho/useAutenticacao'
+import { useTema } from '@/compartilhado/gancho/useTema'
+import { ServicoDeInsights } from '@/compartilhado/fonte/fonteDeDados'
 import type { Insight } from '@/compartilhado/tipo/banco'
 
-export function Settings() {
-  const { user, signOut } = useAuth()
-  const { theme, toggleTheme } = useTheme()
+export function PaginaDeConfiguracoes() {
+  const { user, signOut } = useAutenticacao()
+  const { theme, toggleTheme } = useTema()
   const navigate = useNavigate()
   const [insights, setInsights] = useState<Insight[]>([])
   const [error, setError] = useState('')
 
   useEffect(() => {
-    InsightService.getInsights(5)
+    ServicoDeInsights.listarInsights(5)
       .then(setInsights)
       .catch((err: any) => setError(err.message || 'Erro ao carregar insights'))
   }, [])
@@ -37,19 +37,19 @@ export function Settings() {
         <p className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg px-4 py-2">{error}</p>
       )}
 
-      <Card title="Conta">
+      <Cartao title="Conta">
         <div className="flex items-center justify-between gap-4">
           <div className="min-w-0">
             <p className="text-sm text-gray-500 dark:text-gray-400">Email</p>
             <p className="font-medium text-gray-900 dark:text-white truncate">{user?.email}</p>
           </div>
-          <Button variant="danger" icon={<LogOut size={16} />} onClick={handleSignOut}>
+          <Botao variant="danger" icon={<LogOut size={16} />} onClick={handleSignOut}>
             Sair
-          </Button>
+          </Botao>
         </div>
-      </Card>
+      </Cartao>
 
-      <Card title="Aparência">
+      <Cartao title="Aparência">
         <div className="flex items-center justify-between gap-4">
           <div>
             <p className="font-medium text-gray-900 dark:text-white">Tema</p>
@@ -57,17 +57,17 @@ export function Settings() {
               {theme === 'dark' ? 'Escuro' : 'Claro'}
             </p>
           </div>
-          <Button
+          <Botao
             variant="secondary"
             icon={theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
             onClick={toggleTheme}
           >
             Alternar
-          </Button>
+          </Botao>
         </div>
-      </Card>
+      </Cartao>
 
-      <Card title="Últimos insights" subtitle="Resumos gerados no dashboard">
+      <Cartao title="Últimos insights" subtitle="Resumos gerados no dashboard">
         {insights.length === 0 ? (
           <p className="text-sm text-gray-500 dark:text-gray-400">
             Nenhum insight gerado ainda. Use o botão <Sparkles size={12} className="inline" /> Gerar no
@@ -85,7 +85,7 @@ export function Settings() {
             ))}
           </ul>
         )}
-      </Card>
+      </Cartao>
     </div>
   )
 }

@@ -1,11 +1,11 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Input, Select } from '@/compartilhado/componente/Campo'
-import { Button } from '@/compartilhado/componente/Botao'
-import { todayISO } from '@/compartilhado/utilitario/formato'
+import { CampoDeTexto, CampoDeSelecao } from '@/compartilhado/componente/Campo'
+import { Botao } from '@/compartilhado/componente/Botao'
+import { dataDeHoje } from '@/compartilhado/utilitario/formato'
 
-export const CATEGORIES = [
+export const CATEGORIAS = [
   'Salário',
   'Freelance',
   'Investimentos',
@@ -27,22 +27,22 @@ const schema = z.object({
   description: z.string().optional()
 })
 
-export type TransactionFormValues = z.infer<typeof schema>
+export type ValoresDaTransacao = z.infer<typeof schema>
 
-interface TransactionFormProps {
-  onSubmit: (values: TransactionFormValues) => Promise<void>
+interface FormularioDeTransacaoProps {
+  onSubmit: (values: ValoresDaTransacao) => Promise<void>
   onCancel: () => void
 }
 
-export function TransactionForm({ onSubmit, onCancel }: TransactionFormProps) {
+export function FormularioDeTransacao({ onSubmit, onCancel }: FormularioDeTransacaoProps) {
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting }
-  } = useForm<TransactionFormValues>({
+  } = useForm<ValoresDaTransacao>({
     resolver: zodResolver(schema),
     defaultValues: {
-      date: todayISO(),
+      date: dataDeHoje(),
       type: 'expense',
       category: 'Alimentação',
       amount: 0,
@@ -53,22 +53,22 @@ export function TransactionForm({ onSubmit, onCancel }: TransactionFormProps) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
-        <Select label="Tipo" {...register('type')}>
+        <CampoDeSelecao label="Tipo" {...register('type')}>
           <option value="expense">Despesa</option>
           <option value="income">Receita</option>
-        </Select>
-        <Input label="Data" type="date" error={errors.date?.message} {...register('date')} />
+        </CampoDeSelecao>
+        <CampoDeTexto label="Data" type="date" error={errors.date?.message} {...register('date')} />
       </div>
 
-      <Select label="Categoria" error={errors.category?.message} {...register('category')}>
-        {CATEGORIES.map(c => (
+      <CampoDeSelecao label="Categoria" error={errors.category?.message} {...register('category')}>
+        {CATEGORIAS.map(c => (
           <option key={c} value={c}>
             {c}
           </option>
         ))}
-      </Select>
+      </CampoDeSelecao>
 
-      <Input
+      <CampoDeTexto
         label="Valor (R$)"
         type="number"
         step="0.01"
@@ -77,15 +77,15 @@ export function TransactionForm({ onSubmit, onCancel }: TransactionFormProps) {
         {...register('amount', { valueAsNumber: true })}
       />
 
-      <Input label="Descrição (opcional)" {...register('description')} />
+      <CampoDeTexto label="Descrição (opcional)" {...register('description')} />
 
       <div className="flex justify-end gap-2 pt-2">
-        <Button type="button" variant="secondary" onClick={onCancel}>
+        <Botao type="button" variant="secondary" onClick={onCancel}>
           Cancelar
-        </Button>
-        <Button type="submit" loading={isSubmitting}>
+        </Botao>
+        <Botao type="submit" loading={isSubmitting}>
           Salvar
-        </Button>
+        </Botao>
       </div>
     </form>
   )

@@ -1,17 +1,17 @@
 import { useState } from 'react'
 import { Search, Plus } from 'lucide-react'
-import { BookService } from '@/compartilhado/fonte/fonteDeDados'
-import type { GoogleBook } from '@/modulo/livro/servico'
-import { Button } from '@/compartilhado/componente/Botao'
-import { Loading } from '@/compartilhado/componente/Carregando'
+import { ServicoDeLivros } from '@/compartilhado/fonte/fonteDeDados'
+import type { LivroDoGoogle } from '@/modulo/livro/servico'
+import { Botao } from '@/compartilhado/componente/Botao'
+import { Carregando } from '@/compartilhado/componente/Carregando'
 
-interface BookSearchProps {
+interface BuscaDeLivroProps {
   onAdded: () => void
 }
 
-export function BookSearch({ onAdded }: BookSearchProps) {
+export function BuscaDeLivro({ onAdded }: BuscaDeLivroProps) {
   const [query, setQuery] = useState('')
-  const [results, setResults] = useState<GoogleBook[]>([])
+  const [results, setResults] = useState<LivroDoGoogle[]>([])
   const [loading, setLoading] = useState(false)
   const [addingId, setAddingId] = useState<string | null>(null)
   const [error, setError] = useState('')
@@ -22,7 +22,7 @@ export function BookSearch({ onAdded }: BookSearchProps) {
     setLoading(true)
     setError('')
     try {
-      const items = await BookService.searchGoogleBooks(query, 10)
+      const items = await ServicoDeLivros.buscarNoGoogleBooks(query, 10)
       setResults(items)
       if (items.length === 0) setError('Nenhum livro encontrado')
     } catch (err: any) {
@@ -36,7 +36,7 @@ export function BookSearch({ onAdded }: BookSearchProps) {
     setAddingId(googleBookId)
     setError('')
     try {
-      await BookService.addBookFromGoogle(googleBookId)
+      await ServicoDeLivros.adicionarLivroDoGoogle(googleBookId)
       onAdded()
     } catch (err: any) {
       setError(err.message || 'Erro ao adicionar livro')
@@ -54,15 +54,15 @@ export function BookSearch({ onAdded }: BookSearchProps) {
           placeholder="Título, autor ou ISBN"
           className="flex-1 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-aurora-500 outline-none"
         />
-        <Button type="submit" icon={<Search size={16} />} loading={loading}>
+        <Botao type="submit" icon={<Search size={16} />} loading={loading}>
           Buscar
-        </Button>
+        </Botao>
       </form>
 
       {error && <p className="text-sm text-red-500">{error}</p>}
 
       {loading ? (
-        <Loading label="Buscando no Google Books..." />
+        <Carregando label="Buscando no Google PaginaDeLivros..." />
       ) : (
         <div className="space-y-2 max-h-96 overflow-y-auto scrollbar-thin">
           {results.map(item => (
@@ -86,7 +86,7 @@ export function BookSearch({ onAdded }: BookSearchProps) {
                   {item.volumeInfo.pageCount ? ` · ${item.volumeInfo.pageCount} págs` : ''}
                 </p>
               </div>
-              <Button
+              <Botao
                 size="sm"
                 variant="secondary"
                 icon={<Plus size={14} />}
@@ -94,7 +94,7 @@ export function BookSearch({ onAdded }: BookSearchProps) {
                 onClick={() => handleAdd(item.id)}
               >
                 Adicionar
-              </Button>
+              </Botao>
             </div>
           ))}
         </div>

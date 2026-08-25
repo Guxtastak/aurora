@@ -1,24 +1,24 @@
-import { HabitService } from '@/modulo/habito/servico'
-import { BookService } from '@/modulo/livro/servico'
-import { FinanceService } from '@/modulo/financa/servico'
-import { MoodService } from '@/modulo/humor/servico'
+import { ServicoDeHabitos } from '@/modulo/habito/servico'
+import { ServicoDeLivros } from '@/modulo/livro/servico'
+import { ServicoDeFinancas } from '@/modulo/financa/servico'
+import { ServicoDeHumor } from '@/modulo/humor/servico'
 import { supabase } from '@/compartilhado/fonte/supabase'
 import type { Insight } from '@/compartilhado/tipo/banco'
-import { toISODate, todayISO } from '@/compartilhado/utilitario/formato'
-import { habitMoodCorrelations } from '@/modulo/humor/regraDeComparacao'
+import { paraDataISO, dataDeHoje } from '@/compartilhado/utilitario/formato'
+import { compararHabitosComHumor } from '@/modulo/humor/regraDeComparacao'
 
-export class InsightService {
+export class ServicoDeInsights {
   /**
    * Gera insights diários
    */
-  static async generateDailyInsights() {
+  static async gerarInsightDoDia() {
     const [habits, books, balance] = await Promise.all([
-      HabitService.getHabitsWithTodayStatus(),
-      BookService.getBooks(),
-      FinanceService.getBalance()
+      ServicoDeHabitos.listarHabitosComStatusDeHoje(),
+      ServicoDeLivros.listarLivros(),
+      ServicoDeFinancas.obterSaldo()
     ])
 
-    const today = todayISO()
+    const today = dataDeHoje()
     const completedToday = habits.filter(h => h.completed_today).length
 
     const insights = {
@@ -60,7 +60,7 @@ export class InsightService {
   /**
    * Busca insights do usuário
    */
-  static async getInsights(limit: number = 10) {
+  static async listarInsights(limit: number = 10) {
     const { data, error } = await supabase
       .from('insights')
       .select('*')
@@ -76,16 +76,16 @@ export class InsightService {
    * A regra do cálculo fica em utils/moodCorrelation, que vale igual aqui e no
    * modo demonstração.
    */
-  static async getHabitCorrelations(days: number = 90) {
+  static async obterComparacaoDosHabitos(days: number = 90) {
     const desde = new Date()
     desde.setDate(desde.getDate() - days)
 
     const [habits, logs, moods] = await Promise.all([
-      HabitService.getHabits(),
-      HabitService.getLogsSince(toISODate(desde)),
-      MoodService.getMoodLogs(days)
+      ServicoDeHabitos.listarHabitos(),
+      ServicoDeHabitos.listarMarcacoesDesde(paraDataISO(desde)),
+      ServicoDeHumor.listarRegistrosDeHumor(days)
     ])
 
-    return habitMoodCorrelations(habits, logs, moods)
+    return compararHabitosComHumor(habits, logs, moods)
   }
 }

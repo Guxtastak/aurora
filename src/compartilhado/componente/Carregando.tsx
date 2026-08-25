@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 
-export function Loading({ label = 'Carregando...' }: { label?: string }) {
+export function Carregando({ label = 'Carregando...' }: { label?: string }) {
   return (
     <div className="flex flex-col items-center justify-center gap-3 py-16 text-gray-500 dark:text-gray-400">
       <motion.div
@@ -14,10 +14,10 @@ export function Loading({ label = 'Carregando...' }: { label?: string }) {
   )
 }
 
-export function FullPageLoading() {
+export function CarregandoPaginaInteira() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-      <Loading />
+      <Carregando />
     </div>
   )
 }

@@ -1,19 +1,19 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { BookOpen, Plus, Search } from 'lucide-react'
-import { BookService } from '@/compartilhado/fonte/fonteDeDados'
-import type { Book } from '@/compartilhado/tipo/banco'
-import { BookCard } from '@/modulo/livro/componente/CartaoDeLivro'
-import { BookSearch } from '@/modulo/livro/componente/BuscaDeLivro'
-import { BookForm } from '@/modulo/livro/componente/FormularioDeLivro'
-import type { BookFormValues } from '@/modulo/livro/componente/FormularioDeLivro'
+import { ServicoDeLivros } from '@/compartilhado/fonte/fonteDeDados'
+import type { Livro } from '@/compartilhado/tipo/banco'
+import { CartaoDeLivro } from '@/modulo/livro/componente/CartaoDeLivro'
+import { BuscaDeLivro } from '@/modulo/livro/componente/BuscaDeLivro'
+import { FormularioDeLivro } from '@/modulo/livro/componente/FormularioDeLivro'
+import type { ValoresDoLivro } from '@/modulo/livro/componente/FormularioDeLivro'
 import { Modal } from '@/compartilhado/componente/Modal'
-import { Button } from '@/compartilhado/componente/Botao'
-import { Loading } from '@/compartilhado/componente/Carregando'
-import { EmptyState } from '@/compartilhado/componente/EstadoVazio'
-import { StatCard } from '@/compartilhado/componente/CartaoIndicador'
+import { Botao } from '@/compartilhado/componente/Botao'
+import { Carregando } from '@/compartilhado/componente/Carregando'
+import { EstadoVazio } from '@/compartilhado/componente/EstadoVazio'
+import { CartaoIndicador } from '@/compartilhado/componente/CartaoIndicador'
 
-type Filter = 'all' | Book['status']
+type Filter = 'all' | Livro['status']
 
 const FILTERS: { key: Filter; label: string }[] = [
   { key: 'all', label: 'Todos' },
@@ -23,8 +23,8 @@ const FILTERS: { key: Filter; label: string }[] = [
   { key: 'dropped', label: 'Abandonados' }
 ]
 
-export function Books() {
-  const [books, setBooks] = useState<Book[]>([])
+export function PaginaDeLivros() {
+  const [books, setBooks] = useState<Livro[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [filter, setFilter] = useState<Filter>('all')
@@ -34,7 +34,7 @@ export function Books() {
   const load = async () => {
     try {
       setError('')
-      setBooks(await BookService.getBooks())
+      setBooks(await ServicoDeLivros.listarLivros())
     } catch (err: any) {
       setError(err.message || 'Erro ao carregar livros')
     } finally {
@@ -46,20 +46,20 @@ export function Books() {
     load()
   }, [])
 
-  const handleProgress = async (book: Book, pages: number) => {
+  const handleProgress = async (book: Livro, pages: number) => {
     try {
-      const updated = await BookService.updateProgress(book.id, pages)
+      const updated = await ServicoDeLivros.atualizarProgresso(book.id, pages)
       setBooks(prev => prev.map(b => (b.id === book.id ? updated : b)))
     } catch (err: any) {
       setError(err.message || 'Erro ao atualizar progresso')
     }
   }
 
-  const handleFinish = async (book: Book) => {
+  const handleFinish = async (book: Livro) => {
     const input = window.prompt('Nota de 1 a 5 (opcional):', '')
     const rating = input ? Number(input) : undefined
     try {
-      const updated = await BookService.finishBook(
+      const updated = await ServicoDeLivros.finalizarLivro(
         book.id,
         rating && rating >= 1 && rating <= 5 ? rating : undefined
       )
@@ -69,19 +69,19 @@ export function Books() {
     }
   }
 
-  const handleDelete = async (book: Book) => {
+  const handleDelete = async (book: Livro) => {
     if (!window.confirm(`Excluir "${book.title}"?`)) return
     try {
-      await BookService.deleteBook(book.id)
+      await ServicoDeLivros.excluirLivro(book.id)
       setBooks(prev => prev.filter(b => b.id !== book.id))
     } catch (err: any) {
       setError(err.message || 'Erro ao excluir livro')
     }
   }
 
-  const handleManualAdd = async (values: BookFormValues) => {
+  const handleManualAdd = async (values: ValoresDoLivro) => {
     try {
-      await BookService.addBook(values)
+      await ServicoDeLivros.adicionarLivro(values)
       setManualOpen(false)
       await load()
     } catch (err: any) {
@@ -101,12 +101,12 @@ export function Books() {
           <p className="text-sm text-gray-500 dark:text-gray-400">Sua biblioteca e progresso de leitura</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="secondary" icon={<Plus size={16} />} onClick={() => setManualOpen(true)}>
+          <Botao variant="secondary" icon={<Plus size={16} />} onClick={() => setManualOpen(true)}>
             Manual
-          </Button>
-          <Button icon={<Search size={16} />} onClick={() => setSearchOpen(true)}>
+          </Botao>
+          <Botao icon={<Search size={16} />} onClick={() => setSearchOpen(true)}>
             Buscar livro
-          </Button>
+          </Botao>
         </div>
       </div>
 
@@ -115,9 +115,9 @@ export function Books() {
       )}
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard label="Na biblioteca" value={books.length} />
-        <StatCard label="Finalizados" value={finished.length} accent="green" />
-        <StatCard label="Páginas lidas" value={pagesRead} accent="amber" />
+        <CartaoIndicador label="Na biblioteca" value={books.length} />
+        <CartaoIndicador label="Finalizados" value={finished.length} accent="green" />
+        <CartaoIndicador label="Páginas lidas" value={pagesRead} accent="amber" />
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -137,21 +137,21 @@ export function Books() {
       </div>
 
       {loading ? (
-        <Loading label="Carregando livros..." />
+        <Carregando label="Carregando livros..." />
       ) : visible.length === 0 ? (
-        <EmptyState
+        <EstadoVazio
           icon={<BookOpen size={40} />}
           title={books.length === 0 ? 'Sua biblioteca está vazia' : 'Nada neste filtro'}
           description={
             books.length === 0
-              ? 'Busque um livro no Google Books ou cadastre manualmente.'
+              ? 'Busque um livro no Google PaginaDeLivros ou cadastre manualmente.'
               : 'Tente outro filtro para ver seus livros.'
           }
           action={
             books.length === 0 ? (
-              <Button icon={<Search size={16} />} onClick={() => setSearchOpen(true)}>
+              <Botao icon={<Search size={16} />} onClick={() => setSearchOpen(true)}>
                 Buscar livro
-              </Button>
+              </Botao>
             ) : undefined
           }
         />
@@ -159,7 +159,7 @@ export function Books() {
         <div className="grid gap-4 lg:grid-cols-2">
           <AnimatePresence>
             {visible.map(book => (
-              <BookCard
+              <CartaoDeLivro
                 key={book.id}
                 book={book}
                 onProgress={handleProgress}
@@ -171,8 +171,8 @@ export function Books() {
         </div>
       )}
 
-      <Modal open={searchOpen} onClose={() => setSearchOpen(false)} title="Buscar no Google Books" maxWidth="max-w-lg">
-        <BookSearch
+      <Modal open={searchOpen} onClose={() => setSearchOpen(false)} title="Buscar no Google PaginaDeLivros" maxWidth="max-w-lg">
+        <BuscaDeLivro
           onAdded={() => {
             setSearchOpen(false)
             load()
@@ -181,7 +181,7 @@ export function Books() {
       </Modal>
 
       <Modal open={manualOpen} onClose={() => setManualOpen(false)} title="Adicionar livro manualmente">
-        <BookForm onSubmit={handleManualAdd} onCancel={() => setManualOpen(false)} />
+        <FormularioDeLivro onSubmit={handleManualAdd} onCancel={() => setManualOpen(false)} />
       </Modal>
     </div>
   )

@@ -1,4 +1,4 @@
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface CampoDeTextoProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string
   error?: string
 }
@@ -6,7 +6,7 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 const base =
   'w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-aurora-500 focus:border-transparent outline-none'
 
-export function Input({ label, error, className = '', ...props }: InputProps) {
+export function CampoDeTexto({ label, error, className = '', ...props }: CampoDeTextoProps) {
   return (
     <div>
       {label && (
@@ -20,12 +20,12 @@ export function Input({ label, error, className = '', ...props }: InputProps) {
   )
 }
 
-interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
+interface CampoDeSelecaoProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   label?: string
   error?: string
 }
 
-export function Select({ label, error, className = '', children, ...props }: SelectProps) {
+export function CampoDeSelecao({ label, error, className = '', children, ...props }: CampoDeSelecaoProps) {
   return (
     <div>
       {label && (
@@ -41,12 +41,12 @@ export function Select({ label, error, className = '', children, ...props }: Sel
   )
 }
 
-interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+interface CampoDeTextoLongoProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string
   error?: string
 }
 
-export function Textarea({ label, error, className = '', ...props }: TextareaProps) {
+export function CampoDeTextoLongo({ label, error, className = '', ...props }: CampoDeTextoLongoProps) {
   return (
     <div>
       {label && (

@@ -1,5 +1,5 @@
 import { useState, useEffect, createContext, useContext } from 'react'
-import { supabase, isDemo } from '@/compartilhado/fonte/supabase'
+import { supabase, modoDemonstracao } from '@/compartilhado/fonte/supabase'
 import type { User } from '@supabase/supabase-js'
 
 interface AuthContextType {
@@ -11,18 +11,18 @@ interface AuthContextType {
   isAuthenticated: boolean
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined)
+const ContextoDeAutenticacao = createContext<AuthContextType | undefined>(undefined)
 
 /** Usuário fictício usado apenas no modo demonstração */
 const DEMO_SESSION_KEY = 'aurora-demo-session'
 const demoUser = { id: 'demo-user', email: 'visitante@aurora.demo' } as User
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export function ProvedorDeAutenticacao({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (isDemo) {
+    if (modoDemonstracao) {
       // Na prévia hospedada o visitante já entra autenticado, a menos que tenha saído
       let loggedOut = false
       try {
@@ -59,7 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signIn = async (email: string, password: string) => {
-    if (isDemo) {
+    if (modoDemonstracao) {
       setDemoSession('in')
       setUser({ ...demoUser, email: email || demoUser.email } as User)
       return
@@ -69,7 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signUp = async (email: string, password: string) => {
-    if (isDemo) {
+    if (modoDemonstracao) {
       setDemoSession('in')
       setUser({ ...demoUser, email: email || demoUser.email } as User)
       return
@@ -79,7 +79,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signOut = async () => {
-    if (isDemo) {
+    if (modoDemonstracao) {
       setDemoSession('out')
       setUser(null)
       return
@@ -89,16 +89,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut, isAuthenticated: !!user }}>
+    <ContextoDeAutenticacao.Provider value={{ user, loading, signIn, signUp, signOut, isAuthenticated: !!user }}>
       {children}
-    </AuthContext.Provider>
+    </ContextoDeAutenticacao.Provider>
   )
 }
 
-export function useAuth() {
-  const context = useContext(AuthContext)
+export function useAutenticacao() {
+  const context = useContext(ContextoDeAutenticacao)
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider')
+    throw new Error('useAutenticacao must be used within an ProvedorDeAutenticacao')
   }
   return context
 }

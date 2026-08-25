@@ -1,16 +1,16 @@
 import { motion } from 'framer-motion'
 import { Check, Flame, Trash2, Pencil } from 'lucide-react'
-import type { Habit } from '@/compartilhado/tipo/banco'
+import type { Habito } from '@/compartilhado/tipo/banco'
 
-interface HabitCardProps {
-  habit: Habit
-  onToggle: (habit: Habit) => void
-  onEdit: (habit: Habit) => void
-  onDelete: (habit: Habit) => void
+interface CartaoDeHabitoProps {
+  habit: Habito
+  onToggle: (habit: Habito) => void
+  onEdit: (habit: Habito) => void
+  onDelete: (habit: Habito) => void
   busy?: boolean
 }
 
-export function HabitCard({ habit, onToggle, onEdit, onDelete, busy }: HabitCardProps) {
+export function CartaoDeHabito({ habit, onToggle, onEdit, onDelete, busy }: CartaoDeHabitoProps) {
   const done = !!habit.completed_today
 
   return (

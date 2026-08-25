@@ -1,24 +1,24 @@
 import { supabase } from '@/compartilhado/fonte/supabase'
-import type { Finance } from '@/compartilhado/tipo/banco'
+import type { Transacao } from '@/compartilhado/tipo/banco'
 
-export class FinanceService {
+export class ServicoDeFinancas {
   /**
    * Busca todas as transações
    */
-  static async getTransactions() {
+  static async listarTransacoes() {
     const { data, error } = await supabase
       .from('finances')
       .select('*')
       .order('date', { ascending: false })
 
     if (error) throw error
-    return data as Finance[]
+    return data as Transacao[]
   }
 
   /**
    * Busca transações por período
    */
-  static async getTransactionsByPeriod(startDate: string, endDate: string) {
+  static async listarTransacoesPorPeriodo(startDate: string, endDate: string) {
     const { data, error } = await supabase
       .from('finances')
       .select('*')
@@ -27,13 +27,13 @@ export class FinanceService {
       .order('date', { ascending: false })
 
     if (error) throw error
-    return data as Finance[]
+    return data as Transacao[]
   }
 
   /**
    * Adiciona uma nova transação
    */
-  static async addTransaction(transaction: Omit<Finance, 'id' | 'created_at' | 'user_id'>) {
+  static async adicionarTransacao(transaction: Omit<Transacao, 'id' | 'created_at' | 'user_id'>) {
     const { data, error } = await supabase
       .from('finances')
       .insert(transaction)
@@ -41,13 +41,13 @@ export class FinanceService {
       .single()
 
     if (error) throw error
-    return data as Finance
+    return data as Transacao
   }
 
   /**
    * Atualiza uma transação
    */
-  static async updateTransaction(id: string, updates: Partial<Omit<Finance, 'id' | 'created_at'>>) {
+  static async atualizarTransacao(id: string, updates: Partial<Omit<Transacao, 'id' | 'created_at'>>) {
     const { data, error } = await supabase
       .from('finances')
       .update(updates)
@@ -56,13 +56,13 @@ export class FinanceService {
       .single()
 
     if (error) throw error
-    return data as Finance
+    return data as Transacao
   }
 
   /**
    * Remove uma transação
    */
-  static async deleteTransaction(id: string) {
+  static async excluirTransacao(id: string) {
     const { error } = await supabase
       .from('finances')
       .delete()
@@ -74,8 +74,8 @@ export class FinanceService {
   /**
    * Calcula o saldo atual
    */
-  static async getBalance() {
-    const transactions = await this.getTransactions()
+  static async obterSaldo() {
+    const transactions = await this.listarTransacoes()
 
     const totalIncome = transactions
       .filter(t => t.type === 'income')
@@ -96,8 +96,8 @@ export class FinanceService {
   /**
    * Busca transações agrupadas por categoria
    */
-  static async getTransactionsByCategory() {
-    const transactions = await this.getTransactions()
+  static async listarTransacoesPorCategoria() {
+    const transactions = await this.listarTransacoes()
     const categories: { [key: string]: { income: number; expense: number; count: number } } = {}
 
     transactions.forEach(t => {
@@ -118,11 +118,11 @@ export class FinanceService {
   /**
    * Busca resumo mensal
    */
-  static async getMonthlySummary(year: number, month: number) {
+  static async obterResumoDoMes(year: number, month: number) {
     const startDate = `${year}-${String(month).padStart(2, '0')}-01`
     const endDate = `${year}-${String(month).padStart(2, '0')}-${new Date(year, month, 0).getDate()}`
 
-    const transactions = await this.getTransactionsByPeriod(startDate, endDate)
+    const transactions = await this.listarTransacoesPorPeriodo(startDate, endDate)
 
     const income = transactions
       .filter(t => t.type === 'income')
@@ -144,7 +144,7 @@ export class FinanceService {
   /**
    * Busca cotação de moeda (Awesome API)
    */
-  static async getExchangeRate(from: string = 'USD', to: string = 'BRL') {
+  static async obterCotacaoDoDolar(from: string = 'USD', to: string = 'BRL') {
     const response = await fetch(
       `https://economia.awesomeapi.com.br/json/last/${from}-${to}`
     )

@@ -1,30 +1,30 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { Plus, Repeat } from 'lucide-react'
-import { HabitService } from '@/compartilhado/fonte/fonteDeDados'
-import type { Habit } from '@/compartilhado/tipo/banco'
-import { HabitCard } from '@/modulo/habito/componente/CartaoDeHabito'
-import { HabitForm } from '@/modulo/habito/componente/FormularioDeHabito'
-import type { HabitFormValues } from '@/modulo/habito/componente/FormularioDeHabito'
+import { ServicoDeHabitos } from '@/compartilhado/fonte/fonteDeDados'
+import type { Habito } from '@/compartilhado/tipo/banco'
+import { CartaoDeHabito } from '@/modulo/habito/componente/CartaoDeHabito'
+import { FormularioDeHabito } from '@/modulo/habito/componente/FormularioDeHabito'
+import type { ValoresDoHabito } from '@/modulo/habito/componente/FormularioDeHabito'
 import { Modal } from '@/compartilhado/componente/Modal'
-import { Button } from '@/compartilhado/componente/Botao'
-import { Loading } from '@/compartilhado/componente/Carregando'
-import { EmptyState } from '@/compartilhado/componente/EstadoVazio'
-import { StatCard } from '@/compartilhado/componente/CartaoIndicador'
-import { percent } from '@/compartilhado/utilitario/formato'
+import { Botao } from '@/compartilhado/componente/Botao'
+import { Carregando } from '@/compartilhado/componente/Carregando'
+import { EstadoVazio } from '@/compartilhado/componente/EstadoVazio'
+import { CartaoIndicador } from '@/compartilhado/componente/CartaoIndicador'
+import { porcentagem } from '@/compartilhado/utilitario/formato'
 
-export function Habits() {
-  const [habits, setHabits] = useState<Habit[]>([])
+export function PaginaDeHabitos() {
+  const [habits, setHabits] = useState<Habito[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
-  const [editing, setEditing] = useState<Habit | null>(null)
+  const [editing, setEditing] = useState<Habito | null>(null)
   const [busyId, setBusyId] = useState<string | null>(null)
 
   const load = async () => {
     try {
       setError('')
-      const data = await HabitService.getHabitsWithTodayStatus()
+      const data = await ServicoDeHabitos.listarHabitosComStatusDeHoje()
       setHabits(data)
     } catch (err: any) {
       setError(err.message || 'Erro ao carregar hábitos')
@@ -37,14 +37,14 @@ export function Habits() {
     load()
   }, [])
 
-  const handleToggle = async (habit: Habit) => {
+  const handleToggle = async (habit: Habito) => {
     setBusyId(habit.id)
     // Atualização otimista
     setHabits(prev =>
       prev.map(h => (h.id === habit.id ? { ...h, completed_today: !h.completed_today } : h))
     )
     try {
-      await HabitService.toggleTodayHabit(habit.id)
+      await ServicoDeHabitos.alternarHabitoDeHoje(habit.id)
       await load()
     } catch (err: any) {
       setError(err.message || 'Erro ao atualizar hábito')
@@ -54,12 +54,12 @@ export function Habits() {
     }
   }
 
-  const handleSubmit = async (values: HabitFormValues) => {
+  const handleSubmit = async (values: ValoresDoHabito) => {
     try {
       if (editing) {
-        await HabitService.updateHabit(editing.id, values)
+        await ServicoDeHabitos.atualizarHabito(editing.id, values)
       } else {
-        await HabitService.createHabit(values)
+        await ServicoDeHabitos.criarHabito(values)
       }
       setModalOpen(false)
       setEditing(null)
@@ -69,10 +69,10 @@ export function Habits() {
     }
   }
 
-  const handleDelete = async (habit: Habit) => {
+  const handleDelete = async (habit: Habito) => {
     if (!window.confirm(`Excluir o hábito "${habit.name}"?`)) return
     try {
-      await HabitService.deleteHabit(habit.id)
+      await ServicoDeHabitos.excluirHabito(habit.id)
       setHabits(prev => prev.filter(h => h.id !== habit.id))
     } catch (err: any) {
       setError(err.message || 'Erro ao excluir hábito')
@@ -91,7 +91,7 @@ export function Habits() {
             Marque o que você concluiu hoje e mantenha a sequência
           </p>
         </div>
-        <Button
+        <Botao
           icon={<Plus size={16} />}
           onClick={() => {
             setEditing(null)
@@ -99,7 +99,7 @@ export function Habits() {
           }}
         >
           Novo hábito
-        </Button>
+        </Botao>
       </div>
 
       {error && (
@@ -107,34 +107,34 @@ export function Habits() {
       )}
 
       {loading ? (
-        <Loading label="Carregando hábitos..." />
+        <Carregando label="Carregando hábitos..." />
       ) : habits.length === 0 ? (
-        <EmptyState
+        <EstadoVazio
           icon={<Repeat size={40} />}
           title="Nenhum hábito ainda"
           description="Crie seu primeiro hábito e comece a construir consistência."
           action={
-            <Button icon={<Plus size={16} />} onClick={() => setModalOpen(true)}>
+            <Botao icon={<Plus size={16} />} onClick={() => setModalOpen(true)}>
               Criar hábito
-            </Button>
+            </Botao>
           }
         />
       ) : (
         <>
           <div className="grid gap-4 sm:grid-cols-3">
-            <StatCard label="Concluídos hoje" value={`${doneToday}/${habits.length}`} />
-            <StatCard
+            <CartaoIndicador label="Concluídos hoje" value={`${doneToday}/${habits.length}`} />
+            <CartaoIndicador
               label="Taxa do dia"
-              value={`${percent(doneToday, habits.length)}%`}
+              value={`${porcentagem(doneToday, habits.length)}%`}
               accent="green"
             />
-            <StatCard label="Melhor sequência" value={`${bestStreak} dias`} accent="amber" />
+            <CartaoIndicador label="Melhor sequência" value={`${bestStreak} dias`} accent="amber" />
           </div>
 
           <div className="space-y-3">
             <AnimatePresence>
               {habits.map(habit => (
-                <HabitCard
+                <CartaoDeHabito
                   key={habit.id}
                   habit={habit}
                   busy={busyId === habit.id}
@@ -159,7 +159,7 @@ export function Habits() {
         }}
         title={editing ? 'Editar hábito' : 'Novo hábito'}
       >
-        <HabitForm
+        <FormularioDeHabito
           habit={editing}
           onSubmit={handleSubmit}
           onCancel={() => {

@@ -1,4 +1,4 @@
-import type { Habit, HabitLog, MoodLog } from '@/compartilhado/tipo/banco'
+import type { Habito, MarcacaoDeHabito, RegistroDeHumor } from '@/compartilhado/tipo/banco'
 
 /**
  * Relação entre cumprir um hábito e como foi o dia. Fica aqui, fora do serviço,
@@ -11,23 +11,23 @@ import type { Habit, HabitLog, MoodLog } from '@/compartilhado/tipo/banco'
  */
 
 /** Dias com humor registrado necessários para a comparação valer alguma coisa */
-export const MIN_DAYS = 5
+export const MINIMO_DE_DIAS = 5
 
 /** Dias mínimos de cada lado — com um dia só, a "média" é aquele dia */
-export const MIN_PER_GROUP = 2
+export const MINIMO_POR_GRUPO = 2
 
-export type MoodAverages = {
+export type MediasDoDia = {
   mood: number
   energy: number
 }
 
-export type HabitMoodCorrelation = {
+export type ComparacaoDeHabito = {
   habitId: string
   habitName: string
   /** Dias com humor registrado dentro da janela do hábito */
   days: number
-  comHabito: MoodAverages
-  semHabito: MoodAverages
+  comHabito: MediasDoDia
+  semHabito: MediasDoDia
   deltaMood: number
   deltaEnergy: number
   /** Amostra suficiente para exibir os números */
@@ -39,7 +39,7 @@ function average(values: number[]) {
   return values.reduce((sum, value) => sum + value, 0) / values.length
 }
 
-function averages(logs: MoodLog[]): MoodAverages {
+function averages(logs: RegistroDeHumor[]): MediasDoDia {
   return {
     mood: average(logs.map(log => log.mood)),
     energy: average(logs.map(log => log.energy))
@@ -50,7 +50,7 @@ function day(date: string) {
   return date.slice(0, 10)
 }
 
-function correlate(habit: Habit, logs: HabitLog[], moods: MoodLog[]): HabitMoodCorrelation {
+function correlate(habit: Habito, logs: MarcacaoDeHabito[], moods: RegistroDeHumor[]): ComparacaoDeHabito {
   // Antes de o hábito existir, "não cumpriu" seria falso: a janela começa na criação
   const start = day(habit.created_at)
   const window = moods.filter(mood => day(mood.date) >= start)
@@ -65,7 +65,7 @@ function correlate(habit: Habit, logs: HabitLog[], moods: MoodLog[]): HabitMoodC
   const comHabito = averages(com)
   const semHabito = averages(sem)
   const enough =
-    window.length >= MIN_DAYS && com.length >= MIN_PER_GROUP && sem.length >= MIN_PER_GROUP
+    window.length >= MINIMO_DE_DIAS && com.length >= MINIMO_POR_GRUPO && sem.length >= MINIMO_POR_GRUPO
 
   return {
     habitId: habit.id,
@@ -90,11 +90,11 @@ function correlate(habit: Habit, logs: HabitLog[], moods: MoodLog[]): HabitMoodC
  * da maioria dos dias, e a comparação diria mais sobre a frequência do que sobre
  * o humor.
  */
-export function habitMoodCorrelations(
-  habits: Habit[],
-  logs: HabitLog[],
-  moods: MoodLog[]
-): HabitMoodCorrelation[] {
+export function compararHabitosComHumor(
+  habits: Habito[],
+  logs: MarcacaoDeHabito[],
+  moods: RegistroDeHumor[]
+): ComparacaoDeHabito[] {
   return habits
     .filter(habit => habit.frequency === 'daily')
     .map(habit => correlate(habit, logs, moods))

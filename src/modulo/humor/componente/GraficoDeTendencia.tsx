@@ -8,14 +8,14 @@ import {
   Legend,
   ResponsiveContainer
 } from 'recharts'
-import type { MoodLog } from '@/compartilhado/tipo/banco'
-import { Card } from '@/compartilhado/componente/Cartao'
+import type { RegistroDeHumor } from '@/compartilhado/tipo/banco'
+import { Cartao } from '@/compartilhado/componente/Cartao'
 
-interface MoodTrendChartProps {
-  logs: MoodLog[]
+interface GraficoDeTendenciaProps {
+  logs: RegistroDeHumor[]
 }
 
-export function MoodTrendChart({ logs }: MoodTrendChartProps) {
+export function GraficoDeTendencia({ logs }: GraficoDeTendenciaProps) {
   // O serviço devolve do mais recente para o mais antigo; o gráfico lê ao contrário
   const data = [...logs]
     .sort((a, b) => a.date.localeCompare(b.date))
@@ -26,7 +26,7 @@ export function MoodTrendChart({ logs }: MoodTrendChartProps) {
     }))
 
   return (
-    <Card title="Últimos 30 dias" subtitle="Humor e energia, de 1 a 5">
+    <Cartao title="Últimos 30 dias" subtitle="Humor e energia, de 1 a 5">
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data}>
@@ -40,6 +40,6 @@ export function MoodTrendChart({ logs }: MoodTrendChartProps) {
           </LineChart>
         </ResponsiveContainer>
       </div>
-    </Card>
+    </Cartao>
   )
 }

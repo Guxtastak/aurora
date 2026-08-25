@@ -1,5 +1,5 @@
-import type { Habit, HabitLog, Book, Finance, Goal, MoodLog, Insight } from '@/compartilhado/tipo/banco'
-import { goalProgress } from '@/modulo/meta/regraDeProgresso'
+import type { Habito, MarcacaoDeHabito, Livro, Transacao, Meta, RegistroDeHumor, Insight } from '@/compartilhado/tipo/banco'
+import { progressoDaMeta } from '@/modulo/meta/regraDeProgresso'
 
 /**
  * Armazenamento do modo demonstração: mantém os dados em localStorage para que a
@@ -10,13 +10,13 @@ import { goalProgress } from '@/modulo/meta/regraDeProgresso'
 const STORAGE_KEY = 'aurora-demo-v3'
 const DEMO_USER_ID = 'demo-user'
 
-export interface DemoData {
-  habits: Habit[]
-  habit_logs: HabitLog[]
-  books: Book[]
-  finances: Finance[]
-  goals: Goal[]
-  mood_logs: MoodLog[]
+export interface DadosDaDemonstracao {
+  habits: Habito[]
+  habit_logs: MarcacaoDeHabito[]
+  books: Livro[]
+  finances: Transacao[]
+  goals: Meta[]
+  mood_logs: RegistroDeHumor[]
   insights: Insight[]
 }
 
@@ -31,11 +31,11 @@ function daysAgo(days: number) {
   return date
 }
 
-export function newId() {
+export function novoId() {
   return `demo-${Math.random().toString(36).slice(2, 10)}`
 }
 
-function seed(): DemoData {
+function seed(): DadosDaDemonstracao {
   const now = new Date().toISOString()
 
   const habitSeeds = [
@@ -46,8 +46,8 @@ function seed(): DemoData {
     { name: 'Estudar inglês', icon: '🎯', color: '#f59e0b', chance: 0.45 }
   ]
 
-  const habits: Habit[] = []
-  const habit_logs: HabitLog[] = []
+  const habits: Habito[] = []
+  const habit_logs: MarcacaoDeHabito[] = []
 
   habitSeeds.forEach((item, index) => {
     const id = `demo-habit-${index + 1}`
@@ -61,7 +61,7 @@ function seed(): DemoData {
         const date = iso(daysAgo(day))
         completedDays.push(date)
         habit_logs.push({
-          id: newId(),
+          id: novoId(),
           habit_id: id,
           user_id: DEMO_USER_ID,
           date,
@@ -102,7 +102,7 @@ function seed(): DemoData {
     })
   })
 
-  const books: Book[] = [
+  const books: Livro[] = [
     {
       id: 'demo-book-1',
       user_id: DEMO_USER_ID,
@@ -154,7 +154,7 @@ function seed(): DemoData {
     }
   ]
 
-  const financeSeeds: Array<[number, Finance['type'], string, number, string]> = [
+  const financeSeeds: Array<[number, Transacao['type'], string, number, string]> = [
     [2, 'expense', 'Alimentação', 87.4, 'Mercado da semana'],
     [3, 'expense', 'Transporte', 42.9, 'Combustível'],
     [5, 'expense', 'Assinaturas', 39.9, 'Streaming'],
@@ -175,8 +175,8 @@ function seed(): DemoData {
     [43, 'income', 'Investimentos', 320.45, 'Dividendos']
   ]
 
-  const finances: Finance[] = financeSeeds.map(([day, type, category, amount, description]) => ({
-    id: newId(),
+  const finances: Transacao[] = financeSeeds.map(([day, type, category, amount, description]) => ({
+    id: novoId(),
     user_id: DEMO_USER_ID,
     date: iso(daysAgo(day)),
     type,
@@ -190,13 +190,13 @@ function seed(): DemoData {
     id: string
     title: string
     description: string
-    category: Goal['category']
+    category: Meta['category']
     target: number
     current: number
     unit: string
     startedDaysAgo: number
     deadlineInDays: number
-    status: Goal['status']
+    status: Meta['status']
   }> = [
     {
       id: 'demo-goal-1',
@@ -260,7 +260,7 @@ function seed(): DemoData {
     }
   ]
 
-  const goals: Goal[] = goalSeeds.map(item => ({
+  const goals: Meta[] = goalSeeds.map(item => ({
     id: item.id,
     user_id: DEMO_USER_ID,
     title: item.title,
@@ -272,7 +272,7 @@ function seed(): DemoData {
     deadline: iso(daysAgo(-item.deadlineInDays)),
     category: item.category,
     status: item.status,
-    progress_percentage: goalProgress(item.current, item.target),
+    progress_percentage: progressoDaMeta(item.current, item.target),
     created_at: daysAgo(item.startedDaysAgo).toISOString(),
     updated_at: now
   }))
@@ -285,7 +285,7 @@ function seed(): DemoData {
   )
 
   const clamp = (value: number) => Math.min(5, Math.max(1, value))
-  const mood_logs: MoodLog[] = []
+  const mood_logs: RegistroDeHumor[] = []
 
   for (let day = 34; day >= 0; day--) {
     // Alguns dias sem registro: ninguem preenche todo santo dia
@@ -309,25 +309,25 @@ function seed(): DemoData {
   return { habits, habit_logs, books, finances, goals, mood_logs, insights: [] }
 }
 
-let cache: DemoData | null = null
+let cache: DadosDaDemonstracao | null = null
 
-export function readDemo(): DemoData {
+export function lerDemonstracao(): DadosDaDemonstracao {
   if (cache) return cache
   try {
     const stored = localStorage.getItem(STORAGE_KEY)
     if (stored) {
-      cache = JSON.parse(stored) as DemoData
+      cache = JSON.parse(stored) as DadosDaDemonstracao
       return cache
     }
   } catch {
     // localStorage indisponivel (modo privado): segue em memoria
   }
   cache = seed()
-  writeDemo(cache)
+  gravarDemonstracao(cache)
   return cache
 }
 
-export function writeDemo(data: DemoData) {
+export function gravarDemonstracao(data: DadosDaDemonstracao) {
   cache = data
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
@@ -336,18 +336,18 @@ export function writeDemo(data: DemoData) {
   }
 }
 
-export function resetDemo() {
+export function reiniciarDemonstracao() {
   cache = null
   try {
     localStorage.removeItem(STORAGE_KEY)
   } catch {
     // ignora
   }
-  return readDemo()
+  return lerDemonstracao()
 }
 
-export function demoToday() {
+export function hojeNaDemonstracao() {
   return iso(new Date())
 }
 
-export const demoUserId = DEMO_USER_ID
+export const usuarioDaDemonstracao = DEMO_USER_ID

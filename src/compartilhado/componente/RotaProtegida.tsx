@@ -1,13 +1,13 @@
 import { Navigate } from 'react-router-dom'
-import { useAuth } from '@/compartilhado/gancho/useAutenticacao'
-import { FullPageLoading } from '@/compartilhado/componente/Carregando'
-import { Layout } from '@/compartilhado/moldura/Moldura'
+import { useAutenticacao } from '@/compartilhado/gancho/useAutenticacao'
+import { CarregandoPaginaInteira } from '@/compartilhado/componente/Carregando'
+import { Moldura } from '@/compartilhado/moldura/Moldura'
 
-export function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, loading } = useAuth()
+export function RotaProtegida({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, loading } = useAutenticacao()
 
-  if (loading) return <FullPageLoading />
+  if (loading) return <CarregandoPaginaInteira />
   if (!isAuthenticated) return <Navigate to="/login" replace />
 
-  return <Layout>{children}</Layout>
+  return <Moldura>{children}</Moldura>
 }

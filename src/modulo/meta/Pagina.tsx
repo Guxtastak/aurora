@@ -1,18 +1,18 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { Plus, Target } from 'lucide-react'
-import { GoalService } from '@/compartilhado/fonte/fonteDeDados'
-import type { Goal } from '@/compartilhado/tipo/banco'
-import { GoalCard } from '@/modulo/meta/componente/CartaoDeMeta'
-import { GoalForm } from '@/modulo/meta/componente/FormularioDeMeta'
-import type { GoalFormValues } from '@/modulo/meta/componente/FormularioDeMeta'
+import { ServicoDeMetas } from '@/compartilhado/fonte/fonteDeDados'
+import type { Meta } from '@/compartilhado/tipo/banco'
+import { CartaoDeMeta } from '@/modulo/meta/componente/CartaoDeMeta'
+import { FormularioDeMeta } from '@/modulo/meta/componente/FormularioDeMeta'
+import type { ValoresDaMeta } from '@/modulo/meta/componente/FormularioDeMeta'
 import { Modal } from '@/compartilhado/componente/Modal'
-import { Button } from '@/compartilhado/componente/Botao'
-import { Loading } from '@/compartilhado/componente/Carregando'
-import { EmptyState } from '@/compartilhado/componente/EstadoVazio'
-import { StatCard } from '@/compartilhado/componente/CartaoIndicador'
+import { Botao } from '@/compartilhado/componente/Botao'
+import { Carregando } from '@/compartilhado/componente/Carregando'
+import { EstadoVazio } from '@/compartilhado/componente/EstadoVazio'
+import { CartaoIndicador } from '@/compartilhado/componente/CartaoIndicador'
 
-type Filter = 'all' | Goal['status']
+type Filter = 'all' | Meta['status']
 
 const FILTERS: { key: Filter; label: string }[] = [
   { key: 'all', label: 'Todas' },
@@ -21,18 +21,18 @@ const FILTERS: { key: Filter; label: string }[] = [
   { key: 'failed', label: 'Não atingidas' }
 ]
 
-export function Goals() {
-  const [goals, setGoals] = useState<Goal[]>([])
+export function PaginaDeMetas() {
+  const [goals, setGoals] = useState<Meta[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [filter, setFilter] = useState<Filter>('all')
   const [modalOpen, setModalOpen] = useState(false)
-  const [editing, setEditing] = useState<Goal | null>(null)
+  const [editing, setEditing] = useState<Meta | null>(null)
 
   const load = async () => {
     try {
       setError('')
-      setGoals(await GoalService.getGoals())
+      setGoals(await ServicoDeMetas.listarMetas())
     } catch (err: any) {
       setError(err.message || 'Erro ao carregar metas')
     } finally {
@@ -44,12 +44,12 @@ export function Goals() {
     load()
   }, [])
 
-  const handleSubmit = async (values: GoalFormValues) => {
+  const handleSubmit = async (values: ValoresDaMeta) => {
     try {
       if (editing) {
-        await GoalService.updateGoal(editing.id, values)
+        await ServicoDeMetas.atualizarMeta(editing.id, values)
       } else {
-        await GoalService.createGoal(values)
+        await ServicoDeMetas.criarMeta(values)
       }
       setModalOpen(false)
       setEditing(null)
@@ -59,10 +59,10 @@ export function Goals() {
     }
   }
 
-  const handleDelete = async (goal: Goal) => {
+  const handleDelete = async (goal: Meta) => {
     if (!window.confirm(`Excluir a meta "${goal.title}"?`)) return
     try {
-      await GoalService.deleteGoal(goal.id)
+      await ServicoDeMetas.excluirMeta(goal.id)
       setGoals(prev => prev.filter(g => g.id !== goal.id))
     } catch (err: any) {
       setError(err.message || 'Erro ao excluir meta')
@@ -94,7 +94,7 @@ export function Goals() {
             O que você quer alcançar, e o quanto já andou
           </p>
         </div>
-        <Button
+        <Botao
           icon={<Plus size={16} />}
           onClick={() => {
             setEditing(null)
@@ -102,7 +102,7 @@ export function Goals() {
           }}
         >
           Nova meta
-        </Button>
+        </Botao>
       </div>
 
       {error && (
@@ -110,24 +110,24 @@ export function Goals() {
       )}
 
       {loading ? (
-        <Loading label="Carregando metas..." />
+        <Carregando label="Carregando metas..." />
       ) : goals.length === 0 ? (
-        <EmptyState
+        <EstadoVazio
           icon={<Target size={40} />}
           title="Nenhuma meta ainda"
           description="Defina onde você quer chegar e acompanhe o progresso em um lugar só."
           action={
-            <Button icon={<Plus size={16} />} onClick={() => setModalOpen(true)}>
+            <Botao icon={<Plus size={16} />} onClick={() => setModalOpen(true)}>
               Criar meta
-            </Button>
+            </Botao>
           }
         />
       ) : (
         <>
           <div className="grid gap-4 sm:grid-cols-3">
-            <StatCard label="Ativas" value={active.length} />
-            <StatCard label="Concluídas" value={completed.length} accent="green" />
-            <StatCard
+            <CartaoIndicador label="Ativas" value={active.length} />
+            <CartaoIndicador label="Concluídas" value={completed.length} accent="green" />
+            <CartaoIndicador
               label="Progresso médio"
               value={`${averageProgress}%`}
               hint="das metas ativas com alvo definido"
@@ -152,12 +152,12 @@ export function Goals() {
           </div>
 
           {visible.length === 0 ? (
-            <EmptyState title="Nada neste filtro" description="Escolha outro status para ver as metas." />
+            <EstadoVazio title="Nada neste filtro" description="Escolha outro status para ver as metas." />
           ) : (
             <div className="space-y-3">
               <AnimatePresence>
                 {visible.map(goal => (
-                  <GoalCard
+                  <CartaoDeMeta
                     key={goal.id}
                     goal={goal}
                     onEdit={g => {
@@ -174,7 +174,7 @@ export function Goals() {
       )}
 
       <Modal open={modalOpen} onClose={closeModal} title={editing ? 'Editar meta' : 'Nova meta'}>
-        <GoalForm goal={editing} onSubmit={handleSubmit} onCancel={closeModal} />
+        <FormularioDeMeta goal={editing} onSubmit={handleSubmit} onCancel={closeModal} />
       </Modal>
     </div>
   )

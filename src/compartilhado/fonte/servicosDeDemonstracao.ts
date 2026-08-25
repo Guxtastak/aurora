@@ -1,12 +1,12 @@
-import type { Habit, HabitRow, HabitLog, Book, Finance, Goal, MoodLog, Insight } from '@/compartilhado/tipo/banco'
-import { readDemo, writeDemo, newId, demoToday, demoUserId } from '@/compartilhado/fonte/armazenamentoDeDemonstracao'
-import { BookService } from '@/modulo/livro/servico'
-import { FinanceService } from '@/modulo/financa/servico'
-import type { GoalInput } from '@/modulo/meta/servico'
-import type { MoodInput } from '@/modulo/humor/servico'
-import { toISODate, todayISO } from '@/compartilhado/utilitario/formato'
-import { goalProgress, resolveGoalStatus } from '@/modulo/meta/regraDeProgresso'
-import { habitMoodCorrelations } from '@/modulo/humor/regraDeComparacao'
+import type { Habito, HabitoNoBanco, MarcacaoDeHabito, Livro, Transacao, Meta, RegistroDeHumor, Insight } from '@/compartilhado/tipo/banco'
+import { lerDemonstracao, gravarDemonstracao, novoId, hojeNaDemonstracao, usuarioDaDemonstracao } from '@/compartilhado/fonte/armazenamentoDeDemonstracao'
+import { ServicoDeLivros } from '@/modulo/livro/servico'
+import { ServicoDeFinancas } from '@/modulo/financa/servico'
+import type { DadosDaMeta } from '@/modulo/meta/servico'
+import type { DadosDoRegistro } from '@/modulo/humor/servico'
+import { paraDataISO, dataDeHoje } from '@/compartilhado/utilitario/formato'
+import { progressoDaMeta, resolverStatusDaMeta } from '@/modulo/meta/regraDeProgresso'
+import { compararHabitosComHumor } from '@/modulo/humor/regraDeComparacao'
 
 /**
  * Versões dos serviços que operam sobre o demoStore, com as mesmas assinaturas
@@ -18,7 +18,7 @@ function nowISO() {
 }
 
 function recalcStreaks(habitId: string) {
-  const data = readDemo()
+  const data = lerDemonstracao()
   const dates = [
     ...new Set(data.habit_logs.filter(l => l.habit_id === habitId && l.completed).map(l => l.date))
   ]
@@ -63,82 +63,82 @@ function recalcStreaks(habitId: string) {
       ? { ...h, current_streak: currentStreak, best_streak: Math.max(currentStreak, bestStreak) }
       : h
   )
-  writeDemo(data)
-  return data.habits.find(h => h.id === habitId) as Habit
+  gravarDemonstracao(data)
+  return data.habits.find(h => h.id === habitId) as Habito
 }
 
-export class DemoHabitService {
-  static async getHabits() {
-    return [...readDemo().habits].sort((a, b) => b.created_at.localeCompare(a.created_at))
+export class HabitosDaDemonstracao {
+  static async listarHabitos() {
+    return [...lerDemonstracao().habits].sort((a, b) => b.created_at.localeCompare(a.created_at))
   }
 
-  static async getHabitsWithTodayStatus() {
-    const data = readDemo()
-    const today = demoToday()
+  static async listarHabitosComStatusDeHoje() {
+    const data = lerDemonstracao()
+    const today = hojeNaDemonstracao()
     const done = new Set(
       data.habit_logs.filter(l => l.date === today && l.completed).map(l => l.habit_id)
     )
-    return (await this.getHabits()).map(h => ({ ...h, completed_today: done.has(h.id) }))
+    return (await this.listarHabitos()).map(h => ({ ...h, completed_today: done.has(h.id) }))
   }
 
-  static async getHabitById(id: string) {
-    return readDemo().habits.find(h => h.id === id) as Habit
+  static async buscarHabitoPorId(id: string) {
+    return lerDemonstracao().habits.find(h => h.id === id) as Habito
   }
 
-  static async createHabit(
-    habit: Omit<HabitRow, 'id' | 'created_at' | 'updated_at' | 'current_streak' | 'best_streak' | 'user_id'>
+  static async criarHabito(
+    habit: Omit<HabitoNoBanco, 'id' | 'created_at' | 'updated_at' | 'current_streak' | 'best_streak' | 'user_id'>
   ) {
-    const data = readDemo()
-    const created: Habit = {
+    const data = lerDemonstracao()
+    const created: Habito = {
       ...habit,
-      id: newId(),
-      user_id: demoUserId,
+      id: novoId(),
+      user_id: usuarioDaDemonstracao,
       current_streak: 0,
       best_streak: 0,
       created_at: nowISO(),
       updated_at: nowISO()
     }
     data.habits = [created, ...data.habits]
-    writeDemo(data)
+    gravarDemonstracao(data)
     return created
   }
 
-  static async updateHabit(
+  static async atualizarHabito(
     id: string,
-    updates: Partial<Omit<Habit, 'id' | 'created_at' | 'updated_at' | 'completed_today'>>
+    updates: Partial<Omit<Habito, 'id' | 'created_at' | 'updated_at' | 'completed_today'>>
   ) {
-    const data = readDemo()
+    const data = lerDemonstracao()
     data.habits = data.habits.map(h =>
       h.id === id ? { ...h, ...updates, updated_at: nowISO() } : h
     )
-    writeDemo(data)
-    return data.habits.find(h => h.id === id) as Habit
+    gravarDemonstracao(data)
+    return data.habits.find(h => h.id === id) as Habito
   }
 
-  static async deleteHabit(id: string) {
-    const data = readDemo()
+  static async excluirHabito(id: string) {
+    const data = lerDemonstracao()
     data.habits = data.habits.filter(h => h.id !== id)
     data.habit_logs = data.habit_logs.filter(l => l.habit_id !== id)
-    writeDemo(data)
+    gravarDemonstracao(data)
   }
 
-  static async toggleTodayHabit(habitId: string) {
-    return this.toggleHabitOnDate(habitId, demoToday())
+  static async alternarHabitoDeHoje(habitId: string) {
+    return this.alternarHabitoNaData(habitId, hojeNaDemonstracao())
   }
 
-  static async toggleHabitOnDate(habitId: string, date: string) {
-    const data = readDemo()
+  static async alternarHabitoNaData(habitId: string, date: string) {
+    const data = lerDemonstracao()
     const existing = data.habit_logs.find(l => l.habit_id === habitId && l.date === date)
 
-    let log: HabitLog
+    let log: MarcacaoDeHabito
     if (existing) {
       log = { ...existing, completed: !existing.completed }
       data.habit_logs = data.habit_logs.map(l => (l.id === existing.id ? log : l))
     } else {
       log = {
-        id: newId(),
+        id: novoId(),
         habit_id: habitId,
-        user_id: demoUserId,
+        user_id: usuarioDaDemonstracao,
         date,
         completed: true,
         created_at: nowISO()
@@ -146,64 +146,64 @@ export class DemoHabitService {
       data.habit_logs = [...data.habit_logs, log]
     }
 
-    writeDemo(data)
+    gravarDemonstracao(data)
     recalcStreaks(habitId)
     return log
   }
 
-  static async getHabitLogs(habitId: string, limit?: number) {
-    const logs = readDemo()
+  static async listarMarcacoesDoHabito(habitId: string, limit?: number) {
+    const logs = lerDemonstracao()
       .habit_logs.filter(l => l.habit_id === habitId)
       .sort((a, b) => b.date.localeCompare(a.date))
     return limit ? logs.slice(0, limit) : logs
   }
 
-  static async getLogsSince(startDate: string) {
-    return readDemo()
+  static async listarMarcacoesDesde(startDate: string) {
+    return lerDemonstracao()
       .habit_logs.filter(l => l.completed && l.date >= startDate)
       .sort((a, b) => a.date.localeCompare(b.date))
   }
 
-  static async updateStreak(habitId: string) {
+  static async recalcularSequencia(habitId: string) {
     return recalcStreaks(habitId)
   }
 }
 
-export class DemoBookService {
-  // A busca no Google Books é uma API pública: continua usando a implementação real
-  static searchGoogleBooks = BookService.searchGoogleBooks.bind(BookService)
+export class LivrosDaDemonstracao {
+  // A busca no Google PaginaDeLivros é uma API pública: continua usando a implementação real
+  static buscarNoGoogleBooks = ServicoDeLivros.buscarNoGoogleBooks.bind(ServicoDeLivros)
 
-  static async getBooks() {
-    return [...readDemo().books].sort((a, b) => b.created_at.localeCompare(a.created_at))
+  static async listarLivros() {
+    return [...lerDemonstracao().books].sort((a, b) => b.created_at.localeCompare(a.created_at))
   }
 
-  static async getBooksByStatus(status: Book['status']) {
-    return (await this.getBooks()).filter(b => b.status === status)
+  static async listarLivrosPorStatus(status: Livro['status']) {
+    return (await this.listarLivros()).filter(b => b.status === status)
   }
 
-  static async getBookById(id: string) {
-    return readDemo().books.find(b => b.id === id) as Book
+  static async buscarLivroPorId(id: string) {
+    return lerDemonstracao().books.find(b => b.id === id) as Livro
   }
 
-  static async addBook(book: Omit<Book, 'id' | 'created_at' | 'updated_at' | 'user_id'>) {
-    const data = readDemo()
-    const created: Book = {
+  static async adicionarLivro(book: Omit<Livro, 'id' | 'created_at' | 'updated_at' | 'user_id'>) {
+    const data = lerDemonstracao()
+    const created: Livro = {
       ...book,
-      id: newId(),
-      user_id: demoUserId,
+      id: novoId(),
+      user_id: usuarioDaDemonstracao,
       created_at: nowISO(),
       updated_at: nowISO()
     }
     data.books = [created, ...data.books]
-    writeDemo(data)
+    gravarDemonstracao(data)
     return created
   }
 
-  static async addBookFromGoogle(googleBookId: string) {
-    const results = await BookService.searchGoogleBooks(`id:${googleBookId}`, 1).catch(() => [])
+  static async adicionarLivroDoGoogle(googleBookId: string) {
+    const results = await ServicoDeLivros.buscarNoGoogleBooks(`id:${googleBookId}`, 1).catch(() => [])
     const volume = results[0]?.volumeInfo
 
-    return this.addBook({
+    return this.adicionarLivro({
       title: volume?.title || 'Livro adicionado',
       author: volume?.authors?.[0] || 'Autor desconhecido',
       cover_url: volume?.imageLinks?.thumbnail || '',
@@ -211,37 +211,37 @@ export class DemoBookService {
       pages_read: 0,
       google_books_id: googleBookId,
       status: 'reading',
-      started_date: demoToday()
+      started_date: hojeNaDemonstracao()
     })
   }
 
-  static async updateBook(id: string, updates: Partial<Omit<Book, 'id' | 'created_at' | 'updated_at'>>) {
-    const data = readDemo()
+  static async atualizarLivro(id: string, updates: Partial<Omit<Livro, 'id' | 'created_at' | 'updated_at'>>) {
+    const data = lerDemonstracao()
     data.books = data.books.map(b => (b.id === id ? { ...b, ...updates, updated_at: nowISO() } : b))
-    writeDemo(data)
-    return data.books.find(b => b.id === id) as Book
+    gravarDemonstracao(data)
+    return data.books.find(b => b.id === id) as Livro
   }
 
-  static async updateProgress(id: string, pagesRead: number) {
-    return this.updateBook(id, { pages_read: pagesRead })
+  static async atualizarProgresso(id: string, pagesRead: number) {
+    return this.atualizarLivro(id, { pages_read: pagesRead })
   }
 
-  static async finishBook(id: string, rating?: number) {
-    return this.updateBook(id, {
+  static async finalizarLivro(id: string, rating?: number) {
+    return this.atualizarLivro(id, {
       status: 'finished',
-      finished_date: demoToday(),
+      finished_date: hojeNaDemonstracao(),
       ...(rating ? { rating } : {})
     })
   }
 
-  static async deleteBook(id: string) {
-    const data = readDemo()
+  static async excluirLivro(id: string) {
+    const data = lerDemonstracao()
     data.books = data.books.filter(b => b.id !== id)
-    writeDemo(data)
+    gravarDemonstracao(data)
   }
 
-  static async getReadingStats() {
-    const books = await this.getBooks()
+  static async obterEstatisticasDeLeitura() {
+    const books = await this.listarLivros()
     const finished = books.filter(b => b.status === 'finished')
     return {
       total: books.length,
@@ -253,46 +253,46 @@ export class DemoBookService {
   }
 }
 
-export class DemoFinanceService {
+export class FinancasDaDemonstracao {
   // Cotação vem de uma API pública, sem relação com o Supabase
-  static getExchangeRate = FinanceService.getExchangeRate.bind(FinanceService)
+  static obterCotacaoDoDolar = ServicoDeFinancas.obterCotacaoDoDolar.bind(ServicoDeFinancas)
 
-  static async getTransactions() {
-    return [...readDemo().finances].sort((a, b) => b.date.localeCompare(a.date))
+  static async listarTransacoes() {
+    return [...lerDemonstracao().finances].sort((a, b) => b.date.localeCompare(a.date))
   }
 
-  static async getTransactionsByPeriod(startDate: string, endDate: string) {
-    return (await this.getTransactions()).filter(t => t.date >= startDate && t.date <= endDate)
+  static async listarTransacoesPorPeriodo(startDate: string, endDate: string) {
+    return (await this.listarTransacoes()).filter(t => t.date >= startDate && t.date <= endDate)
   }
 
-  static async addTransaction(transaction: Omit<Finance, 'id' | 'created_at' | 'user_id'>) {
-    const data = readDemo()
-    const created: Finance = {
+  static async adicionarTransacao(transaction: Omit<Transacao, 'id' | 'created_at' | 'user_id'>) {
+    const data = lerDemonstracao()
+    const created: Transacao = {
       ...transaction,
-      id: newId(),
-      user_id: demoUserId,
+      id: novoId(),
+      user_id: usuarioDaDemonstracao,
       created_at: nowISO()
     }
     data.finances = [created, ...data.finances]
-    writeDemo(data)
+    gravarDemonstracao(data)
     return created
   }
 
-  static async updateTransaction(id: string, updates: Partial<Omit<Finance, 'id' | 'created_at'>>) {
-    const data = readDemo()
+  static async atualizarTransacao(id: string, updates: Partial<Omit<Transacao, 'id' | 'created_at'>>) {
+    const data = lerDemonstracao()
     data.finances = data.finances.map(t => (t.id === id ? { ...t, ...updates } : t))
-    writeDemo(data)
-    return data.finances.find(t => t.id === id) as Finance
+    gravarDemonstracao(data)
+    return data.finances.find(t => t.id === id) as Transacao
   }
 
-  static async deleteTransaction(id: string) {
-    const data = readDemo()
+  static async excluirTransacao(id: string) {
+    const data = lerDemonstracao()
     data.finances = data.finances.filter(t => t.id !== id)
-    writeDemo(data)
+    gravarDemonstracao(data)
   }
 
-  static async getBalance() {
-    const transactions = await this.getTransactions()
+  static async obterSaldo() {
+    const transactions = await this.listarTransacoes()
     const totalIncome = transactions
       .filter(t => t.type === 'income')
       .reduce((sum, t) => sum + Number(t.amount), 0)
@@ -308,8 +308,8 @@ export class DemoFinanceService {
     }
   }
 
-  static async getTransactionsByCategory() {
-    const transactions = await this.getTransactions()
+  static async listarTransacoesPorCategoria() {
+    const transactions = await this.listarTransacoes()
     const categories: { [key: string]: { income: number; expense: number; count: number } } = {}
     transactions.forEach(t => {
       if (!categories[t.category]) {
@@ -325,9 +325,9 @@ export class DemoFinanceService {
     return categories
   }
 
-  static async getMonthlySummary(year: number, month: number) {
+  static async obterResumoDoMes(year: number, month: number) {
     const prefix = `${year}-${String(month).padStart(2, '0')}`
-    const transactions = (await this.getTransactions()).filter(t => t.date.startsWith(prefix))
+    const transactions = (await this.listarTransacoes()).filter(t => t.date.startsWith(prefix))
     const income = transactions
       .filter(t => t.type === 'income')
       .reduce((sum, t) => sum + Number(t.amount), 0)
@@ -339,112 +339,112 @@ export class DemoFinanceService {
   }
 }
 
-export class DemoGoalService {
-  static async getGoals() {
-    return [...readDemo().goals].sort((a, b) => b.created_at.localeCompare(a.created_at))
+export class MetasDaDemonstracao {
+  static async listarMetas() {
+    return [...lerDemonstracao().goals].sort((a, b) => b.created_at.localeCompare(a.created_at))
   }
 
-  static async getGoalById(id: string) {
-    return readDemo().goals.find(g => g.id === id) as Goal
+  static async buscarMetaPorId(id: string) {
+    return lerDemonstracao().goals.find(g => g.id === id) as Meta
   }
 
-  static async createGoal(goal: GoalInput) {
-    const data = readDemo()
-    const created: Goal = {
+  static async criarMeta(goal: DadosDaMeta) {
+    const data = lerDemonstracao()
+    const created: Meta = {
       ...goal,
-      status: resolveGoalStatus(goal),
-      progress_percentage: goalProgress(goal.current_value, goal.target_value),
-      id: newId(),
-      user_id: demoUserId,
+      status: resolverStatusDaMeta(goal),
+      progress_percentage: progressoDaMeta(goal.current_value, goal.target_value),
+      id: novoId(),
+      user_id: usuarioDaDemonstracao,
       created_at: nowISO(),
       updated_at: nowISO()
     }
     data.goals = [created, ...data.goals]
-    writeDemo(data)
+    gravarDemonstracao(data)
     return created
   }
 
-  static async updateGoal(id: string, updates: Partial<GoalInput>) {
-    const data = readDemo()
-    let updated: Goal | undefined
+  static async atualizarMeta(id: string, updates: Partial<DadosDaMeta>) {
+    const data = lerDemonstracao()
+    let updated: Meta | undefined
 
     data.goals = data.goals.map(g => {
       if (g.id !== id) return g
       const merged = { ...g, ...updates }
       updated = {
         ...merged,
-        status: resolveGoalStatus(merged),
-        progress_percentage: goalProgress(merged.current_value, merged.target_value),
+        status: resolverStatusDaMeta(merged),
+        progress_percentage: progressoDaMeta(merged.current_value, merged.target_value),
         updated_at: nowISO()
       }
       return updated
     })
 
-    writeDemo(data)
-    return updated as Goal
+    gravarDemonstracao(data)
+    return updated as Meta
   }
 
-  static async deleteGoal(id: string) {
-    const data = readDemo()
+  static async excluirMeta(id: string) {
+    const data = lerDemonstracao()
     data.goals = data.goals.filter(g => g.id !== id)
-    writeDemo(data)
+    gravarDemonstracao(data)
   }
 }
 
-export class DemoMoodService {
-  static async getMoodLogs(days: number = 30) {
+export class HumorDaDemonstracao {
+  static async listarRegistrosDeHumor(days: number = 30) {
     const limite = new Date()
     limite.setDate(limite.getDate() - days)
-    const desde = toISODate(limite)
+    const desde = paraDataISO(limite)
 
-    return readDemo()
+    return lerDemonstracao()
       .mood_logs.filter(log => log.date >= desde)
       .sort((a, b) => b.date.localeCompare(a.date))
   }
 
-  static async getMoodByDate(date: string = todayISO()) {
-    return readDemo().mood_logs.find(log => log.date === date) || null
+  static async buscarRegistroPorData(date: string = dataDeHoje()) {
+    return lerDemonstracao().mood_logs.find(log => log.date === date) || null
   }
 
-  static async saveMood(input: MoodInput) {
-    const data = readDemo()
+  static async gravarRegistroDoDia(input: DadosDoRegistro) {
+    const data = lerDemonstracao()
     const existing = data.mood_logs.find(log => log.date === input.date)
 
     if (existing) {
-      const updated: MoodLog = { ...existing, ...input, updated_at: nowISO() }
+      const updated: RegistroDeHumor = { ...existing, ...input, updated_at: nowISO() }
       data.mood_logs = data.mood_logs.map(log => (log.id === existing.id ? updated : log))
-      writeDemo(data)
+      gravarDemonstracao(data)
       return updated
     }
 
-    const created: MoodLog = {
+    const created: RegistroDeHumor = {
       ...input,
-      id: newId(),
-      user_id: demoUserId,
+      id: novoId(),
+      user_id: usuarioDaDemonstracao,
       created_at: nowISO(),
       updated_at: nowISO()
     }
     data.mood_logs = [created, ...data.mood_logs]
-    writeDemo(data)
+    gravarDemonstracao(data)
     return created
   }
 
-  static async deleteMood(id: string) {
-    const data = readDemo()
+  static async excluirRegistro(id: string) {
+    const data = lerDemonstracao()
     data.mood_logs = data.mood_logs.filter(log => log.id !== id)
-    writeDemo(data)
+    gravarDemonstracao(data)
   }
 }
 
-export class DemoInsightService {
-  static async generateDailyInsights() {
+export class InsightsDaDemonstracao {
+  static async gerarInsightDoDia() {
     const [habits, books, balance] = await Promise.all([
-      DemoHabitService.getHabitsWithTodayStatus(),
-      DemoBookService.getBooks(),
-      DemoFinanceService.getBalance()
+      HabitosDaDemonstracao.listarHabitosComStatusDeHoje(),
+      LivrosDaDemonstracao.listarLivros(),
+      FinancasDaDemonstracao.obterSaldo()
     ])
 
-    const today = demoToday()
+    const today = hojeNaDemonstracao()
     const completedToday = habits.filter(h => h.completed_today).length
 
     const metadata = {
@@ -467,10 +467,10 @@ export class DemoInsightService {
       }
     }
 
-    const data = readDemo()
+    const data = lerDemonstracao()
     const created: Insight = {
-      id: newId(),
-      user_id: demoUserId,
+      id: novoId(),
+      user_id: usuarioDaDemonstracao,
       title: `Resumo Diário - ${today}`,
       description: 'Análise do dia atual',
       type: 'daily',
@@ -478,24 +478,24 @@ export class DemoInsightService {
       generated_at: nowISO()
     }
     data.insights = [created, ...data.insights]
-    writeDemo(data)
+    gravarDemonstracao(data)
     return created
   }
 
-  static async getInsights(limit: number = 10) {
-    return readDemo()
+  static async listarInsights(limit: number = 10) {
+    return lerDemonstracao()
       .insights.slice()
       .sort((a, b) => b.generated_at.localeCompare(a.generated_at))
       .slice(0, limit)
   }
 
-  static async getHabitCorrelations(days: number = 90) {
+  static async obterComparacaoDosHabitos(days: number = 90) {
     const desde = new Date()
     desde.setDate(desde.getDate() - days)
-    const inicio = toISODate(desde)
-    const data = readDemo()
+    const inicio = paraDataISO(desde)
+    const data = lerDemonstracao()
 
-    return habitMoodCorrelations(
+    return compararHabitosComHumor(
       data.habits,
       data.habit_logs,
       data.mood_logs.filter(log => log.date >= inicio)

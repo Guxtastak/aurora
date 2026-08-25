@@ -1,5 +1,5 @@
-import type { Goal } from '@/compartilhado/tipo/banco'
-import { percent, todayISO } from '@/compartilhado/utilitario/formato'
+import type { Meta } from '@/compartilhado/tipo/banco'
+import { porcentagem, dataDeHoje } from '@/compartilhado/utilitario/formato'
 
 /**
  * Regras de progresso e status das metas. Ficam aqui, fora do serviço, porque
@@ -10,7 +10,7 @@ import { percent, todayISO } from '@/compartilhado/utilitario/formato'
 type Measurable = {
   current_value?: number | null
   target_value?: number | null
-  status: Goal['status']
+  status: Meta['status']
 }
 
 /** Meta é mensurável quando tem um alvo numérico maior que zero */
@@ -19,9 +19,9 @@ function isMeasurable(goal: Measurable) {
 }
 
 /** Progresso da meta em 0-100. Meta sem alvo (qualitativa) não tem progresso. */
-export function goalProgress(currentValue?: number | null, targetValue?: number | null) {
+export function progressoDaMeta(currentValue?: number | null, targetValue?: number | null) {
   if (!targetValue || targetValue <= 0) return 0
-  return percent(currentValue || 0, targetValue)
+  return porcentagem(currentValue || 0, targetValue)
 }
 
 /**
@@ -30,16 +30,16 @@ export function goalProgress(currentValue?: number | null, targetValue?: number 
  * usuário é respeitada — em especial `failed`, que o app nunca declara sozinho.
  * Meta sem alvo não sofre automação nenhuma.
  */
-export function resolveGoalStatus(goal: Measurable): Goal['status'] {
+export function resolverStatusDaMeta(goal: Measurable): Meta['status'] {
   if (!isMeasurable(goal)) return goal.status
 
-  if (goalProgress(goal.current_value, goal.target_value) >= 100) return 'completed'
+  if (progressoDaMeta(goal.current_value, goal.target_value) >= 100) return 'completed'
 
   return goal.status === 'completed' ? 'active' : goal.status
 }
 
 /** Meta ainda ativa cujo prazo já passou. O dia do prazo não conta como atraso. */
-export function isGoalOverdue(goal: { deadline?: string | null; status: Goal['status'] }) {
+export function metaEstaAtrasada(goal: { deadline?: string | null; status: Meta['status'] }) {
   if (!goal.deadline || goal.status !== 'active') return false
-  return goal.deadline.slice(0, 10) < todayISO()
+  return goal.deadline.slice(0, 10) < dataDeHoje()
 }

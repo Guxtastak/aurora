@@ -1,15 +1,15 @@
 import { supabase } from '@/compartilhado/fonte/supabase'
-import type { Goal } from '@/compartilhado/tipo/banco'
-import { goalProgress, resolveGoalStatus } from '@/modulo/meta/regraDeProgresso'
+import type { Meta } from '@/compartilhado/tipo/banco'
+import { progressoDaMeta, resolverStatusDaMeta } from '@/modulo/meta/regraDeProgresso'
 
 /** Campos que a tela envia; progresso e status derivados são calculados aqui */
-export type GoalInput = Omit<
-  Goal,
+export type DadosDaMeta = Omit<
+  Meta,
   'id' | 'user_id' | 'created_at' | 'updated_at' | 'progress_percentage'
 >
 
 /** Reduz uma meta do banco aos campos editaveis, sem id nem colunas geradas */
-function toInput(goal: Goal): GoalInput {
+function toInput(goal: Meta): DadosDaMeta {
   return {
     title: goal.title,
     description: goal.description,
@@ -24,32 +24,32 @@ function toInput(goal: Goal): GoalInput {
 }
 
 /** Aplica as regras de progresso/status sobre os campos informados */
-function derive<T extends Partial<GoalInput> & { status: Goal['status'] }>(goal: T) {
+function derive<T extends Partial<DadosDaMeta> & { status: Meta['status'] }>(goal: T) {
   return {
     ...goal,
-    status: resolveGoalStatus(goal),
-    progress_percentage: goalProgress(goal.current_value, goal.target_value)
+    status: resolverStatusDaMeta(goal),
+    progress_percentage: progressoDaMeta(goal.current_value, goal.target_value)
   }
 }
 
-export class GoalService {
+export class ServicoDeMetas {
   /**
    * Busca todas as metas do usuario logado
    */
-  static async getGoals() {
+  static async listarMetas() {
     const { data, error } = await supabase
       .from('goals')
       .select('*')
       .order('created_at', { ascending: false })
 
     if (error) throw error
-    return data as Goal[]
+    return data as Meta[]
   }
 
   /**
    * Busca meta por ID
    */
-  static async getGoalById(id: string) {
+  static async buscarMetaPorId(id: string) {
     const { data, error } = await supabase
       .from('goals')
       .select('*')
@@ -57,13 +57,13 @@ export class GoalService {
       .single()
 
     if (error) throw error
-    return data as Goal
+    return data as Meta
   }
 
   /**
    * Cria uma nova meta
    */
-  static async createGoal(goal: GoalInput) {
+  static async criarMeta(goal: DadosDaMeta) {
     const { data, error } = await supabase
       .from('goals')
       .insert(derive(goal))
@@ -71,7 +71,7 @@ export class GoalService {
       .single()
 
     if (error) throw error
-    return data as Goal
+    return data as Meta
   }
 
   /**
@@ -79,8 +79,8 @@ export class GoalService {
    * (so o valor atual, por exemplo) recalcule progresso e status sobre os
    * valores completos, e nao sobre os campos que vieram no update.
    */
-  static async updateGoal(id: string, updates: Partial<GoalInput>) {
-    const current = await this.getGoalById(id)
+  static async atualizarMeta(id: string, updates: Partial<DadosDaMeta>) {
+    const current = await this.buscarMetaPorId(id)
     const merged = { ...toInput(current), ...updates }
 
     const { data, error } = await supabase
@@ -91,13 +91,13 @@ export class GoalService {
       .single()
 
     if (error) throw error
-    return data as Goal
+    return data as Meta
   }
 
   /**
    * Remove uma meta
    */
-  static async deleteGoal(id: string) {
+  static async excluirMeta(id: string) {
     const { error } = await supabase
       .from('goals')
       .delete()

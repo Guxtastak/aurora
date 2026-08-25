@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 
-interface StatCardProps {
+interface CartaoIndicadorProps {
   label: string
   value: string | number
   hint?: string
@@ -16,7 +16,7 @@ const accents = {
   amber: 'bg-amber-50 text-amber-600 dark:bg-amber-900/40 dark:text-amber-300'
 }
 
-export function StatCard({ label, value, hint, icon, accent = 'aurora', delay = 0 }: StatCardProps) {
+export function CartaoIndicador({ label, value, hint, icon, accent = 'aurora', delay = 0 }: CartaoIndicadorProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}

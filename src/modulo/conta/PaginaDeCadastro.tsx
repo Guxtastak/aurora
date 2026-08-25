@@ -1,16 +1,16 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { useAuth } from '@/compartilhado/gancho/useAutenticacao'
+import { useAutenticacao } from '@/compartilhado/gancho/useAutenticacao'
 import { motion } from 'framer-motion'
 
-export function Register() {
+export function PaginaDeCadastro() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
-  const { signUp } = useAuth()
+  const { signUp } = useAutenticacao()
   const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -32,7 +32,7 @@ export function Register() {
     try {
       await signUp(email, password)
       // Se a confirmação de email estiver desativada no Supabase, a sessão já existe
-      // e o ProtectedRoute libera o dashboard direto.
+      // e o RotaProtegida libera o dashboard direto.
       setMessage('Conta criada! Verifique seu email caso a confirmação esteja ativada.')
       setTimeout(() => navigate('/dashboard'), 1200)
     } catch (err: any) {

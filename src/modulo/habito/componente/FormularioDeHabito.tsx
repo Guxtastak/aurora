@@ -1,9 +1,9 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import type { Habit } from '@/compartilhado/tipo/banco'
-import { Input, Select, Textarea } from '@/compartilhado/componente/Campo'
-import { Button } from '@/compartilhado/componente/Botao'
+import type { Habito } from '@/compartilhado/tipo/banco'
+import { CampoDeTexto, CampoDeSelecao, CampoDeTextoLongo } from '@/compartilhado/componente/Campo'
+import { Botao } from '@/compartilhado/componente/Botao'
 
 const schema = z.object({
   name: z.string().min(1, 'Informe um nome'),
@@ -14,24 +14,24 @@ const schema = z.object({
   target_count: z.number().min(1, 'Mínimo 1')
 })
 
-export type HabitFormValues = z.infer<typeof schema>
+export type ValoresDoHabito = z.infer<typeof schema>
 
-interface HabitFormProps {
-  habit?: Habit | null
-  onSubmit: (values: HabitFormValues) => Promise<void>
+interface FormularioDeHabitoProps {
+  habit?: Habito | null
+  onSubmit: (values: ValoresDoHabito) => Promise<void>
   onCancel: () => void
 }
 
 const ICONS = ['💪', '📖', '🧘', '💧', '🏃', '🌱', '🎯', '🎸', '💻', '🛏️']
 
-export function HabitForm({ habit, onSubmit, onCancel }: HabitFormProps) {
+export function FormularioDeHabito({ habit, onSubmit, onCancel }: FormularioDeHabitoProps) {
   const {
     register,
     handleSubmit,
     watch,
     setValue,
     formState: { errors, isSubmitting }
-  } = useForm<HabitFormValues>({
+  } = useForm<ValoresDoHabito>({
     resolver: zodResolver(schema),
     defaultValues: {
       name: habit?.name ?? '',
@@ -47,9 +47,9 @@ export function HabitForm({ habit, onSubmit, onCancel }: HabitFormProps) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <Input label="Nome" placeholder="Ler 20 páginas" error={errors.name?.message} {...register('name')} />
+      <CampoDeTexto label="Nome" placeholder="Ler 20 páginas" error={errors.name?.message} {...register('name')} />
 
-      <Textarea
+      <CampoDeTextoLongo
         label="Descrição (opcional)"
         rows={2}
         placeholder="Por que esse hábito importa?"
@@ -77,13 +77,13 @@ export function HabitForm({ habit, onSubmit, onCancel }: HabitFormProps) {
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <Select label="Frequência" {...register('frequency')}>
+        <CampoDeSelecao label="Frequência" {...register('frequency')}>
           <option value="daily">Diário</option>
           <option value="weekly">Semanal</option>
           <option value="monthly">Mensal</option>
-        </Select>
+        </CampoDeSelecao>
 
-        <Input
+        <CampoDeTexto
           label="Meta (vezes)"
           type="number"
           min={1}
@@ -102,12 +102,12 @@ export function HabitForm({ habit, onSubmit, onCancel }: HabitFormProps) {
       </div>
 
       <div className="flex justify-end gap-2 pt-2">
-        <Button type="button" variant="secondary" onClick={onCancel}>
+        <Botao type="button" variant="secondary" onClick={onCancel}>
           Cancelar
-        </Button>
-        <Button type="submit" loading={isSubmitting}>
+        </Botao>
+        <Botao type="submit" loading={isSubmitting}>
           {habit ? 'Salvar' : 'Criar hábito'}
-        </Button>
+        </Botao>
       </div>
     </form>
   )

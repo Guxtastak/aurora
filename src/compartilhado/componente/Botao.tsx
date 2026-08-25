@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger'
 type Size = 'sm' | 'md' | 'lg'
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface BotaoProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant
   size?: Size
   loading?: boolean
@@ -24,7 +24,7 @@ const sizes: Record<Size, string> = {
   lg: 'px-6 py-3 text-base'
 }
 
-export function Button({
+export function Botao({
   variant = 'primary',
   size = 'md',
   loading = false,
@@ -33,7 +33,7 @@ export function Button({
   className = '',
   disabled,
   ...props
-}: ButtonProps) {
+}: BotaoProps) {
   return (
     <motion.button
       whileHover={{ scale: disabled || loading ? 1 : 1.02 }}

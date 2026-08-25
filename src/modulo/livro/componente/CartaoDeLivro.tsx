@@ -1,31 +1,31 @@
 import { motion } from 'framer-motion'
 import { BookOpen, Star, Trash2, CheckCircle2 } from 'lucide-react'
-import type { Book } from '@/compartilhado/tipo/banco'
-import { percent } from '@/compartilhado/utilitario/formato'
+import type { Livro } from '@/compartilhado/tipo/banco'
+import { porcentagem } from '@/compartilhado/utilitario/formato'
 
-const STATUS_LABEL: Record<Book['status'], string> = {
+const STATUS_LABEL: Record<Livro['status'], string> = {
   reading: 'Lendo',
   finished: 'Finalizado',
   want_to_read: 'Quero ler',
   dropped: 'Abandonado'
 }
 
-const STATUS_STYLE: Record<Book['status'], string> = {
+const STATUS_STYLE: Record<Livro['status'], string> = {
   reading: 'bg-aurora-50 text-aurora-700 dark:bg-aurora-900/40 dark:text-aurora-300',
   finished: 'bg-green-50 text-green-700 dark:bg-green-900/40 dark:text-green-300',
   want_to_read: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300',
   dropped: 'bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-300'
 }
 
-interface BookCardProps {
-  book: Book
-  onProgress: (book: Book, pages: number) => void
-  onFinish: (book: Book) => void
-  onDelete: (book: Book) => void
+interface CartaoDeLivroProps {
+  book: Livro
+  onProgress: (book: Livro, pages: number) => void
+  onFinish: (book: Livro) => void
+  onDelete: (book: Livro) => void
 }
 
-export function BookCard({ book, onProgress, onFinish, onDelete }: BookCardProps) {
-  const progress = percent(book.pages_read || 0, book.pages_total || 0)
+export function CartaoDeLivro({ book, onProgress, onFinish, onDelete }: CartaoDeLivroProps) {
+  const progress = porcentagem(book.pages_read || 0, book.pages_total || 0)
 
   return (
     <motion.div

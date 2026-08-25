@@ -1,15 +1,15 @@
 import { describe, it, expect } from 'vitest'
-import { habitMoodCorrelations, MIN_DAYS } from '@/modulo/humor/regraDeComparacao'
-import type { Habit, HabitLog, MoodLog } from '@/compartilhado/tipo/banco'
-import { toISODate } from '@/compartilhado/utilitario/formato'
+import { compararHabitosComHumor, MINIMO_DE_DIAS } from '@/modulo/humor/regraDeComparacao'
+import type { Habito, MarcacaoDeHabito, RegistroDeHumor } from '@/compartilhado/tipo/banco'
+import { paraDataISO } from '@/compartilhado/utilitario/formato'
 
 function daysAgo(n: number) {
   const date = new Date()
   date.setDate(date.getDate() - n)
-  return toISODate(date)
+  return paraDataISO(date)
 }
 
-function habit(over: Partial<Habit> = {}): Habit {
+function habit(over: Partial<Habito> = {}): Habito {
   return {
     id: 'h1',
     user_id: 'u1',
@@ -24,7 +24,7 @@ function habit(over: Partial<Habit> = {}): Habit {
   }
 }
 
-function mood(date: string, value: number, energy = value): MoodLog {
+function mood(date: string, value: number, energy = value): RegistroDeHumor {
   return {
     id: `m-${date}`,
     user_id: 'u1',
@@ -36,7 +36,7 @@ function mood(date: string, value: number, energy = value): MoodLog {
   }
 }
 
-function log(date: string, completed = true, habit_id = 'h1'): HabitLog {
+function log(date: string, completed = true, habit_id = 'h1'): MarcacaoDeHabito {
   return {
     id: `l-${habit_id}-${date}`,
     habit_id,
@@ -47,7 +47,7 @@ function log(date: string, completed = true, habit_id = 'h1'): HabitLog {
   }
 }
 
-describe('habitMoodCorrelations', () => {
+describe('compararHabitosComHumor', () => {
   it('compara a media dos dias em que o habito foi cumprido com a dos outros', () => {
     const moods = [
       mood(daysAgo(1), 4), mood(daysAgo(2), 4), mood(daysAgo(3), 4),
@@ -55,7 +55,7 @@ describe('habitMoodCorrelations', () => {
     ]
     const logs = [log(daysAgo(1)), log(daysAgo(2)), log(daysAgo(3))]
 
-    const [result] = habitMoodCorrelations([habit()], logs, moods)
+    const [result] = compararHabitosComHumor([habit()], logs, moods)
 
     expect(result.comHabito.mood).toBe(4)
     expect(result.semHabito.mood).toBe(2)
@@ -71,7 +71,7 @@ describe('habitMoodCorrelations', () => {
     ]
     const logs = [log(daysAgo(1)), log(daysAgo(2)), log(daysAgo(3))]
 
-    const [result] = habitMoodCorrelations([habit()], logs, moods)
+    const [result] = compararHabitosComHumor([habit()], logs, moods)
 
     expect(result.deltaMood).toBe(-3)
   })
@@ -83,7 +83,7 @@ describe('habitMoodCorrelations', () => {
     ]
     const logs = [log(daysAgo(1)), log(daysAgo(2)), log(daysAgo(3))]
 
-    const [result] = habitMoodCorrelations([habit()], logs, moods)
+    const [result] = compararHabitosComHumor([habit()], logs, moods)
 
     expect(result.deltaMood).toBe(0)
     expect(result.deltaEnergy).toBe(4)
@@ -97,7 +97,7 @@ describe('habitMoodCorrelations', () => {
     // O dia 4 tem log, mas nao cumprido: precisa cair no grupo "sem habito"
     const logs = [log(daysAgo(1)), log(daysAgo(2)), log(daysAgo(3)), log(daysAgo(4), false)]
 
-    const [result] = habitMoodCorrelations([habit()], logs, moods)
+    const [result] = compararHabitosComHumor([habit()], logs, moods)
 
     expect(result.comHabito.mood).toBe(4)
     expect(result.semHabito.mood).toBe(2)
@@ -107,7 +107,7 @@ describe('habitMoodCorrelations', () => {
     const moods = Array.from({ length: 10 }, (_, i) => mood(daysAgo(i), 3))
     const criadoHa3Dias = habit({ created_at: `${daysAgo(3)}T00:00:00.000Z` })
 
-    const [result] = habitMoodCorrelations([criadoHa3Dias], [], moods)
+    const [result] = compararHabitosComHumor([criadoHa3Dias], [], moods)
 
     // Dias 3, 2, 1 e 0 — os seis anteriores nao contam
     expect(result.days).toBe(4)
@@ -118,7 +118,7 @@ describe('habitMoodCorrelations', () => {
     const semanal = habit({ id: 'h2', frequency: 'weekly' })
     const mensal = habit({ id: 'h3', frequency: 'monthly' })
 
-    const result = habitMoodCorrelations([semanal, mensal], [], moods)
+    const result = compararHabitosComHumor([semanal, mensal], [], moods)
 
     expect(result).toHaveLength(0)
   })
@@ -130,9 +130,9 @@ describe('habitMoodCorrelations', () => {
     ]
     const logs = [log(daysAgo(1)), log(daysAgo(2))]
 
-    const [result] = habitMoodCorrelations([habit()], logs, moods)
+    const [result] = compararHabitosComHumor([habit()], logs, moods)
 
-    expect(result.days).toBeLessThan(MIN_DAYS)
+    expect(result.days).toBeLessThan(MINIMO_DE_DIAS)
     expect(result.enough).toBe(false)
   })
 
@@ -145,14 +145,14 @@ describe('habitMoodCorrelations', () => {
     // Seis dias de humor, mas o habito so foi cumprido em um deles
     const logs = [log(daysAgo(1))]
 
-    const [result] = habitMoodCorrelations([habit()], logs, moods)
+    const [result] = compararHabitosComHumor([habit()], logs, moods)
 
-    expect(result.days).toBeGreaterThanOrEqual(MIN_DAYS)
+    expect(result.days).toBeGreaterThanOrEqual(MINIMO_DE_DIAS)
     expect(result.enough).toBe(false)
   })
 
   it('devolve o habito com enough falso quando nao ha humor registrado', () => {
-    const [result] = habitMoodCorrelations([habit()], [], [])
+    const [result] = compararHabitosComHumor([habit()], [], [])
 
     expect(result.days).toBe(0)
     expect(result.enough).toBe(false)
@@ -178,7 +178,7 @@ describe('habitMoodCorrelations', () => {
       log(daysAgo(1), true, 'sem')
     ]
 
-    const result = habitMoodCorrelations([fraco, semAmostra, forte], logs, moods)
+    const result = compararHabitosComHumor([fraco, semAmostra, forte], logs, moods)
 
     expect(result.map(r => r.habitId)).toEqual(['forte', 'fraco', 'sem'])
   })

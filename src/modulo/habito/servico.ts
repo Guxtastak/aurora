@@ -1,32 +1,32 @@
 import { supabase } from '@/compartilhado/fonte/supabase'
-import type { Habit, HabitRow, HabitLog } from '@/compartilhado/tipo/banco'
+import type { Habito, HabitoNoBanco, MarcacaoDeHabito } from '@/compartilhado/tipo/banco'
 
 /** Retorna a data (YYYY-MM-DD) local, sem deslocamento de timezone */
-function toISODate(date: Date) {
+function paraDataISO(date: Date) {
   const offset = date.getTimezoneOffset() * 60000
   return new Date(date.getTime() - offset).toISOString().split('T')[0]
 }
 
-export class HabitService {
+export class ServicoDeHabitos {
   /**
    * Busca todos os habitos do usuario logado
    */
-  static async getHabits() {
+  static async listarHabitos() {
     const { data, error } = await supabase
       .from('habits')
       .select('*')
       .order('created_at', { ascending: false })
 
     if (error) throw error
-    return data as Habit[]
+    return data as Habito[]
   }
 
   /**
    * Busca todos os habitos ja marcando quais foram concluidos hoje
    */
-  static async getHabitsWithTodayStatus() {
-    const today = toISODate(new Date())
-    const habits = await this.getHabits()
+  static async listarHabitosComStatusDeHoje() {
+    const today = paraDataISO(new Date())
+    const habits = await this.listarHabitos()
 
     const { data: logs, error } = await supabase
       .from('habit_logs')
@@ -45,7 +45,7 @@ export class HabitService {
   /**
    * Busca habito por ID
    */
-  static async getHabitById(id: string) {
+  static async buscarHabitoPorId(id: string) {
     const { data, error } = await supabase
       .from('habits')
       .select('*')
@@ -53,14 +53,14 @@ export class HabitService {
       .single()
 
     if (error) throw error
-    return data as Habit
+    return data as Habito
   }
 
   /**
    * Cria um novo habito
    */
-  static async createHabit(
-    habit: Omit<HabitRow, 'id' | 'created_at' | 'updated_at' | 'current_streak' | 'best_streak' | 'user_id'>
+  static async criarHabito(
+    habit: Omit<HabitoNoBanco, 'id' | 'created_at' | 'updated_at' | 'current_streak' | 'best_streak' | 'user_id'>
   ) {
     const { data, error } = await supabase
       .from('habits')
@@ -73,13 +73,13 @@ export class HabitService {
       .single()
 
     if (error) throw error
-    return data as Habit
+    return data as Habito
   }
 
   /**
    * Atualiza um habito existente
    */
-  static async updateHabit(id: string, updates: Partial<Omit<Habit, 'id' | 'created_at' | 'updated_at' | 'completed_today'>>) {
+  static async atualizarHabito(id: string, updates: Partial<Omit<Habito, 'id' | 'created_at' | 'updated_at' | 'completed_today'>>) {
     const { data, error } = await supabase
       .from('habits')
       .update(updates)
@@ -88,13 +88,13 @@ export class HabitService {
       .single()
 
     if (error) throw error
-    return data as Habit
+    return data as Habito
   }
 
   /**
    * Remove um habito
    */
-  static async deleteHabit(id: string) {
+  static async excluirHabito(id: string) {
     const { error } = await supabase
       .from('habits')
       .delete()
@@ -106,15 +106,15 @@ export class HabitService {
   /**
    * Marca ou desmarca um habito para hoje
    */
-  static async toggleTodayHabit(habitId: string) {
-    const today = toISODate(new Date())
-    return this.toggleHabitOnDate(habitId, today)
+  static async alternarHabitoDeHoje(habitId: string) {
+    const today = paraDataISO(new Date())
+    return this.alternarHabitoNaData(habitId, today)
   }
 
   /**
    * Marca ou desmarca um habito em uma data especifica
    */
-  static async toggleHabitOnDate(habitId: string, date: string) {
+  static async alternarHabitoNaData(habitId: string, date: string) {
     // Verifica se ja existe log
     const { data: existing } = await supabase
       .from('habit_logs')
@@ -135,8 +135,8 @@ export class HabitService {
       if (error) throw error
 
       // Atualiza streak
-      await this.updateStreak(habitId)
-      return data as HabitLog
+      await this.recalcularSequencia(habitId)
+      return data as MarcacaoDeHabito
     } else {
       // Cria novo log
       const { data, error } = await supabase
@@ -152,15 +152,15 @@ export class HabitService {
       if (error) throw error
 
       // Atualiza streak
-      await this.updateStreak(habitId)
-      return data as HabitLog
+      await this.recalcularSequencia(habitId)
+      return data as MarcacaoDeHabito
     }
   }
 
   /**
    * Busca logs de um habito
    */
-  static async getHabitLogs(habitId: string, limit?: number) {
+  static async listarMarcacoesDoHabito(habitId: string, limit?: number) {
     let query = supabase
       .from('habit_logs')
       .select('*')
@@ -173,13 +173,13 @@ export class HabitService {
 
     const { data, error } = await query
     if (error) throw error
-    return data as HabitLog[]
+    return data as MarcacaoDeHabito[]
   }
 
   /**
    * Busca todos os logs concluidos a partir de uma data (para heatmap/graficos)
    */
-  static async getLogsSince(startDate: string) {
+  static async listarMarcacoesDesde(startDate: string) {
     const { data, error } = await supabase
       .from('habit_logs')
       .select('*')
@@ -188,13 +188,13 @@ export class HabitService {
       .order('date', { ascending: true })
 
     if (error) throw error
-    return data as HabitLog[]
+    return data as MarcacaoDeHabito[]
   }
 
   /**
    * Calcula e atualiza a streak de um habito
    */
-  static async updateStreak(habitId: string) {
+  static async recalcularSequencia(habitId: string) {
     const { data: logs, error } = await supabase
       .from('habit_logs')
       .select('date, completed')
@@ -210,11 +210,11 @@ export class HabitService {
     // ainda nao foi marcado, para nao "zerar" o habito durante o dia)
     let currentStreak = 0
     const cursor = new Date()
-    if (dates.length > 0 && dates[0] !== toISODate(cursor)) {
+    if (dates.length > 0 && dates[0] !== paraDataISO(cursor)) {
       cursor.setDate(cursor.getDate() - 1)
     }
     for (const date of dates) {
-      if (date === toISODate(cursor)) {
+      if (date === paraDataISO(cursor)) {
         currentStreak++
         cursor.setDate(cursor.getDate() - 1)
       } else {
@@ -250,6 +250,6 @@ export class HabitService {
       .single()
 
     if (updateError) throw updateError
-    return data as Habit
+    return data as Habito
   }
 }

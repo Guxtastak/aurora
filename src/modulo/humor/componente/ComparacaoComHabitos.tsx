@@ -1,10 +1,10 @@
 import { ArrowDown, ArrowUp, Minus } from 'lucide-react'
-import type { HabitMoodCorrelation } from '@/modulo/humor/regraDeComparacao'
-import { MIN_DAYS } from '@/modulo/humor/regraDeComparacao'
-import { Card } from '@/compartilhado/componente/Cartao'
+import type { ComparacaoDeHabito } from '@/modulo/humor/regraDeComparacao'
+import { MINIMO_DE_DIAS } from '@/modulo/humor/regraDeComparacao'
+import { Cartao } from '@/compartilhado/componente/Cartao'
 
-interface HabitMoodCorrelationsProps {
-  correlations: HabitMoodCorrelation[]
+interface ComparacaoComHabitosProps {
+  correlations: ComparacaoDeHabito[]
 }
 
 /** Uma casa decimal, com vírgula — o arredondamento é só de exibição */
@@ -23,9 +23,9 @@ function Indicador({ value }: { value: number }) {
   return <Minus size={16} className="text-gray-400" aria-hidden="true" />
 }
 
-export function HabitMoodCorrelations({ correlations }: HabitMoodCorrelationsProps) {
+export function ComparacaoComHabitos({ correlations }: ComparacaoComHabitosProps) {
   return (
-    <Card
+    <Cartao
       title="Hábitos e humor"
       subtitle="O que os dias registrados mostram — é comparação, não causa"
     >
@@ -53,7 +53,7 @@ export function HabitMoodCorrelations({ correlations }: HabitMoodCorrelationsPro
                 ) : (
                   <p className="text-sm text-gray-400 dark:text-gray-500">
                     {item.days === 0
-                      ? `Sem humor registrado ainda — ${MIN_DAYS} dias bastam para começar a comparar`
+                      ? `Sem humor registrado ainda — ${MINIMO_DE_DIAS} dias bastam para começar a comparar`
                       : `${item.days} dia(s) registrados: ainda é pouco para comparar`}
                   </p>
                 )}
@@ -79,6 +79,6 @@ export function HabitMoodCorrelations({ correlations }: HabitMoodCorrelationsPro
           ))}
         </ul>
       )}
-    </Card>
+    </Cartao>
   )
 }

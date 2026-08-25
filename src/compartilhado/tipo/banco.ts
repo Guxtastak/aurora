@@ -1,4 +1,4 @@
-export type Habit = {
+export type Habito = {
   id: string
   user_id: string
   name: string
@@ -14,7 +14,7 @@ export type Habit = {
   completed_today?: boolean
 }
 
-export type HabitLog = {
+export type MarcacaoDeHabito = {
   id: string
   habit_id: string
   user_id: string
@@ -24,7 +24,7 @@ export type HabitLog = {
   created_at: string
 }
 
-export type Book = {
+export type Livro = {
   id: string
   user_id: string
   title: string
@@ -42,7 +42,7 @@ export type Book = {
   updated_at: string
 }
 
-export type Finance = {
+export type Transacao = {
   id: string
   user_id: string
   date: string
@@ -53,7 +53,7 @@ export type Finance = {
   created_at: string
 }
 
-export type Goal = {
+export type Meta = {
   id: string
   user_id: string
   title: string
@@ -70,7 +70,7 @@ export type Goal = {
   updated_at: string
 }
 
-export type MoodLog = {
+export type RegistroDeHumor = {
   id: string
   user_id: string
   date: string
@@ -88,7 +88,7 @@ export type Insight = {
   user_id: string
   title: string
   description: string
-  // 'daily' incluído porque InsightService.generateDailyInsights grava esse tipo
+  // 'daily' incluído porque ServicoDeInsights.gerarInsightDoDia grava esse tipo
   type: 'correlation' | 'prediction' | 'achievement' | 'daily'
   metadata: any
   generated_at: string
@@ -103,8 +103,8 @@ type Generated = 'id' | 'user_id' | 'created_at' | 'updated_at'
 /** Campo que existe somente em memória (calculado no client) */
 type ClientOnly = 'completed_today'
 
-/** Habit como existe no banco (sem o campo calculado no client) */
-export type HabitRow = Omit<Habit, ClientOnly>
+/** Habito como existe no banco (sem o campo calculado no client) */
+export type HabitoNoBanco = Omit<Habito, ClientOnly>
 
 type InsertOf<T> = Omit<T, Extract<keyof T, Generated | ClientOnly>> & { user_id?: string }
 type UpdateOf<T> = Partial<Omit<T, 'id' | Extract<keyof T, ClientOnly>>>
@@ -114,43 +114,43 @@ type UpdateOf<T> = Partial<Omit<T, 'id' | Extract<keyof T, ClientOnly>>>
  * em cada tabela e as seções `Views`/`Functions` no schema. Sem isso o cliente
  * tipado resolve todas as queries como `never`.
  */
-export type Database = {
+export type Banco = {
   public: {
     Tables: {
       habits: {
-        Row: HabitRow
-        Insert: InsertOf<HabitRow>
-        Update: UpdateOf<HabitRow>
+        Row: HabitoNoBanco
+        Insert: InsertOf<HabitoNoBanco>
+        Update: UpdateOf<HabitoNoBanco>
         Relationships: []
       }
       habit_logs: {
-        Row: HabitLog
-        Insert: InsertOf<HabitLog>
-        Update: UpdateOf<HabitLog>
+        Row: MarcacaoDeHabito
+        Insert: InsertOf<MarcacaoDeHabito>
+        Update: UpdateOf<MarcacaoDeHabito>
         Relationships: []
       }
       books: {
-        Row: Book
-        Insert: InsertOf<Book>
-        Update: UpdateOf<Book>
+        Row: Livro
+        Insert: InsertOf<Livro>
+        Update: UpdateOf<Livro>
         Relationships: []
       }
       finances: {
-        Row: Finance
-        Insert: InsertOf<Finance>
-        Update: UpdateOf<Finance>
+        Row: Transacao
+        Insert: InsertOf<Transacao>
+        Update: UpdateOf<Transacao>
         Relationships: []
       }
       goals: {
-        Row: Goal
-        Insert: InsertOf<Goal>
-        Update: UpdateOf<Goal>
+        Row: Meta
+        Insert: InsertOf<Meta>
+        Update: UpdateOf<Meta>
         Relationships: []
       }
       mood_logs: {
-        Row: MoodLog
-        Insert: InsertOf<MoodLog>
-        Update: UpdateOf<MoodLog>
+        Row: RegistroDeHumor
+        Insert: InsertOf<RegistroDeHumor>
+        Update: UpdateOf<RegistroDeHumor>
         Relationships: []
       }
       insights: {

@@ -1,21 +1,21 @@
 import { useEffect, useState } from 'react'
 import { Plus, TrendingUp, TrendingDown, Wallet, DollarSign } from 'lucide-react'
-import { FinanceService } from '@/compartilhado/fonte/fonteDeDados'
-import type { Finance } from '@/compartilhado/tipo/banco'
-import { TransactionForm } from '@/modulo/financa/componente/FormularioDeTransacao'
-import type { TransactionFormValues } from '@/modulo/financa/componente/FormularioDeTransacao'
-import { TransactionList } from '@/modulo/financa/componente/ListaDeTransacoes'
-import { CategoryChart } from '@/modulo/financa/componente/GraficoPorCategoria'
+import { ServicoDeFinancas } from '@/compartilhado/fonte/fonteDeDados'
+import type { Transacao } from '@/compartilhado/tipo/banco'
+import { FormularioDeTransacao } from '@/modulo/financa/componente/FormularioDeTransacao'
+import type { ValoresDaTransacao } from '@/modulo/financa/componente/FormularioDeTransacao'
+import { ListaDeTransacoes } from '@/modulo/financa/componente/ListaDeTransacoes'
+import { GraficoPorCategoria } from '@/modulo/financa/componente/GraficoPorCategoria'
 import { Modal } from '@/compartilhado/componente/Modal'
-import { Button } from '@/compartilhado/componente/Botao'
-import { Card } from '@/compartilhado/componente/Cartao'
-import { Loading } from '@/compartilhado/componente/Carregando'
-import { EmptyState } from '@/compartilhado/componente/EstadoVazio'
-import { StatCard } from '@/compartilhado/componente/CartaoIndicador'
-import { formatCurrency, MONTHS } from '@/compartilhado/utilitario/formato'
+import { Botao } from '@/compartilhado/componente/Botao'
+import { Cartao } from '@/compartilhado/componente/Cartao'
+import { Carregando } from '@/compartilhado/componente/Carregando'
+import { EstadoVazio } from '@/compartilhado/componente/EstadoVazio'
+import { CartaoIndicador } from '@/compartilhado/componente/CartaoIndicador'
+import { formatarMoeda, MESES } from '@/compartilhado/utilitario/formato'
 
-export function Finances() {
-  const [transactions, setTransactions] = useState<Finance[]>([])
+export function PaginaDeFinancas() {
+  const [transactions, setTransactions] = useState<Transacao[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
@@ -28,7 +28,7 @@ export function Finances() {
   const load = async () => {
     try {
       setError('')
-      setTransactions(await FinanceService.getTransactions())
+      setTransactions(await ServicoDeFinancas.listarTransacoes())
     } catch (err: any) {
       setError(err.message || 'Erro ao carregar transações')
     } finally {
@@ -38,14 +38,14 @@ export function Finances() {
 
   useEffect(() => {
     load()
-    FinanceService.getExchangeRate('USD', 'BRL')
+    ServicoDeFinancas.obterCotacaoDoDolar('USD', 'BRL')
       .then(r => setRate(r.rate))
       .catch(() => setRate(null))
   }, [])
 
-  const handleAdd = async (values: TransactionFormValues) => {
+  const handleAdd = async (values: ValoresDaTransacao) => {
     try {
-      await FinanceService.addTransaction(values)
+      await ServicoDeFinancas.adicionarTransacao(values)
       setModalOpen(false)
       await load()
     } catch (err: any) {
@@ -53,10 +53,10 @@ export function Finances() {
     }
   }
 
-  const handleDelete = async (transaction: Finance) => {
+  const handleDelete = async (transaction: Transacao) => {
     if (!window.confirm('Excluir esta transação?')) return
     try {
-      await FinanceService.deleteTransaction(transaction.id)
+      await ServicoDeFinancas.excluirTransacao(transaction.id)
       setTransactions(prev => prev.filter(t => t.id !== transaction.id))
     } catch (err: any) {
       setError(err.message || 'Erro ao excluir transação')
@@ -98,12 +98,12 @@ export function Finances() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Finanças</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400">
             Receitas, despesas e saldo do mês
-            {rate !== null && ` · USD ${formatCurrency(rate)}`}
+            {rate !== null && ` · USD ${formatarMoeda(rate)}`}
           </p>
         </div>
-        <Button icon={<Plus size={16} />} onClick={() => setModalOpen(true)}>
+        <Botao icon={<Plus size={16} />} onClick={() => setModalOpen(true)}>
           Nova transação
-        </Button>
+        </Botao>
       </div>
 
       {error && (
@@ -111,33 +111,33 @@ export function Finances() {
       )}
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
+        <CartaoIndicador
           label="Saldo total"
-          value={formatCurrency(totalIncome - totalExpenses)}
+          value={formatarMoeda(totalIncome - totalExpenses)}
           icon={<Wallet size={18} />}
         />
-        <StatCard
-          label={`Receitas · ${MONTHS[month - 1]}`}
-          value={formatCurrency(income)}
+        <CartaoIndicador
+          label={`Receitas · ${MESES[month - 1]}`}
+          value={formatarMoeda(income)}
           accent="green"
           icon={<TrendingUp size={18} />}
         />
-        <StatCard
-          label={`Despesas · ${MONTHS[month - 1]}`}
-          value={formatCurrency(expenses)}
+        <CartaoIndicador
+          label={`Despesas · ${MESES[month - 1]}`}
+          value={formatarMoeda(expenses)}
           accent="red"
           icon={<TrendingDown size={18} />}
         />
-        <StatCard
+        <CartaoIndicador
           label="Saldo do mês"
-          value={formatCurrency(income - expenses)}
+          value={formatarMoeda(income - expenses)}
           accent={income - expenses >= 0 ? 'green' : 'red'}
           icon={<DollarSign size={18} />}
         />
       </div>
 
       <div className="flex flex-wrap gap-2">
-        {MONTHS.map((label, index) => (
+        {MESES.map((label, index) => (
           <button
             key={label}
             onClick={() => setMonth(index + 1)}
@@ -153,33 +153,33 @@ export function Finances() {
       </div>
 
       {loading ? (
-        <Loading label="Carregando transações..." />
+        <Carregando label="Carregando transações..." />
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">
-          <Card title="Despesas por categoria" subtitle={`${MONTHS[month - 1]} de ${year}`}>
-            <CategoryChart data={byCategory} />
-          </Card>
+          <Cartao title="Despesas por categoria" subtitle={`${MESES[month - 1]} de ${year}`}>
+            <GraficoPorCategoria data={byCategory} />
+          </Cartao>
 
-          <Card title="Transações do mês" subtitle={`${monthTransactions.length} lançamento(s)`}>
+          <Cartao title="Transações do mês" subtitle={`${monthTransactions.length} lançamento(s)`}>
             {monthTransactions.length === 0 ? (
-              <EmptyState
+              <EstadoVazio
                 title="Nenhuma transação neste mês"
                 description="Adicione receitas e despesas para acompanhar seu saldo."
                 action={
-                  <Button size="sm" icon={<Plus size={14} />} onClick={() => setModalOpen(true)}>
+                  <Botao size="sm" icon={<Plus size={14} />} onClick={() => setModalOpen(true)}>
                     Adicionar
-                  </Button>
+                  </Botao>
                 }
               />
             ) : (
-              <TransactionList transactions={monthTransactions} onDelete={handleDelete} />
+              <ListaDeTransacoes transactions={monthTransactions} onDelete={handleDelete} />
             )}
-          </Card>
+          </Cartao>
         </div>
       )}
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Nova transação">
-        <TransactionForm onSubmit={handleAdd} onCancel={() => setModalOpen(false)} />
+        <FormularioDeTransacao onSubmit={handleAdd} onCancel={() => setModalOpen(false)} />
       </Modal>
     </div>
   )

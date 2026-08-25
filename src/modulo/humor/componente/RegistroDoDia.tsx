@@ -1,19 +1,19 @@
 import { useEffect, useState } from 'react'
 import { Check, MessageSquarePlus } from 'lucide-react'
-import { MoodService } from '@/compartilhado/fonte/fonteDeDados'
-import { Card } from '@/compartilhado/componente/Cartao'
-import { Button } from '@/compartilhado/componente/Botao'
-import { Textarea } from '@/compartilhado/componente/Campo'
-import { todayISO } from '@/compartilhado/utilitario/formato'
-import { Scale } from '@/modulo/humor/componente/Escala'
-import { MOODS, ENERGIES } from '@/modulo/humor/componente/escalas'
+import { ServicoDeHumor } from '@/compartilhado/fonte/fonteDeDados'
+import { Cartao } from '@/compartilhado/componente/Cartao'
+import { Botao } from '@/compartilhado/componente/Botao'
+import { CampoDeTextoLongo } from '@/compartilhado/componente/Campo'
+import { dataDeHoje } from '@/compartilhado/utilitario/formato'
+import { Escala } from '@/modulo/humor/componente/Escala'
+import { HUMORES, ENERGIAS } from '@/modulo/humor/componente/escalas'
 
-interface MoodCheckinProps {
+interface RegistroDoDiaProps {
   /** Chamado depois de gravar, para a tela recarregar o que depende do humor */
   onSaved?: () => void
 }
 
-export function MoodCheckin({ onSaved }: MoodCheckinProps) {
+export function RegistroDoDia({ onSaved }: RegistroDoDiaProps) {
   const [mood, setMood] = useState<number | null>(null)
   const [energy, setEnergy] = useState<number | null>(null)
   const [notes, setNotes] = useState('')
@@ -23,7 +23,7 @@ export function MoodCheckin({ onSaved }: MoodCheckinProps) {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    MoodService.getMoodByDate(todayISO())
+    ServicoDeHumor.buscarRegistroPorData(dataDeHoje())
       .then(today => {
         if (!today) return
         setMood(today.mood)
@@ -40,8 +40,8 @@ export function MoodCheckin({ onSaved }: MoodCheckinProps) {
     setSaving(true)
     setError('')
     try {
-      await MoodService.saveMood({
-        date: todayISO(),
+      await ServicoDeHumor.gravarRegistroDoDia({
+        date: dataDeHoje(),
         mood,
         energy,
         notes: notes.trim() || undefined
@@ -61,13 +61,13 @@ export function MoodCheckin({ onSaved }: MoodCheckinProps) {
   }
 
   return (
-    <Card title="Como foi seu dia?" subtitle="Leva cinco segundos e alimenta as correlações">
+    <Cartao title="Como foi seu dia?" subtitle="Leva cinco segundos e alimenta as correlações">
       <div className="space-y-4">
-        <Scale legend="Humor" options={MOODS} value={mood} onChange={pick(setMood)} />
-        <Scale legend="Energia" options={ENERGIES} value={energy} onChange={pick(setEnergy)} />
+        <Escala legend="Humor" options={HUMORES} value={mood} onChange={pick(setMood)} />
+        <Escala legend="Energia" options={ENERGIAS} value={energy} onChange={pick(setEnergy)} />
 
         {showNotes ? (
-          <Textarea
+          <CampoDeTextoLongo
             label="Nota do dia (opcional)"
             rows={2}
             value={notes}
@@ -91,13 +91,13 @@ export function MoodCheckin({ onSaved }: MoodCheckinProps) {
         {error && <p className="text-sm text-red-500">{error}</p>}
 
         <div className="flex items-center gap-3">
-          <Button
+          <Botao
             onClick={handleSave}
             loading={saving}
             disabled={mood === null || energy === null || saved}
           >
             {saved ? 'Registrado' : 'Salvar'}
-          </Button>
+          </Botao>
           {saved && (
             <span className="inline-flex items-center gap-1 text-sm text-green-600 dark:text-green-400">
               <Check size={15} />
@@ -106,6 +106,6 @@ export function MoodCheckin({ onSaved }: MoodCheckinProps) {
           )}
         </div>
       </div>
-    </Card>
+    </Cartao>
   )
 }

@@ -1,11 +1,11 @@
 import { Menu, Moon, Sun, LogOut } from 'lucide-react'
-import { useAuth } from '@/compartilhado/gancho/useAutenticacao'
-import { useTheme } from '@/compartilhado/gancho/useTema'
+import { useAutenticacao } from '@/compartilhado/gancho/useAutenticacao'
+import { useTema } from '@/compartilhado/gancho/useTema'
 import { useNavigate } from 'react-router-dom'
 
-export function Header({ onMenuClick }: { onMenuClick: () => void }) {
-  const { user, signOut } = useAuth()
-  const { theme, toggleTheme } = useTheme()
+export function Cabecalho({ onMenuClick }: { onMenuClick: () => void }) {
+  const { user, signOut } = useAutenticacao()
+  const { theme, toggleTheme } = useTema()
   const navigate = useNavigate()
 
   const handleSignOut = async () => {

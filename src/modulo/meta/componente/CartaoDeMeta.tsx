@@ -1,16 +1,16 @@
 import { motion } from 'framer-motion'
 import { BookOpen, Repeat, Wallet, HeartPulse, Pencil, Trash2, CalendarClock } from 'lucide-react'
-import type { Goal } from '@/compartilhado/tipo/banco'
-import { formatCurrency, formatDate } from '@/compartilhado/utilitario/formato'
-import { isGoalOverdue } from '@/modulo/meta/regraDeProgresso'
+import type { Meta } from '@/compartilhado/tipo/banco'
+import { formatarMoeda, formatarData } from '@/compartilhado/utilitario/formato'
+import { metaEstaAtrasada } from '@/modulo/meta/regraDeProgresso'
 
-interface GoalCardProps {
-  goal: Goal
-  onEdit: (goal: Goal) => void
-  onDelete: (goal: Goal) => void
+interface CartaoDeMetaProps {
+  goal: Meta
+  onEdit: (goal: Meta) => void
+  onDelete: (goal: Meta) => void
 }
 
-const CATEGORIES = {
+const CATEGORIAS = {
   reading: { label: 'Leitura', icon: BookOpen },
   habits: { label: 'Hábitos', icon: Repeat },
   finance: { label: 'Finanças', icon: Wallet },
@@ -26,16 +26,16 @@ const STATUS = {
 /** Metas de dinheiro usam a unidade R$ e são exibidas como moeda */
 function formatValue(value: number | undefined | null, unit?: string) {
   const amount = value || 0
-  if (unit === 'R$') return formatCurrency(amount)
+  if (unit === 'R$') return formatarMoeda(amount)
   const formatted = amount.toLocaleString('pt-BR')
   return unit ? `${formatted} ${unit}` : formatted
 }
 
-export function GoalCard({ goal, onEdit, onDelete }: GoalCardProps) {
-  const category = CATEGORIES[goal.category]
+export function CartaoDeMeta({ goal, onEdit, onDelete }: CartaoDeMetaProps) {
+  const category = CATEGORIAS[goal.category]
   const CategoryIcon = category.icon
   const status = STATUS[goal.status]
-  const overdue = isGoalOverdue(goal)
+  const overdue = metaEstaAtrasada(goal)
   const measurable = !!goal.target_value && goal.target_value > 0
   const progress = goal.progress_percentage || 0
 
@@ -76,7 +76,7 @@ export function GoalCard({ goal, onEdit, onDelete }: GoalCardProps) {
                   overdue ? 'text-red-600 dark:text-red-400' : ''
                 }`}
               >
-                <CalendarClock size={13} /> prazo {formatDate(goal.deadline)}
+                <CalendarClock size={13} /> prazo {formatarData(goal.deadline)}
               </span>
             )}
           </div>

@@ -1,9 +1,9 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import type { Goal } from '@/compartilhado/tipo/banco'
-import { Input, Select, Textarea } from '@/compartilhado/componente/Campo'
-import { Button } from '@/compartilhado/componente/Botao'
+import type { Meta } from '@/compartilhado/tipo/banco'
+import { CampoDeTexto, CampoDeSelecao, CampoDeTextoLongo } from '@/compartilhado/componente/Campo'
+import { Botao } from '@/compartilhado/componente/Botao'
 
 /** Campo numérico opcional: input vazio vira undefined em vez de NaN */
 const optionalNumber = z.number({ message: 'Informe um número' }).min(0, 'Não pode ser negativo').optional()
@@ -29,11 +29,11 @@ const schema = z
     { path: ['deadline'], message: 'O prazo não pode ser antes do início' }
   )
 
-export type GoalFormValues = z.infer<typeof schema>
+export type ValoresDaMeta = z.infer<typeof schema>
 
-interface GoalFormProps {
-  goal?: Goal | null
-  onSubmit: (values: GoalFormValues) => Promise<void>
+interface FormularioDeMetaProps {
+  goal?: Meta | null
+  onSubmit: (values: ValoresDaMeta) => Promise<void>
   onCancel: () => void
 }
 
@@ -43,12 +43,12 @@ const asOptionalNumber = { setValueAs: (value: unknown) => (value === '' || valu
 /** Data em branco precisa chegar ao banco como undefined, não como '' */
 const asOptionalDate = { setValueAs: (value: unknown) => (value ? String(value) : undefined) }
 
-export function GoalForm({ goal, onSubmit, onCancel }: GoalFormProps) {
+export function FormularioDeMeta({ goal, onSubmit, onCancel }: FormularioDeMetaProps) {
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting }
-  } = useForm<GoalFormValues>({
+  } = useForm<ValoresDaMeta>({
     resolver: zodResolver(schema),
     defaultValues: {
       title: goal?.title ?? '',
@@ -65,14 +65,14 @@ export function GoalForm({ goal, onSubmit, onCancel }: GoalFormProps) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <Input
+      <CampoDeTexto
         label="Título"
         placeholder="Ler 24 livros no ano"
         error={errors.title?.message}
         {...register('title')}
       />
 
-      <Textarea
+      <CampoDeTextoLongo
         label="Descrição (opcional)"
         rows={2}
         placeholder="Por que essa meta importa?"
@@ -80,22 +80,22 @@ export function GoalForm({ goal, onSubmit, onCancel }: GoalFormProps) {
       />
 
       <div className="grid grid-cols-2 gap-4">
-        <Select label="Categoria" {...register('category')}>
+        <CampoDeSelecao label="Categoria" {...register('category')}>
           <option value="habits">Hábitos</option>
           <option value="reading">Leitura</option>
           <option value="finance">Finanças</option>
           <option value="health">Saúde</option>
-        </Select>
+        </CampoDeSelecao>
 
-        <Select label="Status" {...register('status')}>
+        <CampoDeSelecao label="Status" {...register('status')}>
           <option value="active">Ativa</option>
           <option value="completed">Concluída</option>
           <option value="failed">Não atingida</option>
-        </Select>
+        </CampoDeSelecao>
       </div>
 
       <div className="grid grid-cols-3 gap-4">
-        <Input
+        <CampoDeTexto
           label="Alvo"
           type="number"
           step="any"
@@ -104,7 +104,7 @@ export function GoalForm({ goal, onSubmit, onCancel }: GoalFormProps) {
           error={errors.target_value?.message}
           {...register('target_value', asOptionalNumber)}
         />
-        <Input
+        <CampoDeTexto
           label="Atual"
           type="number"
           step="any"
@@ -112,7 +112,7 @@ export function GoalForm({ goal, onSubmit, onCancel }: GoalFormProps) {
           error={errors.current_value?.message}
           {...register('current_value', asOptionalNumber)}
         />
-        <Input label="Unidade" placeholder="livros, km, R$" {...register('unit')} />
+        <CampoDeTexto label="Unidade" placeholder="livros, km, R$" {...register('unit')} />
       </div>
 
       <p className="text-xs text-gray-500 dark:text-gray-400 -mt-2">
@@ -121,8 +121,8 @@ export function GoalForm({ goal, onSubmit, onCancel }: GoalFormProps) {
       </p>
 
       <div className="grid grid-cols-2 gap-4">
-        <Input label="Início (opcional)" type="date" {...register('start_date', asOptionalDate)} />
-        <Input
+        <CampoDeTexto label="Início (opcional)" type="date" {...register('start_date', asOptionalDate)} />
+        <CampoDeTexto
           label="Prazo (opcional)"
           type="date"
           error={errors.deadline?.message}
@@ -131,12 +131,12 @@ export function GoalForm({ goal, onSubmit, onCancel }: GoalFormProps) {
       </div>
 
       <div className="flex justify-end gap-2 pt-2">
-        <Button type="button" variant="secondary" onClick={onCancel}>
+        <Botao type="button" variant="secondary" onClick={onCancel}>
           Cancelar
-        </Button>
-        <Button type="submit" loading={isSubmitting}>
+        </Botao>
+        <Botao type="submit" loading={isSubmitting}>
           {goal ? 'Salvar' : 'Criar meta'}
-        </Button>
+        </Botao>
       </div>
     </form>
   )

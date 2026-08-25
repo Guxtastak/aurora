@@ -1,15 +1,15 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { useAuth } from '@/compartilhado/gancho/useAutenticacao'
+import { useAutenticacao } from '@/compartilhado/gancho/useAutenticacao'
 import { motion } from 'framer-motion'
-import { isDemo } from '@/compartilhado/fonte/supabase'
+import { modoDemonstracao } from '@/compartilhado/fonte/supabase'
 
-export function Login() {
+export function PaginaDeEntrada() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const { signIn } = useAuth()
+  const { signIn } = useAutenticacao()
   const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -37,7 +37,7 @@ export function Login() {
         <h1 className="text-3xl font-bold text-center mb-2 text-aurora-600 dark:text-aurora-400">Aurora</h1>
         <p className="text-center text-gray-500 dark:text-gray-400 mb-8">Seu dashboard pessoal</p>
 
-        {isDemo && (
+        {modoDemonstracao && (
           <div className="mb-6 rounded-lg bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 px-4 py-3 text-xs text-amber-800 dark:text-amber-200">
             <strong>Modo demonstração.</strong> O Supabase não está configurado, então qualquer
             email e senha entram e os dados são de exemplo, salvos apenas no seu navegador.

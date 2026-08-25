@@ -10,29 +10,29 @@ import {
   ResponsiveContainer
 } from 'recharts'
 import { Repeat, BookOpen, Wallet, Flame, Sparkles, Check } from 'lucide-react'
-import { HabitService } from '@/compartilhado/fonte/fonteDeDados'
-import { BookService } from '@/compartilhado/fonte/fonteDeDados'
-import { FinanceService } from '@/compartilhado/fonte/fonteDeDados'
-import { InsightService } from '@/compartilhado/fonte/fonteDeDados'
-import type { Habit, Book } from '@/compartilhado/tipo/banco'
-import { StatCard } from '@/compartilhado/componente/CartaoIndicador'
-import { Card } from '@/compartilhado/componente/Cartao'
-import { MoodCheckin } from '@/modulo/humor/componente/RegistroDoDia'
-import { Button } from '@/compartilhado/componente/Botao'
-import { Loading } from '@/compartilhado/componente/Carregando'
-import { EmptyState } from '@/compartilhado/componente/EstadoVazio'
-import { formatCurrency, percent, todayISO, toISODate } from '@/compartilhado/utilitario/formato'
-import { useAuth } from '@/compartilhado/gancho/useAutenticacao'
+import { ServicoDeHabitos } from '@/compartilhado/fonte/fonteDeDados'
+import { ServicoDeLivros } from '@/compartilhado/fonte/fonteDeDados'
+import { ServicoDeFinancas } from '@/compartilhado/fonte/fonteDeDados'
+import { ServicoDeInsights } from '@/compartilhado/fonte/fonteDeDados'
+import type { Habito, Livro } from '@/compartilhado/tipo/banco'
+import { CartaoIndicador } from '@/compartilhado/componente/CartaoIndicador'
+import { Cartao } from '@/compartilhado/componente/Cartao'
+import { RegistroDoDia } from '@/modulo/humor/componente/RegistroDoDia'
+import { Botao } from '@/compartilhado/componente/Botao'
+import { Carregando } from '@/compartilhado/componente/Carregando'
+import { EstadoVazio } from '@/compartilhado/componente/EstadoVazio'
+import { formatarMoeda, porcentagem, dataDeHoje, paraDataISO } from '@/compartilhado/utilitario/formato'
+import { useAutenticacao } from '@/compartilhado/gancho/useAutenticacao'
 
 interface DayPoint {
   day: string
   concluidos: number
 }
 
-export function Dashboard() {
-  const { user } = useAuth()
-  const [habits, setHabits] = useState<Habit[]>([])
-  const [books, setBooks] = useState<Book[]>([])
+export function PaginaInicial() {
+  const { user } = useAutenticacao()
+  const [habits, setHabits] = useState<Habito[]>([])
+  const [books, setBooks] = useState<Livro[]>([])
   const [balance, setBalance] = useState({ balance: 0, totalIncome: 0, totalExpenses: 0 })
   const [weekData, setWeekData] = useState<DayPoint[]>([])
   const [loading, setLoading] = useState(true)
@@ -45,13 +45,13 @@ export function Dashboard() {
       setError('')
       const start = new Date()
       start.setDate(start.getDate() - 6)
-      const startISO = toISODate(start)
+      const startISO = paraDataISO(start)
 
       const [habitsData, booksData, balanceData, logs] = await Promise.all([
-        HabitService.getHabitsWithTodayStatus(),
-        BookService.getBooks(),
-        FinanceService.getBalance(),
-        HabitService.getLogsSince(startISO)
+        ServicoDeHabitos.listarHabitosComStatusDeHoje(),
+        ServicoDeLivros.listarLivros(),
+        ServicoDeFinancas.obterSaldo(),
+        ServicoDeHabitos.listarMarcacoesDesde(startISO)
       ])
 
       setHabits(habitsData)
@@ -63,7 +63,7 @@ export function Dashboard() {
       for (let i = 6; i >= 0; i--) {
         const date = new Date()
         date.setDate(date.getDate() - i)
-        const iso = toISODate(date)
+        const iso = paraDataISO(date)
         days.push({
           day: date.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', ''),
           concluidos: logs.filter(l => l.date === iso).length
@@ -81,12 +81,12 @@ export function Dashboard() {
     load()
   }, [])
 
-  const handleToggle = async (habit: Habit) => {
+  const handleToggle = async (habit: Habito) => {
     setHabits(prev =>
       prev.map(h => (h.id === habit.id ? { ...h, completed_today: !h.completed_today } : h))
     )
     try {
-      await HabitService.toggleTodayHabit(habit.id)
+      await ServicoDeHabitos.alternarHabitoDeHoje(habit.id)
       await load()
     } catch (err: any) {
       setError(err.message || 'Erro ao atualizar hábito')
@@ -97,12 +97,12 @@ export function Dashboard() {
   const handleGenerateInsight = async () => {
     setGenerating(true)
     try {
-      const result = await InsightService.generateDailyInsights()
+      const result = await ServicoDeInsights.gerarInsightDoDia()
       const data = result.metadata
       setInsight(
         `Você concluiu ${data.habits.completedToday} de ${data.habits.total} hábitos hoje ` +
           `(${Math.round(data.habits.completionRate)}%), está lendo ${data.books.reading} livro(s) ` +
-          `e seu saldo é de ${formatCurrency(data.finances.balance)}.`
+          `e seu saldo é de ${formatarMoeda(data.finances.balance)}.`
       )
     } catch (err: any) {
       setError(err.message || 'Erro ao gerar insight')
@@ -111,7 +111,7 @@ export function Dashboard() {
     }
   }
 
-  if (loading) return <Loading label="Montando seu dashboard..." />
+  if (loading) return <Carregando label="Montando seu dashboard..." />
 
   const doneToday = habits.filter(h => h.completed_today).length
   const bestStreak = habits.reduce((max, h) => Math.max(max, h.current_streak || 0), 0)
@@ -126,7 +126,7 @@ export function Dashboard() {
           Olá, {firstName} 👋
         </h1>
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          Resumo de {new Date(`${todayISO()}T00:00:00`).toLocaleDateString('pt-BR')}
+          Resumo de {new Date(`${dataDeHoje()}T00:00:00`).toLocaleDateString('pt-BR')}
         </p>
       </div>
 
@@ -134,24 +134,24 @@ export function Dashboard() {
         <p className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg px-4 py-2">{error}</p>
       )}
 
-      <MoodCheckin />
+      <RegistroDoDia />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
+        <CartaoIndicador
           label="Hábitos hoje"
           value={`${doneToday}/${habits.length}`}
-          hint={`${percent(doneToday, habits.length)}% concluído`}
+          hint={`${porcentagem(doneToday, habits.length)}% concluído`}
           icon={<Repeat size={18} />}
           delay={0}
         />
-        <StatCard
+        <CartaoIndicador
           label="Sequência atual"
           value={`${bestStreak} dias`}
           accent="amber"
           icon={<Flame size={18} />}
           delay={0.05}
         />
-        <StatCard
+        <CartaoIndicador
           label="Lendo agora"
           value={reading.length}
           hint={`${finished.length} finalizado(s)`}
@@ -159,32 +159,32 @@ export function Dashboard() {
           icon={<BookOpen size={18} />}
           delay={0.1}
         />
-        <StatCard
+        <CartaoIndicador
           label="Saldo"
-          value={formatCurrency(balance.balance)}
-          hint={`${formatCurrency(balance.totalIncome)} entradas`}
+          value={formatarMoeda(balance.balance)}
+          hint={`${formatarMoeda(balance.totalIncome)} entradas`}
           accent={balance.balance >= 0 ? 'green' : 'red'}
           icon={<Wallet size={18} />}
           delay={0.15}
         />
       </div>
 
-      <Card
+      <Cartao
         title="Insight do dia"
         subtitle="Um resumo cruzando hábitos, leitura e finanças"
         action={
-          <Button size="sm" variant="secondary" icon={<Sparkles size={14} />} loading={generating} onClick={handleGenerateInsight}>
+          <Botao size="sm" variant="secondary" icon={<Sparkles size={14} />} loading={generating} onClick={handleGenerateInsight}>
             Gerar
-          </Button>
+          </Botao>
         }
       >
         <p className="text-sm text-gray-600 dark:text-gray-300">
           {insight || 'Clique em "Gerar" para calcular e salvar o resumo de hoje.'}
         </p>
-      </Card>
+      </Cartao>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <Card title="Hábitos dos últimos 7 dias" subtitle="Total de conclusões por dia">
+        <Cartao title="Hábitos dos últimos 7 dias" subtitle="Total de conclusões por dia">
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={weekData}>
@@ -196,9 +196,9 @@ export function Dashboard() {
               </BarChart>
             </ResponsiveContainer>
           </div>
-        </Card>
+        </Cartao>
 
-        <Card
+        <Cartao
           title="Hábitos de hoje"
           subtitle="Marque direto por aqui"
           action={
@@ -208,12 +208,12 @@ export function Dashboard() {
           }
         >
           {habits.length === 0 ? (
-            <EmptyState
+            <EstadoVazio
               title="Sem hábitos cadastrados"
               description="Crie hábitos para acompanhar sua rotina."
               action={
                 <Link to="/habits">
-                  <Button size="sm">Criar hábito</Button>
+                  <Botao size="sm">Criar hábito</Botao>
                 </Link>
               }
             />
@@ -248,10 +248,10 @@ export function Dashboard() {
               ))}
             </ul>
           )}
-        </Card>
+        </Cartao>
       </div>
 
-      <Card
+      <Cartao
         title="Leitura em andamento"
         action={
           <Link to="/books" className="text-sm text-aurora-600 dark:text-aurora-400 hover:underline">
@@ -260,12 +260,12 @@ export function Dashboard() {
         }
       >
         {reading.length === 0 ? (
-          <EmptyState
+          <EstadoVazio
             title="Nenhum livro em andamento"
             description="Adicione um livro para acompanhar seu progresso de leitura."
             action={
               <Link to="/books">
-                <Button size="sm">Adicionar livro</Button>
+                <Botao size="sm">Adicionar livro</Botao>
               </Link>
             }
           />
@@ -286,18 +286,18 @@ export function Dashboard() {
                   <div className="h-1.5 mt-2 rounded-full bg-gray-100 dark:bg-gray-700 overflow-hidden">
                     <div
                       className="h-full bg-aurora-500"
-                      style={{ width: `${percent(book.pages_read || 0, book.pages_total || 0)}%` }}
+                      style={{ width: `${porcentagem(book.pages_read || 0, book.pages_total || 0)}%` }}
                     />
                   </div>
                 </div>
                 <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
-                  {percent(book.pages_read || 0, book.pages_total || 0)}%
+                  {porcentagem(book.pages_read || 0, book.pages_total || 0)}%
                 </span>
               </li>
             ))}
           </ul>
         )}
-      </Card>
+      </Cartao>
     </div>
   )
 }

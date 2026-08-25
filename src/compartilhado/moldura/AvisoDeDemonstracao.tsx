@@ -1,11 +1,11 @@
 import { Info, RotateCcw } from 'lucide-react'
-import { resetDemo } from '@/compartilhado/fonte/armazenamentoDeDemonstracao'
+import { reiniciarDemonstracao } from '@/compartilhado/fonte/armazenamentoDeDemonstracao'
 
 /** Aviso exibido apenas na prévia sem Supabase configurado */
-export function DemoBanner() {
+export function AvisoDeDemonstracao() {
   const handleReset = () => {
     if (!window.confirm('Restaurar os dados de exemplo desta prévia?')) return
-    resetDemo()
+    reiniciarDemonstracao()
     window.location.reload()
   }
 

@@ -1,28 +1,28 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { ProtectedRoute } from '@/compartilhado/componente/RotaProtegida'
-import { Login } from '@/modulo/conta/PaginaDeEntrada'
-import { Register } from '@/modulo/conta/PaginaDeCadastro'
-import { Dashboard } from '@/modulo/painel/Pagina'
-import { Habits } from '@/modulo/habito/Pagina'
-import { Books } from '@/modulo/livro/Pagina'
-import { Finances } from '@/modulo/financa/Pagina'
-import { Goals } from '@/modulo/meta/Pagina'
-import { Mood } from '@/modulo/humor/Pagina'
-import { Settings } from '@/modulo/conta/PaginaDeConfiguracoes'
+import { RotaProtegida } from '@/compartilhado/componente/RotaProtegida'
+import { PaginaDeEntrada } from '@/modulo/conta/PaginaDeEntrada'
+import { PaginaDeCadastro } from '@/modulo/conta/PaginaDeCadastro'
+import { PaginaInicial } from '@/modulo/painel/Pagina'
+import { PaginaDeHabitos } from '@/modulo/habito/Pagina'
+import { PaginaDeLivros } from '@/modulo/livro/Pagina'
+import { PaginaDeFinancas } from '@/modulo/financa/Pagina'
+import { PaginaDeMetas } from '@/modulo/meta/Pagina'
+import { PaginaDeHumor } from '@/modulo/humor/Pagina'
+import { PaginaDeConfiguracoes } from '@/modulo/conta/PaginaDeConfiguracoes'
 
-export function AppRoutes() {
+export function Rotas() {
   return (
     <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-      <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-      <Route path="/habits" element={<ProtectedRoute><Habits /></ProtectedRoute>} />
-      <Route path="/books" element={<ProtectedRoute><Books /></ProtectedRoute>} />
-      <Route path="/finances" element={<ProtectedRoute><Finances /></ProtectedRoute>} />
-      <Route path="/goals" element={<ProtectedRoute><Goals /></ProtectedRoute>} />
-      <Route path="/mood" element={<ProtectedRoute><Mood /></ProtectedRoute>} />
-      <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+      <Route path="/login" element={<PaginaDeEntrada />} />
+      <Route path="/register" element={<PaginaDeCadastro />} />
+      <Route path="/" element={<RotaProtegida><PaginaInicial /></RotaProtegida>} />
+      <Route path="/dashboard" element={<RotaProtegida><PaginaInicial /></RotaProtegida>} />
+      <Route path="/habits" element={<RotaProtegida><PaginaDeHabitos /></RotaProtegida>} />
+      <Route path="/books" element={<RotaProtegida><PaginaDeLivros /></RotaProtegida>} />
+      <Route path="/finances" element={<RotaProtegida><PaginaDeFinancas /></RotaProtegida>} />
+      <Route path="/goals" element={<RotaProtegida><PaginaDeMetas /></RotaProtegida>} />
+      <Route path="/mood" element={<RotaProtegida><PaginaDeHumor /></RotaProtegida>} />
+      <Route path="/settings" element={<RotaProtegida><PaginaDeConfiguracoes /></RotaProtegida>} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   )

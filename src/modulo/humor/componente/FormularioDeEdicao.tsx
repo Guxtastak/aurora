@@ -1,19 +1,19 @@
 import { useState } from 'react'
-import type { MoodLog } from '@/compartilhado/tipo/banco'
-import { Button } from '@/compartilhado/componente/Botao'
-import { Textarea } from '@/compartilhado/componente/Campo'
-import { formatDate } from '@/compartilhado/utilitario/formato'
-import { Scale } from '@/modulo/humor/componente/Escala'
-import { MOODS, ENERGIES } from '@/modulo/humor/componente/escalas'
+import type { RegistroDeHumor } from '@/compartilhado/tipo/banco'
+import { Botao } from '@/compartilhado/componente/Botao'
+import { CampoDeTextoLongo } from '@/compartilhado/componente/Campo'
+import { formatarData } from '@/compartilhado/utilitario/formato'
+import { Escala } from '@/modulo/humor/componente/Escala'
+import { HUMORES, ENERGIAS } from '@/modulo/humor/componente/escalas'
 
-interface MoodEditFormProps {
-  log: MoodLog
+interface FormularioDeEdicaoProps {
+  log: RegistroDeHumor
   onSubmit: (values: { mood: number; energy: number; notes?: string }) => Promise<void>
   onCancel: () => void
 }
 
 /** Edição de um dia já registrado. O dia em si não muda — a data é a chave. */
-export function MoodEditForm({ log, onSubmit, onCancel }: MoodEditFormProps) {
+export function FormularioDeEdicao({ log, onSubmit, onCancel }: FormularioDeEdicaoProps) {
   const [mood, setMood] = useState(log.mood)
   const [energy, setEnergy] = useState(log.energy)
   const [notes, setNotes] = useState(log.notes || '')
@@ -30,12 +30,12 @@ export function MoodEditForm({ log, onSubmit, onCancel }: MoodEditFormProps) {
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-gray-500 dark:text-gray-400">{formatDate(log.date)}</p>
+      <p className="text-sm text-gray-500 dark:text-gray-400">{formatarData(log.date)}</p>
 
-      <Scale legend="Humor" options={MOODS} value={mood} onChange={setMood} />
-      <Scale legend="Energia" options={ENERGIES} value={energy} onChange={setEnergy} />
+      <Escala legend="Humor" options={HUMORES} value={mood} onChange={setMood} />
+      <Escala legend="Energia" options={ENERGIAS} value={energy} onChange={setEnergy} />
 
-      <Textarea
+      <CampoDeTextoLongo
         label="Nota do dia (opcional)"
         rows={2}
         value={notes}
@@ -44,12 +44,12 @@ export function MoodEditForm({ log, onSubmit, onCancel }: MoodEditFormProps) {
       />
 
       <div className="flex justify-end gap-2">
-        <Button variant="secondary" onClick={onCancel}>
+        <Botao variant="secondary" onClick={onCancel}>
           Cancelar
-        </Button>
-        <Button onClick={handleSubmit} loading={saving}>
+        </Botao>
+        <Botao onClick={handleSubmit} loading={saving}>
           Salvar
-        </Button>
+        </Botao>
       </div>
     </div>
   )

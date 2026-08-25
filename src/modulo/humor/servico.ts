@@ -1,9 +1,9 @@
 import { supabase } from '@/compartilhado/fonte/supabase'
-import type { MoodLog } from '@/compartilhado/tipo/banco'
-import { toISODate, todayISO } from '@/compartilhado/utilitario/formato'
+import type { RegistroDeHumor } from '@/compartilhado/tipo/banco'
+import { paraDataISO, dataDeHoje } from '@/compartilhado/utilitario/formato'
 
 /** Campos que a tela envia; o resto vem do banco (id, user_id, timestamps) */
-export type MoodInput = {
+export type DadosDoRegistro = {
   date: string
   mood: number
   energy: number
@@ -13,14 +13,14 @@ export type MoodInput = {
 function daysAgoISO(days: number) {
   const date = new Date()
   date.setDate(date.getDate() - days)
-  return toISODate(date)
+  return paraDataISO(date)
 }
 
-export class MoodService {
+export class ServicoDeHumor {
   /**
    * Registros dos ultimos N dias, do mais recente para o mais antigo
    */
-  static async getMoodLogs(days: number = 30) {
+  static async listarRegistrosDeHumor(days: number = 30) {
     const { data, error } = await supabase
       .from('mood_logs')
       .select('*')
@@ -28,13 +28,13 @@ export class MoodService {
       .order('date', { ascending: false })
 
     if (error) throw error
-    return data as MoodLog[]
+    return data as RegistroDeHumor[]
   }
 
   /**
    * Registro de um dia, ou null se aquele dia ainda nao foi preenchido
    */
-  static async getMoodByDate(date: string = todayISO()) {
+  static async buscarRegistroPorData(date: string = dataDeHoje()) {
     const { data, error } = await supabase
       .from('mood_logs')
       .select('*')
@@ -42,17 +42,17 @@ export class MoodService {
       .maybeSingle()
 
     if (error) throw error
-    return (data as MoodLog) || null
+    return (data as RegistroDeHumor) || null
   }
 
   /**
    * Grava o humor do dia. Le antes para decidir entre insert e update em vez de
    * usar upsert: o onConflict precisaria citar (user_id, date), e user_id nao
    * vai no payload — vem do DEFAULT auth.uid(). E o mesmo caminho que o
-   * HabitService.toggleHabitOnDate faz sobre unique (habit_id, date).
+   * ServicoDeHabitos.alternarHabitoNaData faz sobre unique (habit_id, date).
    */
-  static async saveMood(input: MoodInput) {
-    const existing = await this.getMoodByDate(input.date)
+  static async gravarRegistroDoDia(input: DadosDoRegistro) {
+    const existing = await this.buscarRegistroPorData(input.date)
 
     if (existing) {
       const { data, error } = await supabase
@@ -63,7 +63,7 @@ export class MoodService {
         .single()
 
       if (error) throw error
-      return data as MoodLog
+      return data as RegistroDeHumor
     }
 
     const { data, error } = await supabase
@@ -73,13 +73,13 @@ export class MoodService {
       .single()
 
     if (error) throw error
-    return data as MoodLog
+    return data as RegistroDeHumor
   }
 
   /**
    * Remove o registro de um dia
    */
-  static async deleteMood(id: string) {
+  static async excluirRegistro(id: string) {
     const { error } = await supabase
       .from('mood_logs')
       .delete()

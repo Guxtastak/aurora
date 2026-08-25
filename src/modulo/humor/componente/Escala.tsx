@@ -1,13 +1,13 @@
-import type { ScaleOption } from '@/modulo/humor/componente/escalas'
+import type { OpcaoDeEscala } from '@/modulo/humor/componente/escalas'
 
-interface ScaleProps {
+interface EscalaProps {
   legend: string
-  options: ScaleOption[]
+  options: OpcaoDeEscala[]
   value: number | null
   onChange: (value: number) => void
 }
 
-export function Scale({ legend, options, value, onChange }: ScaleProps) {
+export function Escala({ legend, options, value, onChange }: EscalaProps) {
   return (
     <fieldset>
       <legend className="text-sm text-gray-500 dark:text-gray-400 mb-2">{legend}</legend>

@@ -3,7 +3,7 @@ import { LayoutDashboard, Repeat, BookOpen, Wallet, Target, Settings as Settings
 import { motion } from 'framer-motion'
 
 const links = [
-  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/dashboard', label: 'PaginaInicial', icon: LayoutDashboard },
   { to: '/habits', label: 'Hábitos', icon: Repeat },
   { to: '/books', label: 'Livros', icon: BookOpen },
   { to: '/finances', label: 'Finanças', icon: Wallet },
@@ -12,12 +12,12 @@ const links = [
   { to: '/settings', label: 'Configurações', icon: SettingsIcon }
 ]
 
-interface SidebarProps {
+interface MenuLateralProps {
   open: boolean
   onClose: () => void
 }
 
-export function Sidebar({ open, onClose }: SidebarProps) {
+export function MenuLateral({ open, onClose }: MenuLateralProps) {
   return (
     <>
       {open && (

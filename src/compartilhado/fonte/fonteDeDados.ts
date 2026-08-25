@@ -1,17 +1,17 @@
-import { isDemo } from '@/compartilhado/fonte/supabase'
-import { HabitService as SupabaseHabitService } from '@/modulo/habito/servico'
-import { BookService as SupabaseBookService } from '@/modulo/livro/servico'
-import { FinanceService as SupabaseFinanceService } from '@/modulo/financa/servico'
-import { GoalService as SupabaseGoalService } from '@/modulo/meta/servico'
-import { MoodService as SupabaseMoodService } from '@/modulo/humor/servico'
-import { InsightService as SupabaseInsightService } from '@/modulo/painel/servico'
+import { modoDemonstracao } from '@/compartilhado/fonte/supabase'
+import { ServicoDeHabitos as SupabaseHabitService } from '@/modulo/habito/servico'
+import { ServicoDeLivros as SupabaseBookService } from '@/modulo/livro/servico'
+import { ServicoDeFinancas as SupabaseFinanceService } from '@/modulo/financa/servico'
+import { ServicoDeMetas as SupabaseGoalService } from '@/modulo/meta/servico'
+import { ServicoDeHumor as SupabaseMoodService } from '@/modulo/humor/servico'
+import { ServicoDeInsights as SupabaseInsightService } from '@/modulo/painel/servico'
 import {
-  DemoHabitService,
-  DemoBookService,
-  DemoFinanceService,
-  DemoGoalService,
-  DemoMoodService,
-  DemoInsightService
+  HabitosDaDemonstracao,
+  LivrosDaDemonstracao,
+  FinancasDaDemonstracao,
+  MetasDaDemonstracao,
+  HumorDaDemonstracao,
+  InsightsDaDemonstracao
 } from '@/compartilhado/fonte/servicosDeDemonstracao'
 
 /**
@@ -20,28 +20,28 @@ import {
  * importam sempre daqui e não precisam saber qual dos dois está ativo.
  */
 
-export const HabitService: typeof SupabaseHabitService = isDemo
-  ? (DemoHabitService as unknown as typeof SupabaseHabitService)
+export const ServicoDeHabitos: typeof SupabaseHabitService = modoDemonstracao
+  ? (HabitosDaDemonstracao as unknown as typeof SupabaseHabitService)
   : SupabaseHabitService
 
-export const BookService: typeof SupabaseBookService = isDemo
-  ? (DemoBookService as unknown as typeof SupabaseBookService)
+export const ServicoDeLivros: typeof SupabaseBookService = modoDemonstracao
+  ? (LivrosDaDemonstracao as unknown as typeof SupabaseBookService)
   : SupabaseBookService
 
-export const FinanceService: typeof SupabaseFinanceService = isDemo
-  ? (DemoFinanceService as unknown as typeof SupabaseFinanceService)
+export const ServicoDeFinancas: typeof SupabaseFinanceService = modoDemonstracao
+  ? (FinancasDaDemonstracao as unknown as typeof SupabaseFinanceService)
   : SupabaseFinanceService
 
-export const GoalService: typeof SupabaseGoalService = isDemo
-  ? (DemoGoalService as unknown as typeof SupabaseGoalService)
+export const ServicoDeMetas: typeof SupabaseGoalService = modoDemonstracao
+  ? (MetasDaDemonstracao as unknown as typeof SupabaseGoalService)
   : SupabaseGoalService
 
-export const MoodService: typeof SupabaseMoodService = isDemo
-  ? (DemoMoodService as unknown as typeof SupabaseMoodService)
+export const ServicoDeHumor: typeof SupabaseMoodService = modoDemonstracao
+  ? (HumorDaDemonstracao as unknown as typeof SupabaseMoodService)
   : SupabaseMoodService
 
-export const InsightService: typeof SupabaseInsightService = isDemo
-  ? (DemoInsightService as unknown as typeof SupabaseInsightService)
+export const ServicoDeInsights: typeof SupabaseInsightService = modoDemonstracao
+  ? (InsightsDaDemonstracao as unknown as typeof SupabaseInsightService)
   : SupabaseInsightService
 
-export { isDemo }
+export { modoDemonstracao }
