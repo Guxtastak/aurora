@@ -18,7 +18,7 @@ Dentro:
 
 - Tabela `mood_logs` com RLS, mais tipos, serviço e espelho no modo demonstração.
 - Marcação diária de humor e energia no Dashboard.
-- Página `/humor` com médias, gráfico de tendência, correlações e histórico.
+- Página `/mood` (rota em ingles como as outras: /habits, /books, /finances, /goals) com médias, gráfico de tendência, correlações e histórico.
 - `getHabitCorrelations` calculando sobre dado real.
 
 Fora:
@@ -116,8 +116,10 @@ Regras, todas com teste próprio:
    "descoberta".
 5. **Frequência** — só hábitos com `frequency = 'daily'`. Em semanal e mensal, "não
    cumpriu" é o estado normal da maioria dos dias e o número mentiria.
-6. **Ordenação** — por valor absoluto de `deltaMood`, decrescente.
-7. **Médias** — arredondadas a uma casa decimal na exibição, não no cálculo.
+6. **Ordenacao** - habitos com amostra suficiente primeiro; dentro de cada grupo,
+   por valor absoluto de `deltaMood`, decrescente. Sem os dois lados da amostra a
+   diferenca compararia uma media com zero, entao ela nao ordena nada.
+7. **Medias** - arredondadas a uma casa decimal na exibicao, nao no calculo.
 
 Itens com `enough` falso são devolvidos assim mesmo, para a tela poder dizer quantos
 dias ainda faltam em vez de esconder o hábito.
@@ -136,7 +138,7 @@ duas fileiras de cinco botões (humor e energia, 1 a 5, com emoji e rótulo aces
 campo de nota opcional recolhido por padrão. Se o dia já tem registro, vem preenchido
 e editável. Salva pelo `MoodService.saveMood`.
 
-**Página `/humor`** (`src/pages/Mood.tsx`), item novo no Sidebar entre Metas e
+**Página `/mood`** (`src/pages/Mood.tsx`), item novo no Sidebar entre Metas e
 Configurações, ícone `Smile` do lucide-react:
 
 - `StatCard`s: humor médio e energia média dos últimos 30 dias, e dias registrados.
@@ -199,6 +201,6 @@ O CI (`.github/workflows/ci.yml`) roda build, lint e testes no PR.
 | `src/components/mood/HabitMoodCorrelations.tsx` | novo |
 | `src/pages/Mood.tsx` | novo |
 | `src/pages/Dashboard.tsx` | inclui o `MoodCheckin` |
-| `src/routes.tsx` | rota `/humor` |
+| `src/routes.tsx` | rota `/mood` |
 | `src/components/layout/Sidebar.tsx` | item Humor |
 | `README.md` | documenta o módulo e remove o item pendente |
