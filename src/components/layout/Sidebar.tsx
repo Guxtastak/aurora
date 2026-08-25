@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, Repeat, BookOpen, Wallet, Settings as SettingsIcon, X } from 'lucide-react'
+import { LayoutDashboard, Repeat, BookOpen, Wallet, Target, Settings as SettingsIcon, X } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 const links = [
@@ -7,6 +7,7 @@ const links = [
   { to: '/habits', label: 'Hábitos', icon: Repeat },
   { to: '/books', label: 'Livros', icon: BookOpen },
   { to: '/finances', label: 'Finanças', icon: Wallet },
+  { to: '/goals', label: 'Metas', icon: Target },
   { to: '/settings', label: 'Configurações', icon: SettingsIcon }
 ]
 

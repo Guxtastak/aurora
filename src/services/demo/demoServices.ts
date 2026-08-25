@@ -1,7 +1,9 @@
-import type { Habit, HabitRow, HabitLog, Book, Finance, Insight } from '../../types/database.types'
+import type { Habit, HabitRow, HabitLog, Book, Finance, Goal, Insight } from '../../types/database.types'
 import { readDemo, writeDemo, newId, demoToday, demoUserId } from './demoStore'
 import { BookService } from '../bookService'
 import { FinanceService } from '../financeService'
+import type { GoalInput } from '../goalService'
+import { goalProgress, resolveGoalStatus } from '../../utils/goalProgress'
 
 /**
  * Versões dos serviços que operam sobre o demoStore, com as mesmas assinaturas
@@ -331,6 +333,58 @@ export class DemoFinanceService {
       .reduce((sum, t) => sum + Number(t.amount), 0)
 
     return { income, expenses, balance: income - expenses, count: transactions.length, transactions }
+  }
+}
+
+export class DemoGoalService {
+  static async getGoals() {
+    return [...readDemo().goals].sort((a, b) => b.created_at.localeCompare(a.created_at))
+  }
+
+  static async getGoalById(id: string) {
+    return readDemo().goals.find(g => g.id === id) as Goal
+  }
+
+  static async createGoal(goal: GoalInput) {
+    const data = readDemo()
+    const created: Goal = {
+      ...goal,
+      status: resolveGoalStatus(goal),
+      progress_percentage: goalProgress(goal.current_value, goal.target_value),
+      id: newId(),
+      user_id: demoUserId,
+      created_at: nowISO(),
+      updated_at: nowISO()
+    }
+    data.goals = [created, ...data.goals]
+    writeDemo(data)
+    return created
+  }
+
+  static async updateGoal(id: string, updates: Partial<GoalInput>) {
+    const data = readDemo()
+    let updated: Goal | undefined
+
+    data.goals = data.goals.map(g => {
+      if (g.id !== id) return g
+      const merged = { ...g, ...updates }
+      updated = {
+        ...merged,
+        status: resolveGoalStatus(merged),
+        progress_percentage: goalProgress(merged.current_value, merged.target_value),
+        updated_at: nowISO()
+      }
+      return updated
+    })
+
+    writeDemo(data)
+    return updated as Goal
+  }
+
+  static async deleteGoal(id: string) {
+    const data = readDemo()
+    data.goals = data.goals.filter(g => g.id !== id)
+    writeDemo(data)
   }
 }
 

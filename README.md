@@ -15,18 +15,22 @@ app usa dados de exemplo salvos no `localStorage` do visitante. Qualquer email e
 tudo que você criar/editar fica só no seu navegador (o botão *Restaurar dados* no topo devolve o
 estado inicial).
 
-O site é servido pelo branch `gh-pages`, publicado a partir de `dist/`. Para atualizar a prévia
-depois de mudar o código:
+O site é publicado pelo **GitHub Actions**, pelo workflow
+[`.github/workflows/deploy.yml`](.github/workflows/deploy.yml), a cada push na `main` — a fonte do
+Pages é o Actions (`build_type=workflow`), não um branch. Não há passo manual: o workflow constrói
+com `BASE_PATH=/aurora/`, copia `dist/index.html` para `dist/404.html` (é o que faz as rotas do
+React Router funcionarem no Pages) e envia o `dist/` com `actions/deploy-pages@v4`.
+
+Para reproduzir o build da prévia na sua máquina:
 
 ```bash
 BASE_PATH=/aurora/ npm run build   # no PowerShell: $env:BASE_PATH='/aurora/'; npm run build
-cp dist/index.html dist/404.html   # faz as rotas do React Router funcionarem no Pages
-# publique o conteudo de dist/ no branch gh-pages
 ```
 
-Existe um workflow pronto em `.github/workflows/deploy.yml` (fora do versionamento) que faz isso
-automaticamente a cada push na `main`. Para habilitá-lo, o token do GitHub CLI precisa do escopo
-`workflow`: `gh auth refresh -h github.com -s workflow`, e então versionar o arquivo.
+> **Ao mexer em `.github/workflows/`, empurre por SSH.** Nenhum token do `gh` tem o escopo
+> `workflow`, e o GitHub rejeita o push por HTTPS de qualquer arquivo nessa pasta. O `origin` deste
+> clone já usa o alias SSH. A alternativa seria `gh auth refresh -h github.com -s workflow`, que é
+> interativo.
 
 Com o `.env` preenchido, o mesmo código usa o Supabase de verdade — o modo demonstração só liga
 quando não há credenciais válidas.
@@ -66,6 +70,8 @@ A chave do Google Books é **opcional** — sem ela a busca funciona com a quota
 ```bash
 npm run dev     # http://localhost:5173
 npm run build   # typecheck + build de produção
+npm test        # testes das regras de progresso das metas (vitest)
+npm run lint    # oxlint
 npm run preview # serve o build
 ```
 
@@ -81,12 +87,14 @@ src/
     habits/      HabitCard, HabitForm
     books/       BookCard, BookForm, BookSearch (Google Books)
     finances/    TransactionForm, TransactionList, CategoryChart
-  pages/         Login, Register, Dashboard, Habits, Books, Finances, Settings
+    goals/       GoalCard, GoalForm
+  pages/         Login, Register, Dashboard, Habits, Books, Finances, Goals, Settings
   hooks/         useAuth (AuthProvider + contexto), useTheme (dark mode)
-  services/      supabase, habitService, bookService, financeService, insightService
+  services/      supabase, habitService, bookService, financeService, goalService, insightService
                  data.ts (escolhe Supabase ou demo), demo/ (dados de exemplo da prévia)
   types/         database.types.ts
   utils/         format.ts (moeda, datas, percentuais)
+                 goalProgress.ts (regras de progresso/status das metas) + testes
   styles/        index.css (Tailwind)
 supabase/
   schema.sql     Schema completo + RLS
@@ -101,6 +109,10 @@ supabase/
   filtros por status e estatísticas de leitura.
 - **Finanças**: receitas e despesas por categoria, saldo total e mensal, seleção de mês,
   gráfico de pizza por categoria e cotação USD→BRL (AwesomeAPI).
+- **Metas**: CRUD por categoria (leitura, hábitos, finanças, saúde), alvo com unidade, prazo,
+  progresso calculado a partir do valor atual e filtro por status. Bater o alvo conclui a meta e
+  cair abaixo dele a reabre; prazo vencido marca a meta como atrasada sem declarar fracasso.
+  Meta sem alvo fica qualitativa: sem barra de progresso e com o status que você escolher.
 - **Dashboard**: indicadores do dia, gráfico dos últimos 7 dias de hábitos, leitura em andamento e
   geração de insight diário (salvo na tabela `insights`).
 - **Configurações**: conta, alternância de tema claro/escuro e histórico de insights.
@@ -122,5 +134,10 @@ necessidade técnica:
 | `VITE_GOOGLE_BOOKS_API_KEY` | passou a ser opcional | a API responde sem chave; antes o app lançava erro |
 | Fuso horário nas datas | uso de data local em vez de `toISOString()` direto | evita marcar o hábito no dia errado à noite (UTC-3) |
 
-Itens citados na especificação e ainda não implementados: a tabela `goals` existe no schema e no
-tipo `Goal`, mas não tem tela; `getHabitCorrelations` continua retornando os valores simulados do PDF.
+O PDF define a tabela `goals` e o tipo `Goal`, mas nenhum serviço ou tela — a tela de Metas foi
+desenhada aqui, seguindo o formato dos outros módulos. As regras de progresso e status ficam em
+`src/utils/goalProgress.ts`, fora do serviço, porque valem igual para o Supabase e para o modo
+demonstração; são a única parte com teste automatizado.
+
+Item da especificação ainda não implementado: `getHabitCorrelations` continua retornando os valores
+simulados do PDF — correlacionar hábito com humor exigiria registrar humor, que não existe no schema.
