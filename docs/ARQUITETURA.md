@@ -128,9 +128,22 @@ e o lint avisa quando isso quebra.
 **Cabeçalho.** Todo arquivo começa com um bloco dizendo o que ele faz e quem o
 usa. Arquivo novo sem cabeçalho é arquivo pela metade.
 
-**Testes.** Só as regras puras de negócio têm teste automatizado
-(`regraDeProgresso`, `regraDeComparacao`). Não é preguiça: é onde mora a decisão
-que dá para errar em silêncio. Tela quebrada você vê; regra errada, não.
+**Testes.** Testamos onde dá para errar em silêncio — tela quebrada você vê,
+conta errada não. Em três camadas:
+
+1. **Regras puras** (`regraDeProgresso`, `regraDeComparacao`): sem banco, sem
+   React, com todos os casos de borda.
+2. **Serviços, pela versão de demonstração** (`modulo/*/demonstracao.test.ts`):
+   ela roda sem banco e sem simulação, e implementa as mesmas regras que a
+   versão do Supabase — sequência de hábitos, um humor por dia, progresso das
+   metas, soma do saldo.
+3. **O contrato entre as duas versões** (`compartilhado/fonte/contrato.test.ts`):
+   prova que a demonstração tem exatamente os mesmos métodos do serviço, com a
+   mesma quantidade de parâmetros. É a premissa em que o `fonteDeDados` se
+   apoia, e o TypeScript não consegue prová-la sozinho.
+
+Componentes de tela não têm teste. É uma escolha: eles mudam muito e quebram de
+forma visível.
 
 ## Para acrescentar um módulo novo
 
