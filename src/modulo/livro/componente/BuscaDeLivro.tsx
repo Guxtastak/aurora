@@ -1,3 +1,7 @@
+/**
+ * Busca no Google Books dentro de um modal: digita, escolhe o resultado e o
+ * livro entra na estante já com capa e número de páginas.
+ */
 import { useState } from 'react'
 import { Search, Plus } from 'lucide-react'
 import { ServicoDeLivros } from '@/compartilhado/fonte/fonteDeDados'

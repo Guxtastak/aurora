@@ -1,3 +1,9 @@
+/**
+ * Tela de Hábitos (/habitos): lista, marcação do dia, criação e edição.
+ *
+ * A marcação é otimista — a tela muda na hora e só depois confirma com o
+ * servidor; se falhar, volta atrás.
+ */
 import { useEffect, useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { Plus, Repeat } from 'lucide-react'

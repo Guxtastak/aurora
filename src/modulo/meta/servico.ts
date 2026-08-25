@@ -1,3 +1,9 @@
+/**
+ * Tudo que o app faz com metas no Supabase.
+ *
+ * Ao gravar, aplica as regras de regraDeProgresso — inclusive em edição
+ * parcial, por isso lê a meta atual antes de mesclar.
+ */
 import { supabase } from '@/compartilhado/fonte/supabase'
 import type { Meta } from '@/compartilhado/tipo/banco'
 import { progressoDaMeta, resolverStatusDaMeta } from '@/modulo/meta/regraDeProgresso'

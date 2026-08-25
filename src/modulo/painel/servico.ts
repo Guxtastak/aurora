@@ -1,3 +1,7 @@
+/**
+ * O que o painel calcula cruzando os módulos: o insight do dia (que é
+ * gravado na tabela insights) e a comparação entre hábitos e humor.
+ */
 import { ServicoDeHabitos } from '@/modulo/habito/servico'
 import { ServicoDeLivros } from '@/modulo/livro/servico'
 import { ServicoDeFinancas } from '@/modulo/financa/servico'

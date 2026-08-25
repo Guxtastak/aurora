@@ -1,3 +1,8 @@
+/**
+ * Porteiro das rotas: sem usuário logado, redireciona para /entrar.
+ * Enquanto a sessão ainda está sendo verificada, mostra a tela de carregando
+ * — sem isso a tela piscaria o login antes de reconhecer quem já entrou.
+ */
 import { Navigate } from 'react-router-dom'
 import { useAutenticacao } from '@/compartilhado/gancho/useAutenticacao'
 import { CarregandoPaginaInteira } from '@/compartilhado/componente/Carregando'

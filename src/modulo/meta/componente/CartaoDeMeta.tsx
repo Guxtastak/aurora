@@ -1,3 +1,7 @@
+/**
+ * O cartão de uma meta: título, categoria, barra de progresso, prazo e o
+ * aviso de atrasada.
+ */
 import { motion } from 'framer-motion'
 import { BookOpen, Repeat, Wallet, HeartPulse, Pencil, Trash2, CalendarClock } from 'lucide-react'
 import type { Meta } from '@/compartilhado/tipo/banco'

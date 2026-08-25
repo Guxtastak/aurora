@@ -1,3 +1,7 @@
+/**
+ * Faixa do topo: data de hoje, botão de tema claro/escuro, email do usuário
+ * e o botão de sair. No celular, também o botão que abre o menu.
+ */
 import { Menu, Moon, Sun, LogOut } from 'lucide-react'
 import { useAutenticacao } from '@/compartilhado/gancho/useAutenticacao'
 import { useTema } from '@/compartilhado/gancho/useTema'

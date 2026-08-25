@@ -1,3 +1,9 @@
+/**
+ * A lista de "nos dias em que você fez X, seu humor médio foi Y".
+ *
+ * O texto é deliberadamente descritivo: a comparação não prova causa, e
+ * nenhuma frase daqui pode sugerir que prova.
+ */
 import { ArrowDown, ArrowUp, Minus } from 'lucide-react'
 import type { ComparacaoDeHabito } from '@/modulo/humor/regraDeComparacao'
 import { MINIMO_DE_DIAS } from '@/modulo/humor/regraDeComparacao'

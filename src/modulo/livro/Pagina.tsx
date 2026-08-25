@@ -1,3 +1,7 @@
+/**
+ * Tela de Livros (/livros): estante com filtro por status, progresso de
+ * leitura, busca no Google Books e cadastro manual.
+ */
 import { useEffect, useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { BookOpen, Plus, Search } from 'lucide-react'

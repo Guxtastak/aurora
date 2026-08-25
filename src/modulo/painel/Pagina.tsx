@@ -1,3 +1,7 @@
+/**
+ * Tela inicial (/painel): indicadores do dia, marcação de humor, gráfico dos
+ * últimos 7 dias de hábitos, leitura em andamento e o insight do dia.
+ */
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {

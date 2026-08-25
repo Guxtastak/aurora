@@ -1,3 +1,7 @@
+/**
+ * Edição de um dia já registrado, dentro de um modal. A data não muda — ela
+ * é a chave do registro.
+ */
 import { useState } from 'react'
 import type { RegistroDeHumor } from '@/compartilhado/tipo/banco'
 import { Botao } from '@/compartilhado/componente/Botao'

@@ -1,3 +1,6 @@
+/**
+ * Testes da regra de comparação entre hábito e humor.
+ */
 import { describe, it, expect } from 'vitest'
 import { compararHabitosComHumor, MINIMO_DE_DIAS } from '@/modulo/humor/regraDeComparacao'
 import type { Habito, MarcacaoDeHabito, RegistroDeHumor } from '@/compartilhado/tipo/banco'

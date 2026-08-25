@@ -1,3 +1,8 @@
+/**
+ * O menu de navegação. A lista `links` no começo do arquivo é a fonte da
+ * verdade: acrescentou item aqui, apareceu no menu — mas a rota também
+ * precisa existir em app/rotas.tsx.
+ */
 import { NavLink } from 'react-router-dom'
 import { LayoutDashboard, Repeat, BookOpen, Wallet, Target, Settings as SettingsIcon, X, Smile } from 'lucide-react'
 import { motion } from 'framer-motion'

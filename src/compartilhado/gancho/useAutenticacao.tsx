@@ -1,3 +1,10 @@
+/**
+ * Quem é o usuário logado, e as ações de entrar, cadastrar e sair.
+ *
+ * O provedor fica em App.tsx e envolve o app inteiro; qualquer tela chama
+ * useAutenticacao() para saber do usuário. No modo demonstração ele finge um
+ * visitante fixo, e por isso qualquer email e senha entram.
+ */
 import { useState, useEffect, createContext, useContext } from 'react'
 import { supabase, modoDemonstracao } from '@/compartilhado/fonte/supabase'
 import type { User } from '@supabase/supabase-js'

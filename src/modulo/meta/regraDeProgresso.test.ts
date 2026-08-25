@@ -1,3 +1,6 @@
+/**
+ * Testes das regras de progresso e status das metas.
+ */
 import { describe, it, expect } from 'vitest'
 import { progressoDaMeta, resolverStatusDaMeta, metaEstaAtrasada } from '@/modulo/meta/regraDeProgresso'
 import { paraDataISO } from '@/compartilhado/utilitario/formato'

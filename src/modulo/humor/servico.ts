@@ -1,3 +1,9 @@
+/**
+ * Tudo que o app faz com o registro diário de humor no Supabase.
+ *
+ * Um registro por dia: gravarRegistroDoDia lê o dia antes de decidir entre
+ * inserir e atualizar.
+ */
 import { supabase } from '@/compartilhado/fonte/supabase'
 import type { RegistroDeHumor } from '@/compartilhado/tipo/banco'
 import { paraDataISO, dataDeHoje } from '@/compartilhado/utilitario/formato'

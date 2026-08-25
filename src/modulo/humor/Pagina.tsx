@@ -1,3 +1,7 @@
+/**
+ * Tela de Humor (/humor): marcação do dia, médias de 30 dias, gráfico de
+ * tendência, a comparação com os hábitos e o histórico.
+ */
 import { useEffect, useState } from 'react'
 import { Smile, Zap, CalendarCheck } from 'lucide-react'
 import { ServicoDeHumor, ServicoDeInsights } from '@/compartilhado/fonte/fonteDeDados'

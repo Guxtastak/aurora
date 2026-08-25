@@ -1,3 +1,7 @@
+/**
+ * Tema claro ou escuro. Guarda a escolha no localStorage e liga/desliga a
+ * classe `dark` no <html>, que é o que o Tailwind observa.
+ */
 import { useEffect, useState } from 'react'
 
 type Theme = 'light' | 'dark'

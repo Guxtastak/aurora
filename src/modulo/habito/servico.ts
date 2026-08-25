@@ -1,3 +1,9 @@
+/**
+ * Tudo que o app faz com hábitos no Supabase.
+ *
+ * As telas não chamam este arquivo direto: elas importam de
+ * compartilhado/fonte/fonteDeDados, que escolhe entre este e demonstracao.ts.
+ */
 import { supabase } from '@/compartilhado/fonte/supabase'
 import type { Habito, HabitoNoBanco, MarcacaoDeHabito } from '@/compartilhado/tipo/banco'
 

@@ -1,3 +1,7 @@
+/**
+ * A lista de lançamentos do mês, com valor em verde ou vermelho conforme
+ * seja entrada ou saída.
+ */
 import { ArrowDownRight, ArrowUpRight, Trash2 } from 'lucide-react'
 import type { Transacao } from '@/compartilhado/tipo/banco'
 import { formatarMoeda, formatarData } from '@/compartilhado/utilitario/formato'

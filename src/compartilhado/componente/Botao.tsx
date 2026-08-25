@@ -1,3 +1,7 @@
+/**
+ * Botão padrão do app, em quatro estilos (primary, secondary, ghost, danger)
+ * e três tamanhos. Sabe mostrar estado de carregando e um ícone à esquerda.
+ */
 import { motion } from 'framer-motion'
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger'

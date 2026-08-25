@@ -1,3 +1,8 @@
+/**
+ * Os três campos de formulário do app: CampoDeTexto (input),
+ * CampoDeSelecao (select) e CampoDeTextoLongo (textarea). Todos com rótulo
+ * e mensagem de erro no mesmo formato.
+ */
 interface CampoDeTextoProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string
   error?: string

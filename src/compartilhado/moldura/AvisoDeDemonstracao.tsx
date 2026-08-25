@@ -1,3 +1,8 @@
+/**
+ * A tarja que aparece quando o app está sem Supabase configurado, avisando
+ * que os dados são de exemplo e ficam só no navegador. O botão restaura os
+ * dados de exemplo ao estado inicial.
+ */
 import { Info, RotateCcw } from 'lucide-react'
 import { reiniciarDemonstracao } from '@/compartilhado/fonte/armazenamentoDeDemonstracao'
 

@@ -1,3 +1,7 @@
+/**
+ * Tela de Metas (/metas): lista com filtro por status, progresso médio e o
+ * formulário de criar e editar.
+ */
 import { useEffect, useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { Plus, Target } from 'lucide-react'

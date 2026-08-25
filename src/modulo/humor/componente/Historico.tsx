@@ -1,3 +1,6 @@
+/**
+ * A lista dos dias registrados, com nota, editar e excluir.
+ */
 import { Pencil, Trash2 } from 'lucide-react'
 import type { RegistroDeHumor } from '@/compartilhado/tipo/banco'
 import { Cartao } from '@/compartilhado/componente/Cartao'

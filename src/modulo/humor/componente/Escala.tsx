@@ -1,3 +1,7 @@
+/**
+ * A fileira de cinco botões com emoji. Serve tanto para humor quanto para
+ * energia — quem diz qual é a lista é o parâmetro `options`.
+ */
 import type { OpcaoDeEscala } from '@/modulo/humor/componente/escalas'
 
 interface EscalaProps {

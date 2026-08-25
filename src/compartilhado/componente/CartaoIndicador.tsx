@@ -1,3 +1,7 @@
+/**
+ * Cartão de número grande — "Hábitos hoje: 3/5". Usado nas faixas de
+ * indicadores no topo das telas.
+ */
 import { motion } from 'framer-motion'
 
 interface CartaoIndicadorProps {

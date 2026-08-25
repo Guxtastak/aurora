@@ -1,3 +1,9 @@
+/**
+ * O cliente do Supabase e a chave que decide o modo do app.
+ *
+ * Sem VITE_SUPABASE_URL/ANON_KEY válidas no .env, `modoDemonstracao` fica
+ * verdadeiro e todo o app passa a trabalhar sobre o localStorage.
+ */
 import { createClient } from '@supabase/supabase-js'
 import type { Banco } from '@/compartilhado/tipo/banco'
 

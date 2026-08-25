@@ -1,3 +1,7 @@
+/**
+ * Janela sobreposta usada por todos os formulários do app. Fecha no Esc,
+ * no clique fora e no X.
+ */
 import { AnimatePresence, motion } from 'framer-motion'
 import { X } from 'lucide-react'
 import { useEffect } from 'react'

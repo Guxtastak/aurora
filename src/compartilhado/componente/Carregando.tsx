@@ -1,3 +1,8 @@
+/**
+ * Rodinha de carregando. Carregando ocupa o espaço do bloco;
+ * CarregandoPaginaInteira cobre a tela toda, usada enquanto o app ainda não
+ * sabe se existe usuário logado.
+ */
 import { motion } from 'framer-motion'
 
 export function Carregando({ label = 'Carregando...' }: { label?: string }) {

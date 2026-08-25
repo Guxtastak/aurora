@@ -1,3 +1,6 @@
+/**
+ * Linha dupla de humor e energia nos últimos 30 dias.
+ */
 import {
   LineChart,
   Line,

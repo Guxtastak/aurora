@@ -1,3 +1,7 @@
+/**
+ * Tela de configurações (/configuracoes): dados da conta, tema claro/escuro,
+ * histórico de insights e o botão de sair.
+ */
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Moon, Sun, LogOut, Sparkles } from 'lucide-react'

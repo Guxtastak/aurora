@@ -1,3 +1,7 @@
+/**
+ * Tela de Finanças (/financas): saldo, entradas e saídas do mês escolhido,
+ * gráfico por categoria e a cotação do dólar.
+ */
 import { useEffect, useState } from 'react'
 import { Plus, TrendingUp, TrendingDown, Wallet, DollarSign } from 'lucide-react'
 import { ServicoDeFinancas } from '@/compartilhado/fonte/fonteDeDados'

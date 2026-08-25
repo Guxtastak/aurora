@@ -1,3 +1,7 @@
+/**
+ * O que aparece no lugar de uma lista vazia: ícone, uma frase explicando e,
+ * quando faz sentido, o botão que resolve o vazio.
+ */
 interface EstadoVazioProps {
   icon?: React.ReactNode
   title: string

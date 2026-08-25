@@ -1,3 +1,8 @@
+/**
+ * O "como foi seu dia": duas escalas de 1 a 5 e uma nota opcional. Aparece
+ * no topo do Painel e também na tela de Humor. Se o dia já tem registro,
+ * abre preenchido.
+ */
 import { useEffect, useState } from 'react'
 import { Check, MessageSquarePlus } from 'lucide-react'
 import { ServicoDeHumor } from '@/compartilhado/fonte/fonteDeDados'

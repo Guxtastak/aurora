@@ -1,3 +1,7 @@
+/**
+ * Tela de entrada (/entrar). No modo demonstração qualquer email e senha
+ * funcionam, porque não há servidor para conferir.
+ */
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAutenticacao } from '@/compartilhado/gancho/useAutenticacao'

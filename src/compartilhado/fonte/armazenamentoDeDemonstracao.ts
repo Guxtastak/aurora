@@ -1,3 +1,11 @@
+/**
+ * O "banco de dados" do modo demonstração: um objeto guardado no
+ * localStorage do visitante.
+ *
+ * O seed cria hábitos, livros, transações, metas e humor de exemplo de forma
+ * determinística (sem sorteio), para o gráfico não mudar a cada recarga.
+ * Quando o formato dos dados muda, sobe-se o número do STORAGE_KEY.
+ */
 import type { Habito, MarcacaoDeHabito, Livro, Transacao, Meta, RegistroDeHumor, Insight } from '@/compartilhado/tipo/banco'
 import { progressoDaMeta } from '@/modulo/meta/regraDeProgresso'
 

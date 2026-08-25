@@ -1,3 +1,6 @@
+/**
+ * Pizza de despesas por categoria.
+ */
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts'
 import { formatarMoeda } from '@/compartilhado/utilitario/formato'
 

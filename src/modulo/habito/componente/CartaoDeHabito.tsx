@@ -1,3 +1,7 @@
+/**
+ * A linha de um hábito na lista: círculo de marcar, nome, sequência atual e
+ * recorde, e os botões de editar e excluir.
+ */
 import { motion } from 'framer-motion'
 import { Check, Flame, Trash2, Pencil } from 'lucide-react'
 import type { Habito } from '@/compartilhado/tipo/banco'

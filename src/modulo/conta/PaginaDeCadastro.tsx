@@ -1,3 +1,7 @@
+/**
+ * Tela de cadastro (/cadastro). Se o projeto do Supabase exigir confirmação
+ * de email, o acesso só vale depois que o usuário confirmar.
+ */
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAutenticacao } from '@/compartilhado/gancho/useAutenticacao'

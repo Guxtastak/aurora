@@ -1,3 +1,7 @@
+/**
+ * Tudo que o app faz com lançamentos financeiros, mais o resumo do mês e a
+ * busca da cotação USD→BRL na AwesomeAPI.
+ */
 import { supabase } from '@/compartilhado/fonte/supabase'
 import type { Transacao } from '@/compartilhado/tipo/banco'
 

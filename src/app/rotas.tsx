@@ -1,3 +1,9 @@
+/**
+ * O mapa de endereços do app: cada URL e a tela que ela abre.
+ *
+ * Tudo o que não é /entrar e /cadastro passa por RotaProtegida, que joga
+ * visitante deslogado de volta para a tela de entrada.
+ */
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { RotaProtegida } from '@/compartilhado/componente/RotaProtegida'
 import { PaginaDeEntrada } from '@/modulo/conta/PaginaDeEntrada'

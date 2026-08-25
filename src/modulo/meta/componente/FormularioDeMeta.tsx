@@ -1,3 +1,7 @@
+/**
+ * Formulário de criar e editar meta. Alvo e unidade são opcionais: sem eles
+ * a meta fica qualitativa, sem barra de progresso.
+ */
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'

@@ -1,3 +1,7 @@
+/**
+ * O cartão de um livro: capa, autor, barra de progresso e as ações de
+ * avançar páginas, finalizar, editar e excluir.
+ */
 import { motion } from 'framer-motion'
 import { BookOpen, Star, Trash2, CheckCircle2 } from 'lucide-react'
 import type { Livro } from '@/compartilhado/tipo/banco'

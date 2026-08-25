@@ -1,3 +1,7 @@
+/**
+ * Caixa branca com sombra que embrulha praticamente todo bloco de conteúdo
+ * do app. Aceita título, subtítulo e um canto de ação à direita.
+ */
 import { motion } from 'framer-motion'
 
 interface CartaoProps {

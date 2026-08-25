@@ -1,3 +1,7 @@
+/**
+ * Formulário de criar e editar hábito (nome, descrição, ícone, cor,
+ * frequência e meta diária). Validação com zod via react-hook-form.
+ */
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'

@@ -1,3 +1,7 @@
+/**
+ * Tudo que o app faz com livros: no Supabase e também na API do Google
+ * Books, que é de onde vem a capa e a contagem de páginas.
+ */
 import { supabase } from '@/compartilhado/fonte/supabase'
 import type { Livro } from '@/compartilhado/tipo/banco'
 import { dataDeHoje } from '@/compartilhado/utilitario/formato'
