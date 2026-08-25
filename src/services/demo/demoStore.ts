@@ -1,4 +1,4 @@
-import type { Habit, HabitLog, Book, Finance, Goal, Insight } from '../../types/database.types'
+import type { Habit, HabitLog, Book, Finance, Goal, MoodLog, Insight } from '../../types/database.types'
 import { goalProgress } from '../../utils/goalProgress'
 
 /**
@@ -7,7 +7,7 @@ import { goalProgress } from '../../utils/goalProgress'
  * própria cópia dos dados, no próprio navegador.
  */
 
-const STORAGE_KEY = 'aurora-demo-v2'
+const STORAGE_KEY = 'aurora-demo-v3'
 const DEMO_USER_ID = 'demo-user'
 
 export interface DemoData {
@@ -16,6 +16,7 @@ export interface DemoData {
   books: Book[]
   finances: Finance[]
   goals: Goal[]
+  mood_logs: MoodLog[]
   insights: Insight[]
 }
 
@@ -276,7 +277,36 @@ function seed(): DemoData {
     updated_at: now
   }))
 
-  return { habits, habit_logs, books, finances, goals, insights: [] }
+  // Humor dos ultimos 35 dias, correlacionado de proposito com o habito de
+  // treinar para a previa mostrar o recurso funcionando. Deterministico, como o
+  // resto do seed: sem Math.random, para o grafico nao mudar a cada recarga.
+  const treinou = new Set(
+    habit_logs.filter(log => log.habit_id === 'demo-habit-2' && log.completed).map(log => log.date)
+  )
+
+  const clamp = (value: number) => Math.min(5, Math.max(1, value))
+  const mood_logs: MoodLog[] = []
+
+  for (let day = 34; day >= 0; day--) {
+    // Alguns dias sem registro: ninguem preenche todo santo dia
+    if (day % 9 === 4) continue
+
+    const date = iso(daysAgo(day))
+    const fez = treinou.has(date)
+
+    mood_logs.push({
+      id: `demo-mood-${day}`,
+      user_id: DEMO_USER_ID,
+      date,
+      mood: clamp((fez ? 4 : 2) + (((day * 7) % 3) - 1)),
+      energy: clamp((fez ? 4 : 3) + (((day * 5) % 3) - 1)),
+      notes: day === 2 ? 'Dormi bem e o dia rendeu.' : undefined,
+      created_at: daysAgo(day).toISOString(),
+      updated_at: daysAgo(day).toISOString()
+    })
+  }
+
+  return { habits, habit_logs, books, finances, goals, mood_logs, insights: [] }
 }
 
 let cache: DemoData | null = null

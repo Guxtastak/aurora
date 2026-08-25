@@ -3,12 +3,14 @@ import { HabitService as SupabaseHabitService } from './habitService'
 import { BookService as SupabaseBookService } from './bookService'
 import { FinanceService as SupabaseFinanceService } from './financeService'
 import { GoalService as SupabaseGoalService } from './goalService'
+import { MoodService as SupabaseMoodService } from './moodService'
 import { InsightService as SupabaseInsightService } from './insightService'
 import {
   DemoHabitService,
   DemoBookService,
   DemoFinanceService,
   DemoGoalService,
+  DemoMoodService,
   DemoInsightService
 } from './demo/demoServices'
 
@@ -33,6 +35,10 @@ export const FinanceService: typeof SupabaseFinanceService = isDemo
 export const GoalService: typeof SupabaseGoalService = isDemo
   ? (DemoGoalService as unknown as typeof SupabaseGoalService)
   : SupabaseGoalService
+
+export const MoodService: typeof SupabaseMoodService = isDemo
+  ? (DemoMoodService as unknown as typeof SupabaseMoodService)
+  : SupabaseMoodService
 
 export const InsightService: typeof SupabaseInsightService = isDemo
   ? (DemoInsightService as unknown as typeof SupabaseInsightService)
