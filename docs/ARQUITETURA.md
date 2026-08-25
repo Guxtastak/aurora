@@ -19,7 +19,7 @@ src/
     componente/        Botao, Cartao, Campo, Modal, Carregando, EstadoVazio,
                        CartaoIndicador, RotaProtegida
     moldura/           Moldura, Cabecalho, MenuLateral, AvisoDeDemonstracao
-    gancho/            useAutenticacao (quem está logado), useTema (claro/escuro)
+    gancho/            useAutenticacao, useTema, useDados (busca com carregando/erro)
     utilitario/        formato.ts (moeda, data, porcentagem)
     tipo/              banco.ts — as tabelas do Supabase em TypeScript
     fonte/             supabase.ts, fonteDeDados.ts, armazenamentoDeDemonstracao.ts
@@ -107,6 +107,11 @@ onde a coisa vem sem depender de quantas pastas acima o arquivo está — nada d
 `minusculaCamelo.ts`. Cada módulo tem `Pagina.tsx`, `servico.ts` e
 `demonstracao.ts` com esses nomes exatos, para você saber o que vai achar antes
 de abrir.
+
+**Busca de dados na tela.** Toda tela busca pelo `useDados`, em
+`compartilhado/gancho/useDados.ts`. Ele devolve `dados`, `carregando`, `erro` e
+um `recarregar()`, e ja trata o try/catch. Nao escreva `useEffect` com
+`setState` na pagina: era isso que o lint apontava em todas elas.
 
 **Carregamento das telas.** Cada rota baixa a sua tela sob demanda, pelo
 `lazy` do React em `app/rotas.tsx`. Quem abre o Painel nao baixa o codigo do

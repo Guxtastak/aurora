@@ -2,10 +2,11 @@
  * Tela de Metas (/metas): lista com filtro por status, progresso médio e o
  * formulário de criar e editar.
  */
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { Plus, Target } from 'lucide-react'
 import { ServicoDeMetas } from '@/compartilhado/fonte/fonteDeDados'
+import { useDados } from '@/compartilhado/gancho/useDados'
 import type { Meta } from '@/compartilhado/tipo/banco'
 import { CartaoDeMeta } from '@/modulo/meta/componente/CartaoDeMeta'
 import { FormularioDeMeta } from '@/modulo/meta/componente/FormularioDeMeta'
@@ -26,29 +27,22 @@ const FILTERS: { key: Filter; label: string }[] = [
 ]
 
 export function PaginaDeMetas() {
-  const [goals, setGoals] = useState<Meta[]>([])
-  const [carregando, setCarregando] = useState(true)
-  const [error, setError] = useState('')
-  const [filter, setFilter] = useState<Filter>('all')
+  const {
+    dados: metas,
+    setDados: setMetas,
+    carregando,
+    erro,
+    setErro,
+    recarregar
+  } = useDados(() => ServicoDeMetas.listarMetas(), [] as Meta[], {
+    aoFalhar: 'Erro ao carregar metas'
+  })
+
+  const [filtro, setFiltro] = useState<Filter>('all')
   const [modalAberto, setModalAberto] = useState(false)
   const [emEdicao, setEmEdicao] = useState<Meta | null>(null)
 
-  const load = async () => {
-    try {
-      setError('')
-      setGoals(await ServicoDeMetas.listarMetas())
-    } catch (err: any) {
-      setError(err.message || 'Erro ao carregar metas')
-    } finally {
-      setCarregando(false)
-    }
-  }
-
-  useEffect(() => {
-    load()
-  }, [])
-
-  const handleSubmit = async (values: ValoresDaMeta) => {
+  const aoEnviar = async (values: ValoresDaMeta) => {
     try {
       if (emEdicao) {
         await ServicoDeMetas.atualizarMeta(emEdicao.id, values)
@@ -57,35 +51,37 @@ export function PaginaDeMetas() {
       }
       setModalAberto(false)
       setEmEdicao(null)
-      await load()
-    } catch (err: any) {
-      setError(err.message || 'Erro ao salvar meta')
+      await recarregar()
+    } catch (falha: any) {
+      setErro(falha.message || 'Erro ao salvar meta')
     }
   }
 
-  const aoExcluir = async (goal: Meta) => {
-    if (!window.confirm(`Excluir a meta "${goal.title}"?`)) return
+  const aoExcluir = async (meta: Meta) => {
+    if (!window.confirm(`Excluir a meta "${meta.title}"?`)) return
     try {
-      await ServicoDeMetas.excluirMeta(goal.id)
-      setGoals(prev => prev.filter(g => g.id !== goal.id))
-    } catch (err: any) {
-      setError(err.message || 'Erro ao excluir meta')
+      await ServicoDeMetas.excluirMeta(meta.id)
+      setMetas(anteriores => anteriores.filter(m => m.id !== meta.id))
+    } catch (falha: any) {
+      setErro(falha.message || 'Erro ao excluir meta')
     }
   }
 
-  const closeModal = () => {
+  const fecharModal = () => {
     setModalAberto(false)
     setEmEdicao(null)
   }
 
-  const visible = filter === 'all' ? goals : goals.filter(g => g.status === filter)
-  const active = goals.filter(g => g.status === 'active')
-  const completed = goals.filter(g => g.status === 'completed')
-  const measurableActive = active.filter(g => !!g.target_value && g.target_value > 0)
-  const averageProgress = measurableActive.length
+  const visiveis = filtro === 'all' ? metas : metas.filter(m => m.status === filtro)
+  const ativas = metas.filter(m => m.status === 'active')
+  const concluidas = metas.filter(m => m.status === 'completed')
+
+  // Meta sem alvo numerico e qualitativa: nao entra na media de progresso
+  const ativasComAlvo = ativas.filter(m => !!m.target_value && m.target_value > 0)
+  const progressoMedio = ativasComAlvo.length
     ? Math.round(
-        measurableActive.reduce((sum, g) => sum + (g.progress_percentage || 0), 0) /
-          measurableActive.length
+        ativasComAlvo.reduce((soma, m) => soma + (m.progress_percentage || 0), 0) /
+          ativasComAlvo.length
       )
     : 0
 
@@ -109,13 +105,13 @@ export function PaginaDeMetas() {
         </Botao>
       </div>
 
-      {error && (
-        <p className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg px-4 py-2">{error}</p>
+      {erro && (
+        <p className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg px-4 py-2">{erro}</p>
       )}
 
       {carregando ? (
         <Carregando label="Carregando metas..." />
-      ) : goals.length === 0 ? (
+      ) : metas.length === 0 ? (
         <EstadoVazio
           icon={<Target size={40} />}
           title="Nenhuma meta ainda"
@@ -129,11 +125,11 @@ export function PaginaDeMetas() {
       ) : (
         <>
           <div className="grid gap-4 sm:grid-cols-3">
-            <CartaoIndicador label="Ativas" value={active.length} />
-            <CartaoIndicador label="Concluídas" value={completed.length} accent="green" />
+            <CartaoIndicador label="Ativas" value={ativas.length} />
+            <CartaoIndicador label="Concluídas" value={concluidas.length} accent="green" />
             <CartaoIndicador
               label="Progresso médio"
-              value={`${averageProgress}%`}
+              value={`${progressoMedio}%`}
               hint="das metas ativas com alvo definido"
               accent="amber"
             />
@@ -143,9 +139,9 @@ export function PaginaDeMetas() {
             {FILTERS.map(f => (
               <button
                 key={f.key}
-                onClick={() => setFilter(f.key)}
+                onClick={() => setFiltro(f.key)}
                 className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
-                  filter === f.key
+                  filtro === f.key
                     ? 'bg-aurora-500 text-white'
                     : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
                 }`}
@@ -155,12 +151,12 @@ export function PaginaDeMetas() {
             ))}
           </div>
 
-          {visible.length === 0 ? (
+          {visiveis.length === 0 ? (
             <EstadoVazio title="Nada neste filtro" description="Escolha outro status para ver as metas." />
           ) : (
             <div className="space-y-3">
               <AnimatePresence>
-                {visible.map(goal => (
+                {visiveis.map(goal => (
                   <CartaoDeMeta
                     key={goal.id}
                     goal={goal}
@@ -177,8 +173,8 @@ export function PaginaDeMetas() {
         </>
       )}
 
-      <Modal open={modalAberto} onClose={closeModal} title={emEdicao ? 'Editar meta' : 'Nova meta'}>
-        <FormularioDeMeta goal={emEdicao} onSubmit={handleSubmit} onCancel={closeModal} />
+      <Modal open={modalAberto} onClose={fecharModal} title={emEdicao ? 'Editar meta' : 'Nova meta'}>
+        <FormularioDeMeta goal={emEdicao} onSubmit={aoEnviar} onCancel={fecharModal} />
       </Modal>
     </div>
   )

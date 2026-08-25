@@ -2,7 +2,8 @@
  * Tela inicial (/painel): indicadores do dia, marcação de humor, gráfico dos
  * últimos 7 dias de hábitos, leitura em andamento e o insight do dia.
  */
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import { useDados } from '@/compartilhado/gancho/useDados'
 import { Link } from 'react-router-dom'
 import {
   BarChart,
@@ -35,66 +36,62 @@ interface DayPoint {
 
 export function PaginaInicial() {
   const { user } = useAutenticacao()
-  const [habits, setHabits] = useState<Habito[]>([])
-  const [books, setBooks] = useState<Livro[]>([])
-  const [balance, setBalance] = useState({ balance: 0, totalIncome: 0, totalExpenses: 0 })
-  const [dadosDaSemana, setDadosDaSemana] = useState<DayPoint[]>([])
-  const [carregando, setCarregando] = useState(true)
-  const [error, setError] = useState('')
-  const [insight, setInsight] = useState<string>('')
-  const [gerando, setGerando] = useState(false)
+  // O painel cruza quatro serviços, então busca os quatro de uma vez e guarda
+  // o resultado junto — a tela só aparece quando tudo chegou.
+  const { dados, setDados, carregando, erro, setErro, recarregar } = useDados(
+    async () => {
+      const inicioDaSemana = new Date()
+      inicioDaSemana.setDate(inicioDaSemana.getDate() - 6)
 
-  const load = async () => {
-    try {
-      setError('')
-      const start = new Date()
-      start.setDate(start.getDate() - 6)
-      const startISO = paraDataISO(start)
-
-      const [habitsData, booksData, balanceData, logs] = await Promise.all([
+      const [habitos, livros, saldo, marcacoes] = await Promise.all([
         ServicoDeHabitos.listarHabitosComStatusDeHoje(),
         ServicoDeLivros.listarLivros(),
         ServicoDeFinancas.obterSaldo(),
-        ServicoDeHabitos.listarMarcacoesDesde(startISO)
+        ServicoDeHabitos.listarMarcacoesDesde(paraDataISO(inicioDaSemana))
       ])
 
-      setHabits(habitsData)
-      setBooks(booksData)
-      setBalance(balanceData)
-
-      // Monta os ultimos 7 dias
-      const days: DayPoint[] = []
-      for (let i = 6; i >= 0; i--) {
-        const date = new Date()
-        date.setDate(date.getDate() - i)
-        const iso = paraDataISO(date)
-        days.push({
-          day: date.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', ''),
-          concluidos: logs.filter(l => l.date === iso).length
+      // Uma barra por dia dos últimos sete, inclusive nos dias sem marcação
+      const semana: DayPoint[] = []
+      for (let atras = 6; atras >= 0; atras--) {
+        const dia = new Date()
+        dia.setDate(dia.getDate() - atras)
+        const iso = paraDataISO(dia)
+        semana.push({
+          day: dia.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', ''),
+          concluidos: marcacoes.filter(marcacao => marcacao.date === iso).length
         })
       }
-      setDadosDaSemana(days)
-    } catch (err: any) {
-      setError(err.message || 'Erro ao carregar o dashboard')
-    } finally {
-      setCarregando(false)
-    }
-  }
 
-  useEffect(() => {
-    load()
-  }, [])
+      // O servico marca completed_today em todos; a tela trata como Habito comum
+      return { habitos: habitos as Habito[], livros, saldo, semana }
+    },
+    {
+      habitos: [] as Habito[],
+      livros: [] as Livro[],
+      saldo: { balance: 0, totalIncome: 0, totalExpenses: 0, count: 0 },
+      semana: [] as DayPoint[]
+    },
+    { aoFalhar: 'Erro ao carregar o painel' }
+  )
 
-  const handleToggle = async (habit: Habito) => {
-    setHabits(prev =>
-      prev.map(h => (h.id === habit.id ? { ...h, completed_today: !h.completed_today } : h))
-    )
+  const { habitos, livros, saldo, semana } = dados
+  const [insight, setInsight] = useState<string>('')
+  const [gerando, setGerando] = useState(false)
+
+  const aoAlternar = async (habit: Habito) => {
+    // Atualização otimista: a tela muda na hora e o recarregar() confirma
+    setDados(anterior => ({
+      ...anterior,
+      habitos: anterior.habitos.map(h =>
+        h.id === habit.id ? { ...h, completed_today: !h.completed_today } : h
+      )
+    }))
     try {
       await ServicoDeHabitos.alternarHabitoDeHoje(habit.id)
-      await load()
-    } catch (err: any) {
-      setError(err.message || 'Erro ao atualizar hábito')
-      await load()
+      await recarregar()
+    } catch (falha: any) {
+      setErro(falha.message || 'Erro ao atualizar hábito')
+      await recarregar()
     }
   }
 
@@ -104,12 +101,12 @@ export function PaginaInicial() {
       const result = await ServicoDeInsights.gerarInsightDoDia()
       const data = result.metadata
       setInsight(
-        `Você concluiu ${data.habits.completedToday} de ${data.habits.total} hábitos hoje ` +
-          `(${Math.round(data.habits.completionRate)}%), está lendo ${data.books.reading} livro(s) ` +
+        `Você concluiu ${data.habitos.completedToday} de ${data.habitos.total} hábitos hoje ` +
+          `(${Math.round(data.habitos.completionRate)}%), está lendo ${data.livros.reading} livro(s) ` +
           `e seu saldo é de ${formatarMoeda(data.finances.balance)}.`
       )
-    } catch (err: any) {
-      setError(err.message || 'Erro ao gerar insight')
+    } catch (falha: any) {
+      setErro(falha.message || 'Erro ao gerar insight')
     } finally {
       setGerando(false)
     }
@@ -117,10 +114,10 @@ export function PaginaInicial() {
 
   if (carregando) return <Carregando label="Montando seu dashboard..." />
 
-  const doneToday = habits.filter(h => h.completed_today).length
-  const bestStreak = habits.reduce((max, h) => Math.max(max, h.current_streak || 0), 0)
-  const reading = books.filter(b => b.status === 'reading')
-  const finished = books.filter(b => b.status === 'finished')
+  const doneToday = habitos.filter(h => h.completed_today).length
+  const bestStreak = habitos.reduce((max, h) => Math.max(max, h.current_streak || 0), 0)
+  const reading = livros.filter(b => b.status === 'reading')
+  const finished = livros.filter(b => b.status === 'finished')
   const firstName = user?.email?.split('@')[0] || 'você'
 
   return (
@@ -134,8 +131,8 @@ export function PaginaInicial() {
         </p>
       </div>
 
-      {error && (
-        <p className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg px-4 py-2">{error}</p>
+      {erro && (
+        <p className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg px-4 py-2">{erro}</p>
       )}
 
       <RegistroDoDia />
@@ -143,8 +140,8 @@ export function PaginaInicial() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <CartaoIndicador
           label="Hábitos hoje"
-          value={`${doneToday}/${habits.length}`}
-          hint={`${porcentagem(doneToday, habits.length)}% concluído`}
+          value={`${doneToday}/${habitos.length}`}
+          hint={`${porcentagem(doneToday, habitos.length)}% concluído`}
           icon={<Repeat size={18} />}
           delay={0}
         />
@@ -165,9 +162,9 @@ export function PaginaInicial() {
         />
         <CartaoIndicador
           label="Saldo"
-          value={formatarMoeda(balance.balance)}
-          hint={`${formatarMoeda(balance.totalIncome)} entradas`}
-          accent={balance.balance >= 0 ? 'green' : 'red'}
+          value={formatarMoeda(saldo.balance)}
+          hint={`${formatarMoeda(saldo.totalIncome)} entradas`}
+          accent={saldo.balance >= 0 ? 'green' : 'red'}
           icon={<Wallet size={18} />}
           delay={0.15}
         />
@@ -191,7 +188,7 @@ export function PaginaInicial() {
         <Cartao title="Hábitos dos últimos 7 dias" subtitle="Total de conclusões por dia">
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={dadosDaSemana}>
+              <BarChart data={semana}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
                 <XAxis dataKey="day" tick={{ fontSize: 12 }} stroke="#9ca3af" />
                 <YAxis allowDecimals={false} tick={{ fontSize: 12 }} stroke="#9ca3af" />
@@ -211,7 +208,7 @@ export function PaginaInicial() {
             </Link>
           }
         >
-          {habits.length === 0 ? (
+          {habitos.length === 0 ? (
             <EstadoVazio
               title="Sem hábitos cadastrados"
               description="Crie hábitos para acompanhar sua rotina."
@@ -223,10 +220,10 @@ export function PaginaInicial() {
             />
           ) : (
             <ul className="space-y-2">
-              {habits.slice(0, 6).map(habit => (
+              {habitos.slice(0, 6).map(habit => (
                 <li key={habit.id} className="flex items-center gap-3">
                   <button
-                    onClick={() => handleToggle(habit)}
+                    onClick={() => aoAlternar(habit)}
                     aria-label={habit.completed_today ? 'Desmarcar' : 'Marcar'}
                     className={`h-8 w-8 rounded-full flex items-center justify-center transition-colors ${
                       habit.completed_today
