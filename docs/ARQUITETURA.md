@@ -108,6 +108,12 @@ onde a coisa vem sem depender de quantas pastas acima o arquivo está — nada d
 `demonstracao.ts` com esses nomes exatos, para você saber o que vai achar antes
 de abrir.
 
+**Carregamento das telas.** Cada rota baixa a sua tela sob demanda, pelo
+`lazy` do React em `app/rotas.tsx`. Quem abre o Painel nao baixa o codigo do
+grafico de financas junto. Tela nova entra por ali, na funcao `tela()` — se
+voce importar a pagina direto no topo do arquivo, ela volta para o pacote
+inicial e todo mundo passa a baixa-la.
+
 **Cabeçalho.** Todo arquivo começa com um bloco dizendo o que ele faz e quem o
 usa. Arquivo novo sem cabeçalho é arquivo pela metade.
 
