@@ -71,7 +71,7 @@ A chave do Google Books é **opcional** — sem ela a busca funciona com a quota
 ```bash
 npm run dev     # http://localhost:5173
 npm run build   # typecheck + build de produção
-npm test        # testes das regras de progresso das metas (vitest)
+npm test        # 64 testes: regras, servicos e o contrato entre as duas fontes (vitest)
 npm run lint    # oxlint
 npm run preview # serve o build
 ```
