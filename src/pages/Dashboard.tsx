@@ -17,6 +17,7 @@ import { InsightService } from '../services/data'
 import type { Habit, Book } from '../types/database.types'
 import { StatCard } from '../components/common/StatCard'
 import { Card } from '../components/common/Card'
+import { MoodCheckin } from '../components/mood/MoodCheckin'
 import { Button } from '../components/common/Button'
 import { Loading } from '../components/common/Loading'
 import { EmptyState } from '../components/common/EmptyState'
@@ -132,6 +133,8 @@ export function Dashboard() {
       {error && (
         <p className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg px-4 py-2">{error}</p>
       )}
+
+      <MoodCheckin />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard

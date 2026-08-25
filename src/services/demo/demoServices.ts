@@ -1,9 +1,12 @@
-import type { Habit, HabitRow, HabitLog, Book, Finance, Goal, Insight } from '../../types/database.types'
+import type { Habit, HabitRow, HabitLog, Book, Finance, Goal, MoodLog, Insight } from '../../types/database.types'
 import { readDemo, writeDemo, newId, demoToday, demoUserId } from './demoStore'
 import { BookService } from '../bookService'
 import { FinanceService } from '../financeService'
 import type { GoalInput } from '../goalService'
+import type { MoodInput } from '../moodService'
+import { toISODate, todayISO } from '../../utils/format'
 import { goalProgress, resolveGoalStatus } from '../../utils/goalProgress'
+import { habitMoodCorrelations } from '../../utils/moodCorrelation'
 
 /**
  * Versões dos serviços que operam sobre o demoStore, com as mesmas assinaturas
@@ -388,6 +391,51 @@ export class DemoGoalService {
   }
 }
 
+export class DemoMoodService {
+  static async getMoodLogs(days: number = 30) {
+    const limite = new Date()
+    limite.setDate(limite.getDate() - days)
+    const desde = toISODate(limite)
+
+    return readDemo()
+      .mood_logs.filter(log => log.date >= desde)
+      .sort((a, b) => b.date.localeCompare(a.date))
+  }
+
+  static async getMoodByDate(date: string = todayISO()) {
+    return readDemo().mood_logs.find(log => log.date === date) || null
+  }
+
+  static async saveMood(input: MoodInput) {
+    const data = readDemo()
+    const existing = data.mood_logs.find(log => log.date === input.date)
+
+    if (existing) {
+      const updated: MoodLog = { ...existing, ...input, updated_at: nowISO() }
+      data.mood_logs = data.mood_logs.map(log => (log.id === existing.id ? updated : log))
+      writeDemo(data)
+      return updated
+    }
+
+    const created: MoodLog = {
+      ...input,
+      id: newId(),
+      user_id: demoUserId,
+      created_at: nowISO(),
+      updated_at: nowISO()
+    }
+    data.mood_logs = [created, ...data.mood_logs]
+    writeDemo(data)
+    return created
+  }
+
+  static async deleteMood(id: string) {
+    const data = readDemo()
+    data.mood_logs = data.mood_logs.filter(log => log.id !== id)
+    writeDemo(data)
+  }
+}
+
 export class DemoInsightService {
   static async generateDailyInsights() {
     const [habits, books, balance] = await Promise.all([
@@ -441,11 +489,16 @@ export class DemoInsightService {
       .slice(0, limit)
   }
 
-  static async getHabitCorrelations() {
-    return {
-      reading: { productivity: 0.75, mood: 0.6 },
-      exercise: { productivity: 0.85, mood: 0.8 },
-      meditation: { productivity: 0.7, mood: 0.9 }
-    }
+  static async getHabitCorrelations(days: number = 90) {
+    const desde = new Date()
+    desde.setDate(desde.getDate() - days)
+    const inicio = toISODate(desde)
+    const data = readDemo()
+
+    return habitMoodCorrelations(
+      data.habits,
+      data.habit_logs,
+      data.mood_logs.filter(log => log.date >= inicio)
+    )
   }
 }

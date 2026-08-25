@@ -1,9 +1,11 @@
 import { HabitService } from './habitService'
 import { BookService } from './bookService'
 import { FinanceService } from './financeService'
+import { MoodService } from './moodService'
 import { supabase } from './supabase'
 import type { Insight } from '../types/database.types'
-import { todayISO } from '../utils/format'
+import { toISODate, todayISO } from '../utils/format'
+import { habitMoodCorrelations } from '../utils/moodCorrelation'
 
 export class InsightService {
   /**
@@ -70,14 +72,20 @@ export class InsightService {
   }
 
   /**
-   * Analisa correlações entre hábitos e humor (simulado)
+   * Relação entre cumprir cada hábito diário e o humor registrado no dia.
+   * A regra do cálculo fica em utils/moodCorrelation, que vale igual aqui e no
+   * modo demonstração.
    */
-  static async getHabitCorrelations() {
-    // Esta é uma simulação - em produção, usaria dados reais
-    return {
-      reading: { productivity: 0.75, mood: 0.60 },
-      exercise: { productivity: 0.85, mood: 0.80 },
-      meditation: { productivity: 0.70, mood: 0.90 }
-    }
+  static async getHabitCorrelations(days: number = 90) {
+    const desde = new Date()
+    desde.setDate(desde.getDate() - days)
+
+    const [habits, logs, moods] = await Promise.all([
+      HabitService.getHabits(),
+      HabitService.getLogsSince(toISODate(desde)),
+      MoodService.getMoodLogs(days)
+    ])
+
+    return habitMoodCorrelations(habits, logs, moods)
   }
 }
