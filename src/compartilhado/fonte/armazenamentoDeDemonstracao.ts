@@ -351,3 +351,8 @@ export function hojeNaDemonstracao() {
 }
 
 export const usuarioDaDemonstracao = DEMO_USER_ID
+
+/** Momento atual em ISO, usado como created_at/updated_at na demonstracao */
+export function agoraISO() {
+  return new Date().toISOString()
+}

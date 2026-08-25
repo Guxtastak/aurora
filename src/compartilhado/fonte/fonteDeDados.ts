@@ -23,14 +23,12 @@ import { ServicoDeMetas as MetasNoBanco } from '@/modulo/meta/servico'
 import { ServicoDeHumor as HumorNoBanco } from '@/modulo/humor/servico'
 import { ServicoDeInsights as InsightsNoBanco } from '@/modulo/painel/servico'
 
-import {
-  HabitosDaDemonstracao,
-  LivrosDaDemonstracao,
-  FinancasDaDemonstracao,
-  MetasDaDemonstracao,
-  HumorDaDemonstracao,
-  InsightsDaDemonstracao
-} from '@/compartilhado/fonte/servicosDeDemonstracao'
+import { HabitosDaDemonstracao } from '@/modulo/habito/demonstracao'
+import { LivrosDaDemonstracao } from '@/modulo/livro/demonstracao'
+import { FinancasDaDemonstracao } from '@/modulo/financa/demonstracao'
+import { MetasDaDemonstracao } from '@/modulo/meta/demonstracao'
+import { HumorDaDemonstracao } from '@/modulo/humor/demonstracao'
+import { InsightsDaDemonstracao } from '@/modulo/painel/demonstracao'
 
 /**
  * Devolve a implementação que vale agora, mantendo o tipo da versão do banco —
