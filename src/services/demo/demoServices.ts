@@ -6,6 +6,7 @@ import type { GoalInput } from '../goalService'
 import type { MoodInput } from '../moodService'
 import { toISODate, todayISO } from '../../utils/format'
 import { goalProgress, resolveGoalStatus } from '../../utils/goalProgress'
+import { habitMoodCorrelations } from '../../utils/moodCorrelation'
 
 /**
  * Versões dos serviços que operam sobre o demoStore, com as mesmas assinaturas
@@ -488,11 +489,16 @@ export class DemoInsightService {
       .slice(0, limit)
   }
 
-  static async getHabitCorrelations() {
-    return {
-      reading: { productivity: 0.75, mood: 0.6 },
-      exercise: { productivity: 0.85, mood: 0.8 },
-      meditation: { productivity: 0.7, mood: 0.9 }
-    }
+  static async getHabitCorrelations(days: number = 90) {
+    const desde = new Date()
+    desde.setDate(desde.getDate() - days)
+    const inicio = toISODate(desde)
+    const data = readDemo()
+
+    return habitMoodCorrelations(
+      data.habits,
+      data.habit_logs,
+      data.mood_logs.filter(log => log.date >= inicio)
+    )
   }
 }
