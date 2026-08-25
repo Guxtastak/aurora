@@ -14,7 +14,7 @@ export function PaginaDeCadastro() {
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
   const [carregando, setCarregando] = useState(false)
-  const { signUp } = useAutenticacao()
+  const { cadastrar } = useAutenticacao()
   const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -34,7 +34,7 @@ export function PaginaDeCadastro() {
 
     setCarregando(true)
     try {
-      await signUp(email, password)
+      await cadastrar(email, password)
       // Se a confirmação de email estiver desativada no Supabase, a sessão já existe
       // e o RotaProtegida libera o dashboard direto.
       setMessage('Conta criada! Verifique seu email caso a confirmação esteja ativada.')

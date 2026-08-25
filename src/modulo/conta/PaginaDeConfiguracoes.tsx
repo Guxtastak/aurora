@@ -13,7 +13,7 @@ import { ServicoDeInsights } from '@/compartilhado/fonte/fonteDeDados'
 import type { Insight } from '@/compartilhado/tipo/banco'
 
 export function PaginaDeConfiguracoes() {
-  const { user, signOut } = useAutenticacao()
+  const { usuario, sair } = useAutenticacao()
   const { theme, toggleTheme } = useTema()
   const navigate = useNavigate()
   const [insights, setInsights] = useState<Insight[]>([])
@@ -26,7 +26,7 @@ export function PaginaDeConfiguracoes() {
   }, [])
 
   const handleSignOut = async () => {
-    await signOut()
+    await sair()
     navigate('/entrar')
   }
 
@@ -45,7 +45,7 @@ export function PaginaDeConfiguracoes() {
         <div className="flex items-center justify-between gap-4">
           <div className="min-w-0">
             <p className="text-sm text-gray-500 dark:text-gray-400">Email</p>
-            <p className="font-medium text-gray-900 dark:text-white truncate">{user?.email}</p>
+            <p className="font-medium text-gray-900 dark:text-white truncate">{usuario?.email}</p>
           </div>
           <Botao variant="danger" icon={<LogOut size={16} />} onClick={handleSignOut}>
             Sair

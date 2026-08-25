@@ -13,7 +13,7 @@ export function PaginaDeEntrada() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [carregando, setCarregando] = useState(false)
-  const { signIn } = useAutenticacao()
+  const { entrar } = useAutenticacao()
   const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -21,7 +21,7 @@ export function PaginaDeEntrada() {
     setError('')
     setCarregando(true)
     try {
-      await signIn(email, password)
+      await entrar(email, password)
       navigate('/painel')
     } catch (err: any) {
       setError(err.message || 'Erro ao fazer login')

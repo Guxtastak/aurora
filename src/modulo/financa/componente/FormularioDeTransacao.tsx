@@ -1,6 +1,6 @@
 /**
- * Formulário de entrada ou saída. A lista CATEGORIAS no topo do arquivo é a
- * fonte das opções.
+ * Formulário de entrada ou saída. As opções do campo de categoria vêm de
+ * modulo/financa/categorias.ts.
  */
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -8,20 +8,8 @@ import { z } from 'zod'
 import { CampoDeTexto, CampoDeSelecao } from '@/compartilhado/componente/Campo'
 import { Botao } from '@/compartilhado/componente/Botao'
 import { dataDeHoje } from '@/compartilhado/utilitario/formato'
+import { CATEGORIAS } from '@/modulo/financa/categorias'
 
-export const CATEGORIAS = [
-  'Salário',
-  'Freelance',
-  'Investimentos',
-  'Moradia',
-  'Alimentação',
-  'Transporte',
-  'Saúde',
-  'Educação',
-  'Lazer',
-  'Assinaturas',
-  'Outros'
-]
 
 const schema = z.object({
   date: z.string().min(1, 'Informe a data'),
