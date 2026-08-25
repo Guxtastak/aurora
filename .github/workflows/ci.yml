@@ -1,0 +1,40 @@
+name: Verificações
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Um PR que recebe vários pushes seguidos só verifica o último
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # `npm run build` é `tsc -b && vite build`: o typecheck entra junto.
+      # Sem VITE_SUPABASE_* o build sai em modo demonstração, como na prévia.
+      - name: Build e typecheck
+        run: npm run build
+
+      # O oxlint hoje só emite warnings (set-state-in-effect, only-export-components).
+      # Warning não derruba o job; erro, sim — é o que `react/rules-of-hooks` gera.
+      - name: Lint
+        run: npm run lint
+
+      - name: Testes
+        run: npm test
