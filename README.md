@@ -49,7 +49,8 @@ npm install
 
 1. Crie um projeto em <https://supabase.com>.
 2. Abra **SQL Editor**, cole o conteúdo de [`supabase/schema.sql`](supabase/schema.sql) e execute.
-   Isso cria as tabelas (`habits`, `habit_logs`, `books`, `finances`, `goals`, `insights`),
+   Isso cria as tabelas (`habits`, `habit_logs`, `books`, `finances`, `goals`, `mood_logs`,
+   `insights`),
    os índices, o trigger de `updated_at` e as políticas de RLS.
 3. Em **Authentication > Providers > Email**, se quiser entrar sem confirmar email,
    desative *Confirm email*.
@@ -88,13 +89,17 @@ src/
     books/       BookCard, BookForm, BookSearch (Google Books)
     finances/    TransactionForm, TransactionList, CategoryChart
     goals/       GoalCard, GoalForm
-  pages/         Login, Register, Dashboard, Habits, Books, Finances, Goals, Settings
+    mood/        MoodCheckin, Scale + moodScales, MoodTrendChart,
+                 HabitMoodCorrelations, MoodHistory, MoodEditForm
+  pages/         Login, Register, Dashboard, Habits, Books, Finances, Goals, Mood, Settings
   hooks/         useAuth (AuthProvider + contexto), useTheme (dark mode)
-  services/      supabase, habitService, bookService, financeService, goalService, insightService
+  services/      supabase, habitService, bookService, financeService, goalService,
+                 moodService, insightService
                  data.ts (escolhe Supabase ou demo), demo/ (dados de exemplo da prévia)
   types/         database.types.ts
   utils/         format.ts (moeda, datas, percentuais)
                  goalProgress.ts (regras de progresso/status das metas) + testes
+                 moodCorrelation.ts (relação entre hábito e humor) + testes
   styles/        index.css (Tailwind)
 supabase/
   schema.sql     Schema completo + RLS
@@ -113,8 +118,14 @@ supabase/
   progresso calculado a partir do valor atual e filtro por status. Bater o alvo conclui a meta e
   cair abaixo dele a reabre; prazo vencido marca a meta como atrasada sem declarar fracasso.
   Meta sem alvo fica qualitativa: sem barra de progresso e com o status que você escolher.
-- **Dashboard**: indicadores do dia, gráfico dos últimos 7 dias de hábitos, leitura em andamento e
-  geração de insight diário (salvo na tabela `insights`).
+- **Humor**: registro diário de humor e energia (escalas de 1 a 5) com nota opcional, um por dia.
+  A tela mostra as médias de 30 dias, o gráfico de tendência, o histórico editável e a comparação
+  entre cada hábito diário e o humor: o humor médio dos dias em que você cumpriu o hábito contra o
+  dos dias em que não cumpriu. A comparação só aparece com pelo menos 5 dias registrados e 2 dias
+  de cada lado; hábitos semanais e mensais ficam de fora, porque neles "não cumpriu" é o estado
+  normal da maioria dos dias. É comparação, não causa — e o texto da tela nunca afirma o contrário.
+- **Dashboard**: indicadores do dia, gráfico dos últimos 7 dias de hábitos, leitura em andamento,
+  marcação do humor do dia e geração de insight diário (salvo na tabela `insights`).
 - **Configurações**: conta, alternância de tema claro/escuro e histórico de insights.
 
 ## Decisões e desvios em relação ao PDF
@@ -133,11 +144,19 @@ necessidade técnica:
 | URLs de Google Books / AwesomeAPI / resumo mensal | template strings reconstruídas | os `${...}` foram corrompidos na exportação do PDF |
 | `VITE_GOOGLE_BOOKS_API_KEY` | passou a ser opcional | a API responde sem chave; antes o app lançava erro |
 | Fuso horário nas datas | uso de data local em vez de `toISOString()` direto | evita marcar o hábito no dia errado à noite (UTC-3) |
+| `getHabitCorrelations` com `productivity` | a dimensão virou `energy` | produtividade não tinha dado nenhum por trás; energia o usuário informa junto com o humor |
 
 O PDF define a tabela `goals` e o tipo `Goal`, mas nenhum serviço ou tela — a tela de Metas foi
 desenhada aqui, seguindo o formato dos outros módulos. As regras de progresso e status ficam em
 `src/utils/goalProgress.ts`, fora do serviço, porque valem igual para o Supabase e para o modo
 demonstração; são a única parte com teste automatizado.
 
-Item da especificação ainda não implementado: `getHabitCorrelations` continua retornando os valores
-simulados do PDF — correlacionar hábito com humor exigiria registrar humor, que não existe no schema.
+A tabela `mood_logs` e a tela de Humor também não estão no PDF. Elas existem porque o
+`getHabitCorrelations` da especificação devolvia valores simulados e nenhuma tela o chamava:
+correlacionar hábito com humor exige registrar humor. Hoje a função calcula sobre dado real, e a
+regra do cálculo ficou em `src/utils/moodCorrelation.ts` — fora do serviço, testada, pelo mesmo
+critério do `goalProgress.ts`.
+
+> **Já rodou o `schema.sql` antes?** Rode de novo. O arquivo é idempotente (`create table if not
+> exists`, `drop policy if exists`), então executá-lo inteiro só acrescenta a tabela `mood_logs`,
+> o índice, o trigger e as políticas — sem tocar nos seus dados.
