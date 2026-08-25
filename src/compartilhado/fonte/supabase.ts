@@ -1,0 +1,25 @@
+/**
+ * O cliente do Supabase e a chave que decide o modo do app.
+ *
+ * Sem VITE_SUPABASE_URL/ANON_KEY válidas no .env, `modoDemonstracao` fica
+ * verdadeiro e todo o app passa a trabalhar sobre o localStorage.
+ */
+import { createClient } from '@supabase/supabase-js'
+import type { Banco } from '@/compartilhado/tipo/banco'
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+
+/**
+ * Modo demonstração: sem credenciais válidas do Supabase o app roda com dados
+ * de exemplo no localStorage (é assim que a prévia do GitHub Pages funciona).
+ * Preencha o .env com a URL e a anon key do seu projeto para usar o banco real.
+ */
+export const modoDemonstracao = !supabaseUrl || !supabaseAnonKey || !/^https?:\/\//.test(supabaseUrl)
+
+// Em modo demo o cliente nunca é usado, mas precisa de uma URL sintaticamente
+// válida para o createClient não lançar durante o import.
+export const supabase = createClient<Banco>(
+  modoDemonstracao ? 'https://demo.invalid' : supabaseUrl,
+  modoDemonstracao ? 'demo-anon-key' : supabaseAnonKey
+)

@@ -80,30 +80,42 @@ npm run preview # serve o build
 
 ## Estrutura
 
+O código é separado **por assunto**, não por tipo técnico: tudo de hábitos mora em
+`modulo/habito/`, tudo de humor em `modulo/humor/`, e assim por diante.
+
 ```
 src/
-  components/
-    common/      Button, Card, Input/Select/Textarea, Modal, Loading, EmptyState, StatCard, ProtectedRoute
-    layout/      Layout, Sidebar, Header
-    habits/      HabitCard, HabitForm
-    books/       BookCard, BookForm, BookSearch (Google Books)
-    finances/    TransactionForm, TransactionList, CategoryChart
-    goals/       GoalCard, GoalForm
-    mood/        MoodCheckin, Scale + moodScales, MoodTrendChart,
-                 HabitMoodCorrelations, MoodHistory, MoodEditForm
-  pages/         Login, Register, Dashboard, Habits, Books, Finances, Goals, Mood, Settings
-  hooks/         useAuth (AuthProvider + contexto), useTheme (dark mode)
-  services/      supabase, habitService, bookService, financeService, goalService,
-                 moodService, insightService
-                 data.ts (escolhe Supabase ou demo), demo/ (dados de exemplo da prévia)
-  types/         database.types.ts
-  utils/         format.ts (moeda, datas, percentuais)
-                 goalProgress.ts (regras de progresso/status das metas) + testes
-                 moodCorrelation.ts (relação entre hábito e humor) + testes
-  styles/        index.css (Tailwind)
+  app/                 main → App → rotas
+  estilo/              index.css (Tailwind)
+  compartilhado/       o que serve a todos os módulos
+    componente/        Botao, Cartao, Campo, Modal, Carregando, EstadoVazio,
+                       CartaoIndicador, RotaProtegida
+    moldura/           Moldura, Cabecalho, MenuLateral, AvisoDeDemonstracao
+    gancho/            useAutenticacao, useTema
+    utilitario/        formato.ts (moeda, datas, percentuais)
+    tipo/              banco.ts (as tabelas do Supabase em TypeScript)
+    fonte/             supabase.ts, fonteDeDados.ts (escolhe banco ou demonstração),
+                       armazenamentoDeDemonstracao.ts (dados de exemplo da prévia)
+  modulo/
+    habito/            Pagina, servico, demonstracao, componente/
+    livro/             idem (inclui a busca no Google Books)
+    financa/           idem
+    meta/              idem + regraDeProgresso.ts (com teste)
+    humor/             idem + regraDeComparacao.ts (com teste)
+    painel/            a tela inicial, que cruza os outros módulos
+    conta/             entrar, cadastrar, configurações
 supabase/
-  schema.sql     Schema completo + RLS
+  schema.sql           Schema completo + RLS
+docs/
+  ARQUITETURA.md       o caminho de um clique até o banco, e as convenções
 ```
+
+Cada módulo tem sempre `Pagina.tsx`, `servico.ts` e `demonstracao.ts` com esses
+nomes exatos. Os imports são absolutos: `@/` aponta para `src/`.
+
+> **Primeira vez no projeto?** Comece por [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md).
+> Ele mostra o caminho completo de um clique na tela até o banco e de volta, com um
+> exemplo real, e explica o que fica em português e o que fica em inglês — e por quê.
 
 ## Funcionalidades
 
@@ -146,16 +158,21 @@ necessidade técnica:
 | Fuso horário nas datas | uso de data local em vez de `toISOString()` direto | evita marcar o hábito no dia errado à noite (UTC-3) |
 | `getHabitCorrelations` com `productivity` | a dimensão virou `energy` | produtividade não tinha dado nenhum por trás; energia o usuário informa junto com o humor |
 
+> As linhas da tabela acima citam os nomes originais do PDF. O codigo hoje usa nomes
+> em portugues: `useAuth` virou `useAutenticacao`, `Database` virou `Banco`,
+> `getHabitCorrelations` virou `obterComparacaoDosHabitos`. A conversao completa esta
+> em [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md).
+
 O PDF define a tabela `goals` e o tipo `Goal`, mas nenhum serviço ou tela — a tela de Metas foi
 desenhada aqui, seguindo o formato dos outros módulos. As regras de progresso e status ficam em
-`src/utils/goalProgress.ts`, fora do serviço, porque valem igual para o Supabase e para o modo
+`src/modulo/meta/regraDeProgresso.ts`, fora do serviço, porque valem igual para o Supabase e para o modo
 demonstração; são a única parte com teste automatizado.
 
 A tabela `mood_logs` e a tela de Humor também não estão no PDF. Elas existem porque o
 `getHabitCorrelations` da especificação devolvia valores simulados e nenhuma tela o chamava:
 correlacionar hábito com humor exige registrar humor. Hoje a função calcula sobre dado real, e a
-regra do cálculo ficou em `src/utils/moodCorrelation.ts` — fora do serviço, testada, pelo mesmo
-critério do `goalProgress.ts`.
+regra do cálculo ficou em `src/modulo/humor/regraDeComparacao.ts` — fora do serviço, testada, pelo mesmo
+critério do `regraDeProgresso.ts`.
 
 > **Já rodou o `schema.sql` antes?** Rode de novo. O arquivo é idempotente (`create table if not
 > exists`, `drop policy if exists`), então executá-lo inteiro só acrescenta a tabela `mood_logs`,
