@@ -12,7 +12,7 @@ export function Cabecalho({ onMenuClick }: { onMenuClick: () => void }) {
   const { theme, toggleTheme } = useTema()
   const navigate = useNavigate()
 
-  const handleSignOut = async () => {
+  const aoSair = async () => {
     await sair()
     navigate('/entrar')
   }
@@ -49,7 +49,7 @@ export function Cabecalho({ onMenuClick }: { onMenuClick: () => void }) {
         </span>
 
         <button
-          onClick={handleSignOut}
+          onClick={aoSair}
           className="p-2 rounded-lg text-gray-500 hover:bg-red-50 hover:text-red-600 dark:text-gray-300 dark:hover:bg-red-900/30"
           aria-label="Sair"
         >

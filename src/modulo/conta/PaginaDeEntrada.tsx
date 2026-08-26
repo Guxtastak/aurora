@@ -16,7 +16,7 @@ export function PaginaDeEntrada() {
   const { entrar } = useAutenticacao()
   const navigate = useNavigate()
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const aoEntrar = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setCarregando(true)
@@ -48,7 +48,7 @@ export function PaginaDeEntrada() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={aoEntrar} className="space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
             <input

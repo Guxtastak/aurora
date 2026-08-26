@@ -25,7 +25,7 @@ export function PaginaDeConfiguracoes() {
       .catch((err: any) => setError(err.message || 'Erro ao carregar insights'))
   }, [])
 
-  const handleSignOut = async () => {
+  const aoSair = async () => {
     await sair()
     navigate('/entrar')
   }
@@ -47,7 +47,7 @@ export function PaginaDeConfiguracoes() {
             <p className="text-sm text-gray-500 dark:text-gray-400">Email</p>
             <p className="font-medium text-gray-900 dark:text-white truncate">{usuario?.email}</p>
           </div>
-          <Botao variant="danger" icon={<LogOut size={16} />} onClick={handleSignOut}>
+          <Botao variant="danger" icon={<LogOut size={16} />} onClick={aoSair}>
             Sair
           </Botao>
         </div>

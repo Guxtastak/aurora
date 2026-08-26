@@ -17,7 +17,7 @@ export function PaginaDeCadastro() {
   const { cadastrar } = useAutenticacao()
   const navigate = useNavigate()
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const aoCadastrar = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setMessage('')
@@ -60,7 +60,7 @@ export function PaginaDeCadastro() {
         <h1 className="text-3xl font-bold text-center mb-2 text-aurora-600 dark:text-aurora-400">Aurora</h1>
         <p className="text-center text-gray-500 dark:text-gray-400 mb-8">Crie sua conta</p>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={aoCadastrar} className="space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
             <input
