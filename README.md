@@ -130,6 +130,24 @@ nomes exatos. Os imports são absolutos: `@/` aponta para `src/`.
   progresso calculado a partir do valor atual e filtro por status. Bater o alvo conclui a meta e
   cair abaixo dele a reabre; prazo vencido marca a meta como atrasada sem declarar fracasso.
   Meta sem alvo fica qualitativa: sem barra de progresso e com o status que você escolher.
+  A meta também pode buscar o próprio número em outro módulo, em vez de esperar que você
+  atualize à mão. São seis origens:
+
+  | Origem | De onde vem o número |
+  | --- | --- |
+  | Eu atualizo na mão | o valor que você digitar (padrão) |
+  | Livros finalizados | quantos livros você finalizou no período da meta |
+  | Páginas lidas | as páginas desses livros finalizados |
+  | Marcações de um hábito | em quantos dias você marcou o hábito escolhido |
+  | Quanto guardei | entradas menos saídas no período |
+  | Quanto gastei | só as saídas do período |
+
+  O período é do início da meta (ou da criação dela) até o prazo (ou hoje) — é o que faz
+  "ler 24 livros no ano" contar este ano e não a estante inteira, e o que impede uma meta de
+  poupança criada hoje de já nascer batida por causa do dinheiro que você tinha antes.
+  O valor é recalculado toda vez que a tela abre e nunca fica gravado, então corrigir o livro
+  ou a transação corrige a meta sozinho. Livro finalizado sem data de conclusão não entra na
+  conta, e a tela avisa quantos ficaram de fora.
 - **Humor**: registro diário de humor e energia (escalas de 1 a 5) com nota opcional, um por dia.
   A tela mostra as médias de 30 dias, o gráfico de tendência, o histórico editável e a comparação
   entre cada hábito diário e o humor: o humor médio dos dias em que você cumpriu o hábito contra o
@@ -175,5 +193,7 @@ regra do cálculo ficou em `src/modulo/humor/regraDeComparacao.ts` — fora do s
 critério do `regraDeProgresso.ts`.
 
 > **Já rodou o `schema.sql` antes?** Rode de novo. O arquivo é idempotente (`create table if not
-> exists`, `drop policy if exists`), então executá-lo inteiro só acrescenta a tabela `mood_logs`,
-> o índice, o trigger e as políticas — sem tocar nos seus dados.
+> exists`, `drop policy if exists`, `add column if not exists`), então executá-lo inteiro só
+> acrescenta a tabela `mood_logs`, o índice, o trigger, as políticas e as colunas `source` e
+> `source_habit_id` da tabela `goals` — sem tocar nos seus dados. As metas que você já tem
+> continuam manuais, porque `source` nasce com `default 'manual'`.
