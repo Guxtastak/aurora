@@ -111,7 +111,7 @@ export type Livro = {
   notes?: string
   pages_total?: number
   pages_read?: number
-  started_date?: string
+  started_date?: string | null
   finished_date?: string | null
   google_books_id?: string
   created_at: string
@@ -127,7 +127,7 @@ export type LivroParaInserir = {
   notes?: string
   pages_total?: number
   pages_read?: number
-  started_date?: string
+  started_date?: string | null
   finished_date?: string | null
   google_books_id?: string
   user_id?: string
@@ -142,7 +142,7 @@ export type LivroParaAtualizar = {
   notes?: string
   pages_total?: number
   pages_read?: number
-  started_date?: string
+  started_date?: string | null
   finished_date?: string | null
   google_books_id?: string
   user_id?: string
