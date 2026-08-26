@@ -20,7 +20,7 @@ import type { Meta } from '@/compartilhado/tipo/banco'
 import { valorDaMeta, livrosSemDataDeConclusao } from '@/modulo/meta/regraDeOrigem'
 import type { DadosDosModulos } from '@/modulo/meta/regraDeOrigem'
 import { progressoDaMeta, resolverStatusDaMeta } from '@/modulo/meta/regraDeProgresso'
-import { ehAutomatica } from '@/modulo/meta/origens'
+import { usaLivros } from '@/modulo/meta/origens'
 
 export type MetaComProgresso = Meta & {
   /** Valor que vale agora: calculado para meta automática, gravado para manual */
@@ -70,7 +70,7 @@ export async function listarMetasComProgresso() {
   return {
     metas: comProgresso,
     /** Quantos livros finalizados não entram nas contas por falta de data */
-    livrosSemData: comProgresso.some(meta => ehAutomatica(meta.source))
+    livrosSemData: comProgresso.some(meta => usaLivros(meta.source))
       ? livrosSemDataDeConclusao(dados)
       : 0
   }
