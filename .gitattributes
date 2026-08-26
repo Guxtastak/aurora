@@ -1,0 +1,25 @@
+# Finais de linha.
+#
+# O projeto é editado no Windows, mas roda no CI em Linux e é servido por um
+# runner Linux no Pages. Sem regra, cada máquina grava do seu jeito e o
+# repositório acumula arquivos com CRLF, LF e — pior — os dois no mesmo arquivo.
+# Quando isso acontece, uma alteração de duas linhas aparece no diff como o
+# arquivo inteiro reescrito, e a revisão perde o sentido.
+#
+# A regra: no repositório, tudo é LF. Na sua cópia de trabalho o git converte
+# sozinho, então você não precisa configurar nada no editor.
+
+* text=auto eol=lf
+
+# Os binários que um dia entrarem aqui: o git nunca deve tentar converter, e
+# diff de bytes não ajuda ninguém. Hoje o projeto é todo texto, mas capa de
+# livro e captura de tela chegam cedo ou tarde.
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.webp binary
+*.ico  binary
+*.pdf  binary
+*.woff  binary
+*.woff2 binary
