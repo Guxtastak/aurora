@@ -23,6 +23,8 @@ export class MetasDaDemonstracao {
     const data = lerDemonstracao()
     const created: Meta = {
       ...goal,
+      source: goal.source || 'manual',
+      source_habit_id: goal.source_habit_id ?? null,
       status: resolverStatusDaMeta(goal),
       progress_percentage: progressoDaMeta(goal.current_value, goal.target_value),
       id: novoId(),

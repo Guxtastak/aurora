@@ -15,7 +15,7 @@ import { progressoDaMeta } from '@/modulo/meta/regraDeProgresso'
  * própria cópia dos dados, no próprio navegador.
  */
 
-const STORAGE_KEY = 'aurora-demo-v3'
+const STORAGE_KEY = 'aurora-demo-v4'
 const DEMO_USER_ID = 'demo-user'
 
 export interface DadosDaDemonstracao {
@@ -159,6 +159,80 @@ function seed(): DadosDaDemonstracao {
       pages_read: 0,
       created_at: daysAgo(12).toISOString(),
       updated_at: now
+    },
+    // Os finalizados abaixo existem para a meta de leitura ter o que contar: ela
+    // conta livro por finished_date dentro da janela dela. O ultimo foi
+    // finalizado antes do inicio da meta e fica de fora de proposito, para a
+    // previa mostrar que a janela e levada a serio.
+    {
+      id: 'demo-book-5',
+      user_id: DEMO_USER_ID,
+      title: 'Devagar',
+      author: 'Carl Honoré',
+      status: 'finished',
+      rating: 4,
+      pages_total: 288,
+      pages_read: 288,
+      started_date: iso(daysAgo(58)),
+      finished_date: iso(daysAgo(44)),
+      created_at: daysAgo(58).toISOString(),
+      updated_at: now
+    },
+    {
+      id: 'demo-book-6',
+      user_id: DEMO_USER_ID,
+      title: 'Mindset',
+      author: 'Carol Dweck',
+      status: 'finished',
+      rating: 5,
+      pages_total: 312,
+      pages_read: 312,
+      started_date: iso(daysAgo(88)),
+      finished_date: iso(daysAgo(63)),
+      created_at: daysAgo(88).toISOString(),
+      updated_at: now
+    },
+    {
+      id: 'demo-book-7',
+      user_id: DEMO_USER_ID,
+      title: 'Trabalho Focado',
+      author: 'Cal Newport',
+      status: 'finished',
+      rating: 5,
+      pages_total: 296,
+      pages_read: 296,
+      started_date: iso(daysAgo(112)),
+      finished_date: iso(daysAgo(91)),
+      created_at: daysAgo(112).toISOString(),
+      updated_at: now
+    },
+    {
+      id: 'demo-book-8',
+      user_id: DEMO_USER_ID,
+      title: 'A Sutil Arte de Ligar o F*da-se',
+      author: 'Mark Manson',
+      status: 'finished',
+      rating: 3,
+      pages_total: 224,
+      pages_read: 224,
+      started_date: iso(daysAgo(130)),
+      finished_date: iso(daysAgo(108)),
+      created_at: daysAgo(130).toISOString(),
+      updated_at: now
+    },
+    {
+      id: 'demo-book-9',
+      user_id: DEMO_USER_ID,
+      title: 'Rápido e Devagar',
+      author: 'Daniel Kahneman',
+      status: 'finished',
+      rating: 4,
+      pages_total: 608,
+      pages_read: 608,
+      started_date: iso(daysAgo(190)),
+      finished_date: iso(daysAgo(151)),
+      created_at: daysAgo(190).toISOString(),
+      updated_at: now
     }
   ]
 
@@ -205,6 +279,7 @@ function seed(): DadosDaDemonstracao {
     startedDaysAgo: number
     deadlineInDays: number
     status: Meta['status']
+    source?: Meta['source']
   }> = [
     {
       id: 'demo-goal-1',
@@ -216,7 +291,9 @@ function seed(): DadosDaDemonstracao {
       unit: 'livros',
       startedDaysAgo: 120,
       deadlineInDays: 150,
-      status: 'active'
+      status: 'active',
+      // O 9 acima e ignorado: a meta conta os livros finalizados na janela
+      source: 'books_finished'
     },
     {
       id: 'demo-goal-2',
@@ -228,7 +305,9 @@ function seed(): DadosDaDemonstracao {
       unit: 'R$',
       startedDaysAgo: 210,
       deadlineInDays: 120,
-      status: 'active'
+      status: 'active',
+      // Entradas menos saidas na janela, nao o saldo da conta
+      source: 'money_saved'
     },
     {
       id: 'demo-goal-3',
@@ -271,6 +350,8 @@ function seed(): DadosDaDemonstracao {
   const goals: Meta[] = goalSeeds.map(item => ({
     id: item.id,
     user_id: DEMO_USER_ID,
+    source: item.source || 'manual',
+    source_habit_id: null,
     title: item.title,
     description: item.description,
     target_value: item.target,
