@@ -5,11 +5,13 @@
 import { motion } from 'framer-motion'
 import { BookOpen, Repeat, Wallet, HeartPulse, Pencil, Trash2, CalendarClock } from 'lucide-react'
 import type { Meta } from '@/compartilhado/tipo/banco'
+import type { MetaComProgresso } from '@/modulo/meta/progressoAutomatico'
+import { origemPorId, ehAutomatica } from '@/modulo/meta/origens'
 import { formatarMoeda, formatarData } from '@/compartilhado/utilitario/formato'
 import { metaEstaAtrasada } from '@/modulo/meta/regraDeProgresso'
 
 interface CartaoDeMetaProps {
-  goal: Meta
+  goal: MetaComProgresso
   onEdit: (goal: Meta) => void
   onDelete: (goal: Meta) => void
 }
@@ -38,10 +40,16 @@ function formatValue(value: number | undefined | null, unit?: string) {
 export function CartaoDeMeta({ goal, onEdit, onDelete }: CartaoDeMetaProps) {
   const category = CATEGORIAS[goal.category]
   const CategoryIcon = category.icon
-  const status = STATUS[goal.status]
-  const overdue = metaEstaAtrasada(goal)
+  // Selo, atraso e barra saem todos do calculo, nao do banco: para meta
+  // automatica o valor gravado pode estar velho, porque a gente nunca o regrava.
+  // Se o selo viesse do banco, a meta que acabou de bater o alvo apareceria
+  // como "Ativa" com a barra em 100%.
+  const status = STATUS[goal.statusVivo]
+  const overdue = metaEstaAtrasada({ deadline: goal.deadline, status: goal.statusVivo })
   const measurable = !!goal.target_value && goal.target_value > 0
-  const progress = goal.progress_percentage || 0
+  const progress = goal.progresso
+  const origem = origemPorId(goal.source)
+  const automatica = ehAutomatica(goal.source)
 
   return (
     <motion.div
@@ -104,11 +112,19 @@ export function CartaoDeMeta({ goal, onEdit, onDelete }: CartaoDeMetaProps) {
         </div>
       </div>
 
+      {automatica && (
+        <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
+          {goal.habitoAusente
+            ? 'O hábito desta meta foi excluído — o progresso ficou sem fonte.'
+            : `Atualiza sozinha · ${origem.rotulo.toLowerCase()}`}
+        </p>
+      )}
+
       {measurable && (
         <div className="mt-4">
           <div className="flex items-center justify-between text-sm mb-1.5">
             <span className="text-gray-600 dark:text-gray-300">
-              {formatValue(goal.current_value, goal.unit)}
+              {formatValue(goal.valorAtual, goal.unit)}
               <span className="text-gray-400 dark:text-gray-500">
                 {' '}
                 de {formatValue(goal.target_value, goal.unit)}
