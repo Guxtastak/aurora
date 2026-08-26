@@ -25,11 +25,20 @@ interface CartaoDeLivroProps {
   book: Livro
   onProgress: (book: Livro, pages: number) => void
   onFinish: (book: Livro) => void
+  /** Corrige a data de um livro já finalizado; sem isso a meta o ignora para sempre */
+  onFinishedDate: (book: Livro, date: string) => void
   onDelete: (book: Livro) => void
 }
 
-export function CartaoDeLivro({ book, onProgress, onFinish, onDelete }: CartaoDeLivroProps) {
+export function CartaoDeLivro({
+  book,
+  onProgress,
+  onFinish,
+  onFinishedDate,
+  onDelete
+}: CartaoDeLivroProps) {
   const progress = porcentagem(book.pages_read || 0, book.pages_total || 0)
+  const semDataDeConclusao = book.status === 'finished' && !book.finished_date
 
   return (
     <motion.div
@@ -85,6 +94,34 @@ export function CartaoDeLivro({ book, onProgress, onFinish, onDelete }: CartaoDe
                 transition={{ duration: 0.5 }}
               />
             </div>
+          </div>
+        )}
+
+        {book.status === 'finished' && (
+          <div className="mt-3">
+            <label className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+              <span className="whitespace-nowrap">Concluído em</span>
+              <input
+                type="date"
+                defaultValue={book.finished_date || ''}
+                onChange={e => {
+                  if (e.target.value && e.target.value !== book.finished_date) {
+                    onFinishedDate(book, e.target.value)
+                  }
+                }}
+                className={`px-2 py-1 text-sm rounded-lg border bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
+                  semDataDeConclusao
+                    ? 'border-amber-400 dark:border-amber-500'
+                    : 'border-gray-300 dark:border-gray-600'
+                }`}
+                aria-label="Data de conclusão"
+              />
+            </label>
+            {semDataDeConclusao && (
+              <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
+                Sem esta data o livro não conta nas suas metas de leitura.
+              </p>
+            )}
           </div>
         )}
 

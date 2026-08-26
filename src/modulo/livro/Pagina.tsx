@@ -67,6 +67,18 @@ export function PaginaDeLivros() {
     }
   }
 
+  // Corrige a data de um livro ja finalizado. Existe porque livro finalizado
+  // sem data nunca conta nas metas de leitura, e antes disso nao havia como
+  // preencher: o botao Finalizar so aparece em livro que ainda nao terminou.
+  const aoCorrigirDataDeConclusao = async (book: Livro, date: string) => {
+    try {
+      const updated = await ServicoDeLivros.atualizarLivro(book.id, { finished_date: date })
+      setLivros(prev => prev.map(b => (b.id === book.id ? updated : b)))
+    } catch (falha: any) {
+      setErro(falha.message || 'Erro ao atualizar a data de conclusão')
+    }
+  }
+
   const aoExcluir = async (book: Livro) => {
     if (!window.confirm(`Excluir "${book.title}"?`)) return
     try {
@@ -162,6 +174,7 @@ export function PaginaDeLivros() {
                 book={book}
                 onProgress={aoAvancarPaginas}
                 onFinish={handleFinish}
+                onFinishedDate={aoCorrigirDataDeConclusao}
                 onDelete={aoExcluir}
               />
             ))}
