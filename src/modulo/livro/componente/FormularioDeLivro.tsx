@@ -1,11 +1,12 @@
 /**
  * Formulário de cadastro manual e edição de livro.
  */
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { CampoDeTexto, CampoDeSelecao } from '@/compartilhado/componente/Campo'
 import { Botao } from '@/compartilhado/componente/Botao'
+import { dataDeConclusao } from '@/modulo/livro/regraDeConclusao'
 
 const schema = z.object({
   title: z.string().min(1, 'Informe o título'),
@@ -13,10 +14,19 @@ const schema = z.object({
   status: z.enum(['reading', 'finished', 'want_to_read', 'dropped']),
   pages_total: z.number().min(0),
   pages_read: z.number().min(0),
-  cover_url: z.string().optional()
+  cover_url: z.string().optional(),
+  finished_date: z.string().optional()
 })
 
-export type ValoresDoLivro = z.infer<typeof schema>
+type CamposDoFormulario = z.infer<typeof schema>
+
+/**
+ * O que sai do formulário. A data de conclusão já vem resolvida pela
+ * regraDeConclusao: preenchida quando o livro é finalizado, nula quando não é.
+ */
+export type ValoresDoLivro = Omit<CamposDoFormulario, 'finished_date'> & {
+  finished_date: string | null
+}
 
 interface FormularioDeLivroProps {
   onSubmit: (values: ValoresDoLivro) => Promise<void>
@@ -27,8 +37,9 @@ export function FormularioDeLivro({ onSubmit, onCancel }: FormularioDeLivroProps
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors, isSubmitting }
-  } = useForm<ValoresDoLivro>({
+  } = useForm<CamposDoFormulario>({
     resolver: zodResolver(schema),
     defaultValues: {
       title: '',
@@ -36,12 +47,22 @@ export function FormularioDeLivro({ onSubmit, onCancel }: FormularioDeLivroProps
       status: 'want_to_read',
       pages_total: 0,
       pages_read: 0,
-      cover_url: ''
+      cover_url: '',
+      finished_date: ''
     }
   })
 
+  const status = useWatch({ control, name: 'status' })
+  const finalizado = status === 'finished'
+
+  const enviar = (campos: CamposDoFormulario) =>
+    onSubmit({
+      ...campos,
+      finished_date: dataDeConclusao(campos.status, campos.finished_date)
+    })
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form onSubmit={handleSubmit(enviar)} className="space-y-4">
       <CampoDeTexto label="Título" error={errors.title?.message} {...register('title')} />
       <CampoDeTexto label="Autor" error={errors.author?.message} {...register('author')} />
 
@@ -51,6 +72,20 @@ export function FormularioDeLivro({ onSubmit, onCancel }: FormularioDeLivroProps
         <option value="finished">Finalizado</option>
         <option value="dropped">Abandonado</option>
       </CampoDeSelecao>
+
+      {finalizado && (
+        <div>
+          <CampoDeTexto
+            label="Data de conclusão"
+            type="date"
+            error={errors.finished_date?.message}
+            {...register('finished_date')}
+          />
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            Em branco, vale hoje. É por esta data que as metas de leitura contam o livro.
+          </p>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-4">
         <CampoDeTexto
