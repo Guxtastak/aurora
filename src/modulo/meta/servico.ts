@@ -11,8 +11,11 @@ import { progressoDaMeta, resolverStatusDaMeta } from '@/modulo/meta/regraDeProg
 /** Campos que a tela envia; progresso e status derivados são calculados aqui */
 export type DadosDaMeta = Omit<
   Meta,
-  'id' | 'user_id' | 'created_at' | 'updated_at' | 'progress_percentage'
->
+  'id' | 'user_id' | 'created_at' | 'updated_at' | 'progress_percentage' | 'source'
+> & {
+  /** Opcional na entrada: sem origem informada, o banco assume 'manual' */
+  source?: Meta['source']
+}
 
 /** Reduz uma meta do banco aos campos editaveis, sem id nem colunas geradas */
 function toInput(goal: Meta): DadosDaMeta {
@@ -25,7 +28,9 @@ function toInput(goal: Meta): DadosDaMeta {
     start_date: goal.start_date,
     deadline: goal.deadline,
     category: goal.category,
-    status: goal.status
+    status: goal.status,
+    source: goal.source,
+    source_habit_id: goal.source_habit_id
   }
 }
 

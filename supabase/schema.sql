@@ -86,6 +86,18 @@ create table if not exists public.goals (
   updated_at          timestamptz not null default now()
 );
 
+-- De onde vem o numero da meta. 'manual' e o comportamento original: o valor
+-- em current_value foi digitado pelo usuario. As outras origens fazem o app
+-- calcular o valor a partir do modulo correspondente, dentro da janela da meta.
+-- source_habit_id so e usado por 'habit_checkins'; apagar o habito zera o
+-- vinculo em vez de apagar a meta.
+alter table public.goals
+  add column if not exists source text not null default 'manual'
+    check (source in ('manual', 'books_finished', 'pages_read',
+                      'habit_checkins', 'money_saved', 'money_spent')),
+  add column if not exists source_habit_id uuid
+    references public.habits (id) on delete set null;
+
 -- --------------------------------------------------------------- mood_logs
 create table if not exists public.mood_logs (
   id         uuid primary key default gen_random_uuid(),

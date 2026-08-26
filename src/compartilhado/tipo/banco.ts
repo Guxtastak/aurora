@@ -184,6 +184,18 @@ export type TransacaoParaAtualizar = {
 
 // ====================================================================== goals
 
+/**
+ * De onde a meta tira o valor atual. 'manual' mantem o comportamento
+ * original: o usuario digita. Rotulos e unidades em modulo/meta/origens.ts.
+ */
+export type OrigemDaMeta =
+  | 'manual'
+  | 'books_finished'
+  | 'pages_read'
+  | 'habit_checkins'
+  | 'money_saved'
+  | 'money_spent'
+
 export type Meta = {
   id: string
   user_id: string
@@ -197,6 +209,10 @@ export type Meta = {
   category: 'reading' | 'habits' | 'finance' | 'health'
   status: 'active' | 'completed' | 'failed'
   progress_percentage: number
+  /** De onde vem o valor atual. Catalogo em modulo/meta/origens.ts */
+  source: OrigemDaMeta
+  /** So usado por habit_checkins; nulo se o habito foi apagado */
+  source_habit_id?: string | null
   created_at: string
   updated_at: string
 }
@@ -212,6 +228,8 @@ export type MetaParaInserir = {
   category: 'reading' | 'habits' | 'finance' | 'health'
   status: 'active' | 'completed' | 'failed'
   progress_percentage: number
+  source?: OrigemDaMeta
+  source_habit_id?: string | null
   user_id?: string
 }
 
@@ -226,6 +244,8 @@ export type MetaParaAtualizar = {
   category?: 'reading' | 'habits' | 'finance' | 'health'
   status?: 'active' | 'completed' | 'failed'
   progress_percentage?: number
+  source?: OrigemDaMeta
+  source_habit_id?: string | null
   user_id?: string
   created_at?: string
   updated_at?: string
