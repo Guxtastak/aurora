@@ -78,3 +78,12 @@ export function origemSugeridaPara(categoria: Meta['category']): OrigemDaMeta {
 export function ehAutomatica(origem: OrigemDaMeta) {
   return origem !== 'manual'
 }
+
+/**
+ * Origens que dependem do módulo de livros. A tela de Metas usa isto para só
+ * avisar sobre livro sem data de conclusão quando alguma meta de fato lê dali —
+ * quem só tem meta de dinheiro não precisa ouvir sobre a estante.
+ */
+export function usaLivros(origem: OrigemDaMeta) {
+  return origem === 'books_finished' || origem === 'pages_read'
+}

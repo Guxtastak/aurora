@@ -5,9 +5,11 @@
 import { useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { Plus, Target } from 'lucide-react'
-import { ServicoDeMetas } from '@/compartilhado/fonte/fonteDeDados'
+import { ServicoDeMetas, ServicoDeHabitos } from '@/compartilhado/fonte/fonteDeDados'
 import { useDados } from '@/compartilhado/gancho/useDados'
-import type { Meta } from '@/compartilhado/tipo/banco'
+import { listarMetasComProgresso } from '@/modulo/meta/progressoAutomatico'
+import type { MetaComProgresso } from '@/modulo/meta/progressoAutomatico'
+import type { Meta, Habito } from '@/compartilhado/tipo/banco'
 import { CartaoDeMeta } from '@/modulo/meta/componente/CartaoDeMeta'
 import { FormularioDeMeta } from '@/modulo/meta/componente/FormularioDeMeta'
 import type { ValoresDaMeta } from '@/modulo/meta/componente/FormularioDeMeta'
@@ -28,15 +30,22 @@ const FILTERS: { key: Filter; label: string }[] = [
 
 export function PaginaDeMetas() {
   const {
-    dados: metas,
-    setDados: setMetas,
+    dados,
+    setDados,
     carregando,
     erro,
     setErro,
     recarregar
-  } = useDados(() => ServicoDeMetas.listarMetas(), [] as Meta[], {
-    aoFalhar: 'Erro ao carregar metas'
-  })
+  } = useDados(
+    () => listarMetasComProgresso(),
+    { metas: [] as MetaComProgresso[], livrosSemData: 0 },
+    { aoFalhar: 'Erro ao carregar metas' }
+  )
+
+  const { metas, livrosSemData } = dados
+
+  // So para o seletor da origem "marcacoes de um habito" no formulario
+  const { dados: habitos } = useDados(() => ServicoDeHabitos.listarHabitos(), [] as Habito[])
 
   const [filtro, setFiltro] = useState<Filter>('all')
   const [modalAberto, setModalAberto] = useState(false)
@@ -61,7 +70,10 @@ export function PaginaDeMetas() {
     if (!window.confirm(`Excluir a meta "${meta.title}"?`)) return
     try {
       await ServicoDeMetas.excluirMeta(meta.id)
-      setMetas(anteriores => anteriores.filter(m => m.id !== meta.id))
+      setDados(anterior => ({
+        ...anterior,
+        metas: anterior.metas.filter(m => m.id !== meta.id)
+      }))
     } catch (falha: any) {
       setErro(falha.message || 'Erro ao excluir meta')
     }
@@ -72,15 +84,17 @@ export function PaginaDeMetas() {
     setEmEdicao(null)
   }
 
-  const visiveis = filtro === 'all' ? metas : metas.filter(m => m.status === filtro)
-  const ativas = metas.filter(m => m.status === 'active')
-  const concluidas = metas.filter(m => m.status === 'completed')
+  // statusVivo e progresso vem do calculo, nao do que esta gravado: para meta
+  // automatica o banco guarda o ultimo valor conhecido, que pode estar velho
+  const visiveis = filtro === 'all' ? metas : metas.filter(m => m.statusVivo === filtro)
+  const ativas = metas.filter(m => m.statusVivo === 'active')
+  const concluidas = metas.filter(m => m.statusVivo === 'completed')
 
   // Meta sem alvo numerico e qualitativa: nao entra na media de progresso
   const ativasComAlvo = ativas.filter(m => !!m.target_value && m.target_value > 0)
   const progressoMedio = ativasComAlvo.length
     ? Math.round(
-        ativasComAlvo.reduce((soma, m) => soma + (m.progress_percentage || 0), 0) /
+        ativasComAlvo.reduce((soma, m) => soma + m.progresso, 0) /
           ativasComAlvo.length
       )
     : 0
@@ -104,6 +118,13 @@ export function PaginaDeMetas() {
           Nova meta
         </Botao>
       </div>
+
+      {livrosSemData > 0 && (
+        <p className="text-sm text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/20 rounded-lg px-4 py-2">
+          {livrosSemData} livro(s) finalizado(s) sem data de conclusão não entram nas metas de
+          leitura. Abra o livro e preencha a data para ele contar.
+        </p>
+      )}
 
       {erro && (
         <p className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg px-4 py-2">{erro}</p>
@@ -174,7 +195,7 @@ export function PaginaDeMetas() {
       )}
 
       <Modal open={modalAberto} onClose={fecharModal} title={emEdicao ? 'Editar meta' : 'Nova meta'}>
-        <FormularioDeMeta goal={emEdicao} onSubmit={aoEnviar} onCancel={fecharModal} />
+        <FormularioDeMeta goal={emEdicao} habitos={habitos} onSubmit={aoEnviar} onCancel={fecharModal} />
       </Modal>
     </div>
   )
