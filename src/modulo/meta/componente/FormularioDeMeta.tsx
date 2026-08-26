@@ -152,7 +152,11 @@ export function FormularioDeMeta({ goal, habitos, onSubmit, onCancel }: Formular
       </CampoDeSelecao>
 
       {origem.precisaDeHabito && (
-        <CampoDeSelecao label="Hábito" {...register('source_habit_id')}>
+        <CampoDeSelecao
+          label="Hábito"
+          error={errors.source_habit_id?.message}
+          {...register('source_habit_id')}
+        >
           <option value="">Escolha um hábito</option>
           {habitos.map(habito => (
             <option key={habito.id} value={habito.id}>
