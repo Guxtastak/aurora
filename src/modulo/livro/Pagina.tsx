@@ -53,7 +53,7 @@ export function PaginaDeLivros() {
     }
   }
 
-  const handleFinish = async (book: Livro) => {
+  const aoFinalizar = async (book: Livro) => {
     const input = window.prompt('Nota de 1 a 5 (opcional):', '')
     const rating = input ? Number(input) : undefined
     try {
@@ -89,7 +89,7 @@ export function PaginaDeLivros() {
     }
   }
 
-  const handleManualAdd = async (values: ValoresDoLivro) => {
+  const aoAdicionarManualmente = async (values: ValoresDoLivro) => {
     try {
       await ServicoDeLivros.adicionarLivro(values)
       setCadastroManualAberto(false)
@@ -173,7 +173,7 @@ export function PaginaDeLivros() {
                 key={book.id}
                 book={book}
                 onProgress={aoAvancarPaginas}
-                onFinish={handleFinish}
+                onFinish={aoFinalizar}
                 onFinishedDate={aoCorrigirDataDeConclusao}
                 onDelete={aoExcluir}
               />
@@ -192,7 +192,7 @@ export function PaginaDeLivros() {
       </Modal>
 
       <Modal open={cadastroManualAberto} onClose={() => setCadastroManualAberto(false)} title="Adicionar livro manualmente">
-        <FormularioDeLivro onSubmit={handleManualAdd} onCancel={() => setCadastroManualAberto(false)} />
+        <FormularioDeLivro onSubmit={aoAdicionarManualmente} onCancel={() => setCadastroManualAberto(false)} />
       </Modal>
     </div>
   )
