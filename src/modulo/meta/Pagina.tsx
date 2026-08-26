@@ -3,6 +3,7 @@
  * formulário de criar e editar.
  */
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
 import { Plus, Target } from 'lucide-react'
 import { ServicoDeMetas, ServicoDeHabitos } from '@/compartilhado/fonte/fonteDeDados'
@@ -122,7 +123,11 @@ export function PaginaDeMetas() {
       {livrosSemData > 0 && (
         <p className="text-sm text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/20 rounded-lg px-4 py-2">
           {livrosSemData} livro(s) finalizado(s) sem data de conclusão não entram nas metas de
-          leitura. Abra o livro e preencha a data para ele contar.
+          leitura.{' '}
+          <Link to="/livros" className="underline font-medium">
+            Preencha a data na estante
+          </Link>{' '}
+          para eles contarem.
         </p>
       )}
 
