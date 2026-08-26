@@ -23,7 +23,7 @@ export function FormularioDeEdicao({ log, onSubmit, onCancel }: FormularioDeEdic
   const [notes, setNotes] = useState(log.notes || '')
   const [salvando, setSalvando] = useState(false)
 
-  const handleSubmit = async () => {
+  const aoSalvar = async () => {
     setSalvando(true)
     try {
       await onSubmit({ mood, energy, notes: notes.trim() || undefined })
@@ -51,7 +51,7 @@ export function FormularioDeEdicao({ log, onSubmit, onCancel }: FormularioDeEdic
         <Botao variant="secondary" onClick={onCancel}>
           Cancelar
         </Botao>
-        <Botao onClick={handleSubmit} carregando={salvando}>
+        <Botao onClick={aoSalvar} carregando={salvando}>
           Salvar
         </Botao>
       </div>

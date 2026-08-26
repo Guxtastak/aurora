@@ -20,7 +20,7 @@ export function BuscaDeLivro({ onAdded }: BuscaDeLivroProps) {
   const [idSendoAdicionado, setIdSendoAdicionado] = useState<string | null>(null)
   const [error, setError] = useState('')
 
-  const handleSearch = async (e: React.FormEvent) => {
+  const aoBuscar = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!query.trim()) return
     setCarregando(true)
@@ -36,7 +36,7 @@ export function BuscaDeLivro({ onAdded }: BuscaDeLivroProps) {
     }
   }
 
-  const handleAdd = async (googleBookId: string) => {
+  const aoAdicionar = async (googleBookId: string) => {
     setIdSendoAdicionado(googleBookId)
     setError('')
     try {
@@ -51,7 +51,7 @@ export function BuscaDeLivro({ onAdded }: BuscaDeLivroProps) {
 
   return (
     <div className="space-y-4">
-      <form onSubmit={handleSearch} className="flex gap-2">
+      <form onSubmit={aoBuscar} className="flex gap-2">
         <input
           value={query}
           onChange={e => setQuery(e.target.value)}
@@ -95,7 +95,7 @@ export function BuscaDeLivro({ onAdded }: BuscaDeLivroProps) {
                 variant="secondary"
                 icon={<Plus size={14} />}
                 carregando={idSendoAdicionado === item.id}
-                onClick={() => handleAdd(item.id)}
+                onClick={() => aoAdicionar(item.id)}
               >
                 Adicionar
               </Botao>

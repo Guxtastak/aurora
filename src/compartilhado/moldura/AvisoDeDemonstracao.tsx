@@ -8,7 +8,7 @@ import { reiniciarDemonstracao } from '@/compartilhado/fonte/armazenamentoDeDemo
 
 /** Aviso exibido apenas na prévia sem Supabase configurado */
 export function AvisoDeDemonstracao() {
-  const handleReset = () => {
+  const aoRestaurar = () => {
     if (!window.confirm('Restaurar os dados de exemplo desta prévia?')) return
     reiniciarDemonstracao()
     window.location.reload()
@@ -24,7 +24,7 @@ export function AvisoDeDemonstracao() {
           conforme o README.
         </span>
         <button
-          onClick={handleReset}
+          onClick={aoRestaurar}
           className="ml-auto inline-flex items-center gap-1 px-2 py-1 rounded-md border border-amber-300 dark:border-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/60"
         >
           <RotateCcw size={12} /> Restaurar dados
