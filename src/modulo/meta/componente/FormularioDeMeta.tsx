@@ -2,12 +2,15 @@
  * Formulário de criar e editar meta. Alvo e unidade são opcionais: sem eles
  * a meta fica qualitativa, sem barra de progresso.
  */
-import { useForm } from 'react-hook-form'
+import { useEffect } from 'react'
+import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import type { Meta } from '@/compartilhado/tipo/banco'
 import { CampoDeTexto, CampoDeSelecao, CampoDeTextoLongo } from '@/compartilhado/componente/Campo'
 import { Botao } from '@/compartilhado/componente/Botao'
+import { ORIGENS, origemPorId, origemSugeridaPara, ehAutomatica } from '@/modulo/meta/origens'
+import type { Habito } from '@/compartilhado/tipo/banco'
 
 /** Campo numérico opcional: input vazio vira undefined em vez de NaN */
 const optionalNumber = z.number({ message: 'Informe um número' }).min(0, 'Não pode ser negativo').optional()
@@ -26,17 +29,34 @@ const schema = z
     unit: z.string().optional(),
     start_date: optionalDate,
     deadline: optionalDate,
-    status: z.enum(['active', 'completed', 'failed'])
+    status: z.enum(['active', 'completed', 'failed']),
+    source: z.enum(['manual', 'books_finished', 'pages_read', 'habit_checkins', 'money_saved', 'money_spent']),
+    source_habit_id: z.string().optional()
   })
+  .refine(
+    values => values.source !== 'habit_checkins' || !!values.source_habit_id,
+    { message: 'Escolha o hábito que vai alimentar esta meta', path: ['source_habit_id'] }
+  )
   .refine(
     values => !values.start_date || !values.deadline || values.deadline >= values.start_date,
     { path: ['deadline'], message: 'O prazo não pode ser antes do início' }
   )
 
-export type ValoresDaMeta = z.infer<typeof schema>
+type CamposDoFormulario = z.infer<typeof schema>
+
+/**
+ * O que sai do formulário. O hábito difere do campo cru: o `<select>` em branco
+ * devolve `''`, que não é uuid válido, e origem que não usa hábito não pode
+ * carregar o vínculo de quando usava — os dois casos viram `null`.
+ */
+export type ValoresDaMeta = Omit<CamposDoFormulario, 'source_habit_id'> & {
+  source_habit_id: string | null
+}
 
 interface FormularioDeMetaProps {
   goal?: Meta | null
+  /** Para o seletor da origem "marcacoes de um habito" */
+  habitos: Habito[]
   onSubmit: (values: ValoresDaMeta) => Promise<void>
   onCancel: () => void
 }
@@ -47,12 +67,14 @@ const asOptionalNumber = { setValueAs: (value: unknown) => (value === '' || valu
 /** Data em branco precisa chegar ao banco como undefined, não como '' */
 const asOptionalDate = { setValueAs: (value: unknown) => (value ? String(value) : undefined) }
 
-export function FormularioDeMeta({ goal, onSubmit, onCancel }: FormularioDeMetaProps) {
+export function FormularioDeMeta({ goal, habitos, onSubmit, onCancel }: FormularioDeMetaProps) {
   const {
     register,
     handleSubmit,
+    control,
+    setValue,
     formState: { errors, isSubmitting }
-  } = useForm<ValoresDaMeta>({
+  } = useForm<CamposDoFormulario>({
     resolver: zodResolver(schema),
     defaultValues: {
       title: goal?.title ?? '',
@@ -63,12 +85,35 @@ export function FormularioDeMeta({ goal, onSubmit, onCancel }: FormularioDeMetaP
       unit: goal?.unit ?? '',
       start_date: goal?.start_date ?? undefined,
       deadline: goal?.deadline ?? undefined,
-      status: goal?.status ?? 'active'
+      status: goal?.status ?? 'active',
+      source: goal?.source ?? 'manual',
+      source_habit_id: goal?.source_habit_id ?? undefined
     }
   })
 
+  const categoria = useWatch({ control, name: 'category' })
+  const origemEscolhida = useWatch({ control, name: 'source' })
+  const origem = origemPorId(origemEscolhida)
+  const automatica = ehAutomatica(origemEscolhida)
+
+  // Trocar a categoria sugere a origem e a unidade dela — so ao criar, para nao
+  // sobrescrever a escolha de quem esta editando uma meta que ja existe
+  useEffect(() => {
+    if (goal || !categoria) return
+    const sugerida = origemSugeridaPara(categoria)
+    setValue('source', sugerida)
+    setValue('unit', origemPorId(sugerida).unidadeSugerida)
+  }, [categoria, goal, setValue])
+
+  const enviar = (campos: CamposDoFormulario) =>
+    onSubmit({
+      ...campos,
+      source_habit_id:
+        campos.source === 'habit_checkins' ? campos.source_habit_id || null : null
+    })
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form onSubmit={handleSubmit(enviar)} className="space-y-4">
       <CampoDeTexto
         label="Título"
         placeholder="Ler 24 livros no ano"
@@ -98,6 +143,25 @@ export function FormularioDeMeta({ goal, onSubmit, onCancel }: FormularioDeMetaP
         </CampoDeSelecao>
       </div>
 
+      <CampoDeSelecao label="De onde vem o progresso" {...register('source')}>
+        {ORIGENS.map(opcao => (
+          <option key={opcao.id} value={opcao.id}>
+            {opcao.rotulo}
+          </option>
+        ))}
+      </CampoDeSelecao>
+
+      {origem.precisaDeHabito && (
+        <CampoDeSelecao label="Hábito" {...register('source_habit_id')}>
+          <option value="">Escolha um hábito</option>
+          {habitos.map(habito => (
+            <option key={habito.id} value={habito.id}>
+              {habito.name}
+            </option>
+          ))}
+        </CampoDeSelecao>
+      )}
+
       <div className="grid grid-cols-3 gap-4">
         <CampoDeTexto
           label="Alvo"
@@ -108,14 +172,23 @@ export function FormularioDeMeta({ goal, onSubmit, onCancel }: FormularioDeMetaP
           error={errors.target_value?.message}
           {...register('target_value', asOptionalNumber)}
         />
-        <CampoDeTexto
-          label="Atual"
-          type="number"
-          step="any"
-          min={0}
-          error={errors.current_value?.message}
-          {...register('current_value', asOptionalNumber)}
-        />
+        {automatica ? (
+          <div>
+            <span className="block text-sm text-gray-500 dark:text-gray-400 mb-1.5">Atual</span>
+            <p className="text-sm text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 rounded-lg px-3 py-2">
+              {origem.explicacao}
+            </p>
+          </div>
+        ) : (
+          <CampoDeTexto
+            label="Atual"
+            type="number"
+            step="any"
+            min={0}
+            error={errors.current_value?.message}
+            {...register('current_value', asOptionalNumber)}
+          />
+        )}
         <CampoDeTexto label="Unidade" placeholder="livros, km, R$" {...register('unit')} />
       </div>
 
