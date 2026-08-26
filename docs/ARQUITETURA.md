@@ -28,7 +28,7 @@ src/
     habito/            Pagina, servico, demonstracao, componente/
     livro/             idem
     financa/           idem
-    meta/              idem + regraDeProgresso (com teste)
+    meta/              idem + regraDeProgresso e regraDeOrigem (com teste)
     humor/             idem + regraDeComparacao (com teste)
     painel/            a tela inicial, que cruza os outros módulos
     conta/             entrar, cadastrar, configurações
@@ -85,6 +85,7 @@ método em um, acrescente no outro.
 | Estamos no modo demonstração? | `compartilhado/fonte/supabase.ts` |
 | Quais são as tabelas? | `compartilhado/tipo/banco.ts` e `supabase/schema.sql` |
 | Quando uma meta conta como concluída? | `modulo/meta/regraDeProgresso.ts` |
+| De onde a meta tira o número dela? | `modulo/meta/regraDeOrigem.ts` (a conta); `modulo/meta/origens.ts` (o catálogo) |
 | Como se compara hábito com humor? | `modulo/humor/regraDeComparacao.ts` |
 | Que dados a prévia mostra? | `compartilhado/fonte/armazenamentoDeDemonstracao.ts` |
 
@@ -131,7 +132,7 @@ usa. Arquivo novo sem cabeçalho é arquivo pela metade.
 **Testes.** Testamos onde dá para errar em silêncio — tela quebrada você vê,
 conta errada não. Em três camadas:
 
-1. **Regras puras** (`regraDeProgresso`, `regraDeComparacao`): sem banco, sem
+1. **Regras puras** (`regraDeProgresso`, `regraDeOrigem`, `regraDeComparacao`): sem banco, sem
    React, com todos os casos de borda.
 2. **Serviços, pela versão de demonstração** (`modulo/*/demonstracao.test.ts`):
    ela roda sem banco e sem simulação, e implementa as mesmas regras que a
